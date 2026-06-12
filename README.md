@@ -61,4 +61,4 @@ Remplace `TON-PSEUDO` par ton identifiant GitHub.
 - Code d’entrée RP actuel : `7236`
 - Le site bloque l’indexation via `robots.txt` et la balise `noindex`.
 - Les visuels d’opérations utilisent le fichier de secours `assets/images/operations/no-signal.svg` tant que les images finales ne sont pas ajoutées.
-- En local, `preview-server.cjs` peut servir des médias depuis ton PC via `local-media.config.json`. Pour Vercel, copie les fichiers finaux dans le projet, par exemple `assets/images/subjects/nadir.png`, `assets/images/subjects/panam.png`, `assets/images/subjects/cain-voss.png`, `assets/images/archive/cam1.png` à `cam6.png`, et `assets/videos/archive/camchambre1.mp4`.
+- Pour Vercel, les médias finaux doivent être physiquement présents dans le repo. Lance `COPIER_MEDIAS_VERCEL.cmd` avant le commit pour placer les PNG/MP4 dans `assets/images/` et `assets/videos/`.

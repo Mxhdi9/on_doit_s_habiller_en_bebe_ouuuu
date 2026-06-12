@@ -5,30 +5,15 @@ const body = document.body;
 const ACCESS_CODE = "7236";
 const INITIAL_AMBIENT_VOLUME = 50;
 const ARCHIVE_VAULT_CODE = "5556904";
-const DEX_PHOTO_FILE = "./assets/images/dex-reveal.svg";
-const DEX_PHOTO_FALLBACK = "./assets/images/dex-reveal.svg";
-const NADIR_PHOTO_FILE = "./assets/images/nadir-profile.svg";
-const NADIR_PHOTO_FALLBACK = "./assets/images/nadir-profile.svg";
-const PANAM_PHOTO_FILE = "./assets/images/panam-profile.svg";
-const PANAM_PHOTO_FALLBACK = "./assets/images/panam-profile.svg";
-const CAIN_PHOTO_FILE = "./assets/images/cain-profile.svg";
-const CAIN_PHOTO_FALLBACK = "./assets/images/cain-profile.svg";
-const CATEGORY_BACKGROUND_FILE = "./assets/images/archive/accueil.svg";
-const LOCAL_MEDIA_ROUTE = "/local-media/";
-const LOCAL_MEDIA_SOURCES = {
-  dex: `${LOCAL_MEDIA_ROUTE}dex`,
-  nadir: `${LOCAL_MEDIA_ROUTE}subjects/nadir`,
-  panam: `${LOCAL_MEDIA_ROUTE}subjects/panam`,
-  cain: `${LOCAL_MEDIA_ROUTE}subjects/cain`,
-  cover: `${LOCAL_MEDIA_ROUTE}archive/accueil`,
-  cam01: `${LOCAL_MEDIA_ROUTE}archive/cam01`,
-  cam02: `${LOCAL_MEDIA_ROUTE}archive/cam02`,
-  cam03: `${LOCAL_MEDIA_ROUTE}archive/cam03`,
-  cam04: `${LOCAL_MEDIA_ROUTE}archive/cam04`,
-  cam05: `${LOCAL_MEDIA_ROUTE}archive/cam05`,
-  cam06: `${LOCAL_MEDIA_ROUTE}archive/cam06-video`,
-  cam06Image: `${LOCAL_MEDIA_ROUTE}archive/cam06-image`,
-};
+const DEX_PHOTO_FILE = "./assets/images/dex.png";
+const DEX_PHOTO_FALLBACK = "./assets/images/dex.png";
+const NADIR_PHOTO_FILE = "./assets/images/subjects/nadir.png";
+const NADIR_PHOTO_FALLBACK = "./assets/images/subjects/nadir.png";
+const PANAM_PHOTO_FILE = "./assets/images/subjects/panam.png";
+const PANAM_PHOTO_FALLBACK = "./assets/images/subjects/panam.png";
+const CAIN_PHOTO_FILE = "./assets/images/subjects/cain-voss.png";
+const CAIN_PHOTO_FALLBACK = "./assets/images/subjects/cain-voss.png";
+const CATEGORY_BACKGROUND_FILE = "./assets/images/archive/accueil.png";
 
 const fragmentCodes = {
   frag01: "TRACE",
@@ -189,24 +174,20 @@ let missionOrbitFrame = null;
 let missionOrbitBase = null;
 
 const GAME_MEDIA = {
-  cover: "./assets/images/archive/accueil.svg",
-  cam01: "./assets/images/archive/cam01-exterieur.svg",
-  cam02: "./assets/images/archive/cam02-entree.svg",
-  cam03: "./assets/images/archive/cam03-couloir.svg",
-  cam04: "./assets/images/archive/cam04-salon.svg",
-  cam05: "./assets/images/archive/cam05-cuisine.svg",
-  cam06: "./assets/images/archive/cam06-couloir.svg",
-  cam06Image: "./assets/images/archive/cam06-chambre.svg",
+  cover: "./assets/images/archive/accueil.png",
+  cam01: "./assets/images/archive/cam1.png",
+  cam02: "./assets/images/archive/cam2.png",
+  cam03: "./assets/images/archive/cam3.png",
+  cam04: "./assets/images/archive/cam4.png",
+  cam05: "./assets/images/archive/cam5.png",
+  cam06: "./assets/videos/archive/camchambre1.mp4",
+  cam06Image: "./assets/images/archive/cam6.png",
 };
 
-const MEDIA_REFRESH_TOKEN = "ascalon-20260610-subjects";
-
-function shouldUseLocalMediaRoute() {
-  return ["127.0.0.1", "localhost"].includes(window.location.hostname);
-}
+const MEDIA_REFRESH_TOKEN = "ascalon-20260612-vercel-media";
 
 function mediaUrl(src, key = "") {
-  const resolved = shouldUseLocalMediaRoute() && LOCAL_MEDIA_SOURCES[key] ? LOCAL_MEDIA_SOURCES[key] : src;
+  const resolved = src;
 
   if (!resolved || resolved.startsWith("data:")) {
     return resolved;
