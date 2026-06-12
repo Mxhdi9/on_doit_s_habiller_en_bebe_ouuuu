@@ -1,0 +1,28 @@
+Place ici les images des operations de la cartographie ASCALON.
+
+Chemin attendu par le site :
+./assets/images/operations/
+
+Fichiers attendus :
+- night-glass.jpg
+- red-harbor.jpg
+- altiplano.jpg
+- black-rain.jpg
+- sand-veil.jpg
+- iron-saint.jpg
+- dead-signal.jpg
+- white-room.jpg
+- mute-angel.jpg
+- echo-veil.jpg
+- cold-shell.jpg
+- no-witness.jpg
+- blue-funeral.jpg
+- broken-halo.jpg
+- bolivia-loop.jpg
+- black-orchid.jpg
+- sleeping-wire.jpg
+- ash-market.jpg
+- silent-contract.jpg
+- east-cipher.jpg
+
+Si une image manque, le site affiche automatiquement no-signal.svg.

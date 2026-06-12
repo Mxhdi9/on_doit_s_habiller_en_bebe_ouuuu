@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>ASCALON // Archive restreinte</title>
+    <link rel="stylesheet" href="./css/style.css?v=ascalon-20260610-structure" />
+  </head>
+  <body class="locked">
+    <div class="noise"></div>
+    <div class="scanline"></div>
+    <audio id="ambientAudio" src="/local-media/audio/ambient" preload="auto" autoplay playsinline loop></audio>
+    <div class="ambient-control" id="ambientControl">
+      <label for="ambientVolume" id="ambientVolumeLabel">Audio 50%</label>
+      <input id="ambientVolume" type="range" min="0" max="100" value="50" step="1" aria-label="Volume audio" />
+    </div>
+
+    <div class="access-flash" id="accessFlash" aria-hidden="true">SIGNAL VISUEL</div>
+
+    <section class="entry-gate" id="entryGate" aria-labelledby="entryTitle">
+      <div class="entry-panel">
+        <img class="entry-logo" src="./assets/images/ascalon-logo.svg" alt="ASCALON" />
+        <div class="entry-access">
+          <p class="classification">Accès restreint</p>
+          <h1 id="entryTitle">ASCALON</h1>
+          <p class="entry-copy">Code d’habilitation requis.</p>
+          <form class="entry-form" id="entryForm">
+            <label for="entryCode">Code d’accès</label>
+            <output class="entry-display" id="entryDisplay" aria-live="polite">••••</output>
+            <input id="entryCode" type="hidden" autocomplete="off" />
+            <div class="entry-keypad" aria-label="Pavé numérique d’accès">
+              <button type="button" data-entry-key="1">1</button>
+              <button type="button" data-entry-key="2">2</button>
+              <button type="button" data-entry-key="3">3</button>
+              <button type="button" data-entry-key="4">4</button>
+              <button type="button" data-entry-key="5">5</button>
+              <button type="button" data-entry-key="6">6</button>
+              <button type="button" data-entry-key="7">7</button>
+              <button type="button" data-entry-key="8">8</button>
+              <button type="button" data-entry-key="9">9</button>
+              <button type="button" data-entry-key="clear">CLR</button>
+              <button type="button" data-entry-key="0">0</button>
+              <button type="button" data-entry-key="enter">OK</button>
+            </div>
+            <p class="form-feedback" id="entryFeedback" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <div class="modal hidden" id="signalModal" role="dialog" aria-modal="true" aria-labelledby="signalTitle">
+      <div class="modal-panel">
+        <p class="kicker">PROTOCOLE ASCALON</p>
+        <h2 id="signalTitle">Signal interne</h2>
+        <p id="signalMessage">Aucun signal.</p>
+        <button class="btn danger" type="button" id="closeSignal">Fermer</button>
+      </div>
+    </div>
+
+    <div class="image-modal hidden" id="dexModal" role="dialog" aria-modal="true" aria-labelledby="dexTitle">
+      <div class="image-modal-panel">
+        <button class="image-close" type="button" id="closeDex" aria-label="Fermer">×</button>
+        <p class="kicker">IMAGE EXTRAITE // DEX</p>
+        <h2 id="dexTitle">Contact non archivé</h2>
+        <div class="spoiler-panel" id="dexSpoiler">
+          <p>Image sensible. Source non confirmée. Affichage manuel requis.</p>
+          <button class="btn primary" type="button" id="revealDex">Révéler l’image</button>
+        </div>
+        <figure class="dex-figure hidden" id="dexFigure">
+          <img id="dexImage" src="./assets/images/dex-reveal.svg?v=ascalon-20260607-vercel" alt="Deux silhouettes dans une rue sombre" />
+          <figcaption id="dexFallbackNote" class="hidden">
+            Image introuvable : ./assets/images/dex-reveal.svg
+          </figcaption>
+        </figure>
+        <button class="btn primary" type="button" id="backDex">Retour</button>
+      </div>
+    </div>
+
+    <div class="modal hidden" id="n17NameModal" role="dialog" aria-modal="true" aria-labelledby="n17NameTitle">
+      <div class="modal-panel compact-modal">
+        <p class="kicker">Accès restauré</p>
+        <h2 id="n17NameTitle">Sujet N-17</h2>
+        <p>Validation nominale retirée. Fiche consultable directement.</p>
+        <form class="code-form" id="n17NameForm">
+          <label for="n17NameInput">Accès dossier</label>
+          <div class="code-line">
+            <input id="n17NameInput" type="text" autocomplete="off" placeholder="ACCÈS" />
+            <button class="btn primary" type="submit">Valider</button>
+          </div>
+          <p class="form-feedback" id="n17NameFeedback" aria-live="polite"></p>
+        </form>
+        <button class="btn ghost" type="button" id="closeN17Name">Retour</button>
+      </div>
+    </div>
+
+    <section class="archive-game hidden" id="archiveGame" aria-hidden="true" aria-label="Archive vidéo N.D.R">
+      <div class="archive-grain" aria-hidden="true"></div>
+
+      <div class="archive-boot" id="archiveBoot">
+        <img class="archive-cover" id="archiveCoverImage" alt="" aria-hidden="true" />
+        <button class="archive-close" type="button" id="archiveExitIntro">Quitter</button>
+        <button class="archive-dossier-title" type="button" data-dossier-trigger>
+          ARCHIVE VIDÉO — DOSSIER N.D.R
+        </button>
+        <p>DATE : INCONNUE</p>
+        <p>SOURCE : CAMÉRAS DOMICILE FAMILIAL</p>
+        <p>STATUT : FRAGMENT INCOMPLET</p>
+        <button class="btn primary" type="button" id="archiveLaunch">Lancer l’archive</button>
+      </div>
+
+      <div class="archive-interface hidden" id="archiveInterface">
+        <header class="archive-topline">
+          <button class="archive-file-label" type="button" data-dossier-trigger>DOSSIER N.D.R</button>
+          <span class="archive-rec">REC</span>
+          <span id="archiveTimestamp">DATE : INCONNUE // 02:13:07</span>
+          <button class="archive-close" type="button" id="archiveExit">Quitter</button>
+        </header>
+
+        <main class="archive-layout">
+          <section class="archive-monitor" aria-live="polite">
+            <div class="camera-screen" id="cameraScreen">
+              <div class="camera-frame" id="cameraFrame"></div>
+              <div class="camera-static hidden" id="cameraStatic">PERTE DE SIGNAL</div>
+              <div class="camera-meta">
+                <span id="cameraLabel">CAM 01 — EXTÉRIEUR</span>
+                <span id="cameraSignal">SIGNAL OK</span>
+              </div>
+            </div>
+          </section>
+
+          <aside class="archive-panel">
+            <div class="archive-progress">
+              <span>ARCHIVE RECONSTITUÉE</span>
+              <strong id="archivePercent">0%</strong>
+              <div class="archive-progress-track">
+                <div id="archiveProgressFill"></div>
+              </div>
+            </div>
+            <div class="archive-terminal" id="archiveLog">
+              <p><span>sys</span> archive en attente.</p>
+            </div>
+          </aside>
+        </main>
+
+        <nav class="camera-dock" id="cameraDock" aria-label="Sélecteur de caméras">
+          <button class="camera-button active" type="button" data-cam="cam01">CAM 01<span>EXTÉRIEUR</span></button>
+          <button class="camera-button" type="button" data-cam="cam02">CAM 02<span>ENTRÉE</span></button>
+          <button class="camera-button locked" type="button" data-cam="cam03">CAM 03<span>LOCKED</span></button>
+          <button class="camera-button locked" type="button" data-cam="cam04">CAM 04<span>LOCKED</span></button>
+          <button class="camera-button locked" type="button" data-cam="cam05">CAM 05<span>LOCKED</span></button>
+          <button class="camera-button locked" type="button" data-cam="cam06">CAM 06<span>LOCKED</span></button>
+        </nav>
+      </div>
+
+      <div class="archive-damaged hidden" id="archiveDamaged" aria-live="polite"></div>
+
+      <div class="archive-final hidden" id="archiveFinal">
+        <div class="corrupt-final" aria-label="Archive corrompue">
+          <span data-text="ARCHIVE CORROMPUE">ARCHIVE CORROMPUE</span>
+        </div>
+        <div class="archive-final-actions">
+          <button class="btn primary" type="button" id="archiveBackMenu">Revenir au menu</button>
+          <button class="btn ghost" type="button" id="archiveNextFragment">Retour console</button>
+        </div>
+      </div>
+
+      <div class="archive-secret hidden" id="archiveSecret">
+        ASCALON a observé avant Duval.
+      </div>
+    </section>
+
+    <main class="shell">
+      <header class="site-header" aria-label="Navigation principale">
+        <button class="brand" type="button" id="brandButton" data-page="home" aria-label="Retour accueil">
+          <img class="brand-logo" src="./assets/images/ascalon-logo.svg" alt="ASCALON" />
+        </button>
+
+        <nav class="nav-panel">
+          <button class="nav-link active" type="button" data-page="home">Accueil</button>
+          <button class="nav-link" type="button" data-page="official">Présentation</button>
+          <button class="nav-link" type="button" data-page="doctrine">Doctrine</button>
+          <button class="nav-link" type="button" data-page="subjects">Sujets</button>
+          <button class="nav-link" type="button" data-page="cartography">Cartographie</button>
+          <button class="nav-link" type="button" data-page="messages">Console</button>
+        </nav>
+      </header>
+
+      <section class="workspace">
+        <section class="page page-home active" id="page-home" data-page="home">
+          <div class="terminal-card intro-panel">
+            <p class="classification">PROGRAMME ASCALON // STRUCTURE OPÉRATIONNELLE</p>
+            <img class="hero-logo" src="./assets/images/ascalon-logo.svg" alt="ASCALON" />
+            <p class="subtitle">Camp privé de discipline, d’instruction et de remise en condition</p>
+            <div class="access-box">
+              <p>Ordre. Endurance. Silence. Retour au contrôle.</p>
+              <button class="btn primary" type="button" data-page="official">Entrer</button>
+            </div>
+            <p class="motto">On ne promet pas le confort. On exige la tenue.</p>
+          </div>
+        </section>
+
+        <section class="page" id="page-official" data-page="official">
+          <div class="section-head">
+            <p class="kicker">Présentation officielle</p>
+            <h2>Cadre opérationnel</h2>
+          </div>
+
+          <div class="document-block">
+            <p>
+              ASCALON est un camp privé de structuration opérationnelle conçu pour les profils à fort potentiel
+              physique, nerveux et décisionnel. Le programme accueille des individus ayant besoin d’un cadre strict,
+              d’une routine militaire et d’une instruction constante afin de retrouver une ligne claire : obéir,
+              tenir, s’adapter et fonctionner sous pression. Chaque cycle est construit autour de la discipline, de la
+              condition physique, de la gestion du stress, de l’endurance mentale et de la cohésion en milieu fermé.
+            </p>
+            <p>
+              Les journées sont organisées avec précision : réveil encadré, entraînement au poids du corps, marche
+              tactique, exercices d’observation, instruction au silence, contrôle émotionnel, apprentissage des ordres
+              courts et mise en situation progressive. ASCALON ne cherche pas à offrir un environnement confortable ;
+              le camp impose un rythme volontairement dur, stable et répétitif. Cette exigence permet de retirer le
+              désordre, de réduire l’impulsivité et de créer une réponse fiable face à l’urgence.
+            </p>
+            <p>
+              L’encadrement repose sur une chaîne de supervision resserrée. Chaque participant est observé, noté et
+              corrigé selon sa capacité à respecter une consigne, à conserver son calme et à maintenir son utilité au
+              sein d’un groupe. Les instructeurs ne valorisent ni la rébellion ni l’improvisation inutile : la priorité
+              reste la tenue, la loyauté, la lucidité et la disponibilité opérationnelle. ASCALON forme des profils
+              capables d’être envoyés là où la pression, la fatigue et le danger empêchent les méthodes ordinaires de
+              fonctionner.
+            </p>
+          </div>
+
+          <div class="principle-grid">
+            <article class="principle-card">
+              <span class="card-index">01</span>
+              <h3>Discipline</h3>
+              <p>Installer une routine ferme, lisible et non négociable.</p>
+            </article>
+            <article class="principle-card">
+              <span class="card-index">02</span>
+              <h3>Instruction</h3>
+              <p>Transformer les réflexes instables en gestes utilisables.</p>
+            </article>
+            <article class="principle-card">
+              <span class="card-index">03</span>
+              <h3>Terrain</h3>
+              <p>Préparer chaque profil aux conditions hostiles et aux ordres courts.</p>
+            </article>
+          </div>
+
+          <blockquote class="cold-quote">ASCALON impose un cadre. Le cadre rend l’action possible.</blockquote>
+        </section>
+
+        <section class="page" id="page-doctrine" data-page="doctrine">
+          <div class="section-head">
+            <p class="kicker">Manuel interne / Extrait 7B</p>
+            <h2>Doctrine</h2>
+          </div>
+
+          <ol class="doctrine-list">
+            <li>La peur est une information.</li>
+            <li>L’attachement est une faille.</li>
+            <li>L’obéissance précède la compréhension.</li>
+            <li>Un sujet utile ne demande pas pourquoi.</li>
+            <li>Un sujet instable doit être réinitialisé.</li>
+            <li>Le silence protège la structure.</li>
+          </ol>
+
+          <div class="directive">
+            <span>Directive non signée</span>
+            <p>On ne répare pas. On structure ce qu’il reste.</p>
+          </div>
+        </section>
+
+        <section class="page" id="page-subjects" data-page="subjects">
+          <div class="section-head">
+            <p class="kicker">Registre des sujets</p>
+            <h2>Index opérationnel</h2>
+          </div>
+
+          <div class="subject-layout">
+            <div class="subject-list">
+              <button class="subject-row muted" type="button" data-subject-title="Sujet N-03" data-subject-detail="Retiré après refus répété d’isolement. Réaffectation impossible." data-subject-hint="Aucune trace familiale utile.">
+                <span>Sujet N-03</span>
+                <strong>RETIRÉ</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet K-08" data-subject-detail="Échec de conditionnement. Opposition physique à deux instructeurs." data-subject-hint="Dossier clôturé sans transfert.">
+                <span>Sujet K-08</span>
+                <strong>ÉCHEC</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet M-11" data-subject-detail="Non viable. Stress aigu, réponses motrices incohérentes." data-subject-hint="Aucune aptitude opérationnelle stable.">
+                <span>Sujet M-11</span>
+                <strong>NON VIABLE</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet A-02" data-subject-detail="Éliminé du cycle pour non-respect d’un supérieur direct." data-subject-hint="Le rapport mentionne une sanction publique.">
+                <span>Sujet A-02</span>
+                <strong>EXCLU</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet C-04" data-subject-detail="Mémoire correcte, discipline faible. Fuite simulée au jour 19." data-subject-hint="Aucun lien avec la Bolivie.">
+                <span>Sujet C-04</span>
+                <strong>ÉCARTÉ</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet R-05" data-subject-detail="Profil agressif, impossible à stabiliser en groupe fermé." data-subject-hint="Mention répétée : orgueil.">
+                <span>Sujet R-05</span>
+                <strong>INSTABLE</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet T-06" data-subject-detail="Obéissance mécanique, autonomie insuffisante en terrain ouvert." data-subject-hint="Le sujet attendait les ordres trop longtemps.">
+                <span>Sujet T-06</span>
+                <strong>INCOMPLET</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet D-07" data-subject-detail="Excellent tireur, rupture nerveuse pendant contrôle nocturne." data-subject-hint="Marque : sommeil impossible.">
+                <span>Sujet D-07</span>
+                <strong>RETIRÉ</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet J-09" data-subject-detail="Refus de se taire pendant les interrogatoires blancs." data-subject-hint="Signalement : parle pour résister.">
+                <span>Sujet J-09</span>
+                <strong>ÉCHEC</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet V-10" data-subject-detail="Aptitude élevée à l’observation. Disparu avant phase terrain." data-subject-hint="Fausse piste volontaire.">
+                <span>Sujet V-10</span>
+                <strong>DISPARU</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet S-12" data-subject-detail="Non-respect d’un protocole de silence. Renvoyé au niveau zéro." data-subject-hint="Réinitialisation non concluante.">
+                <span>Sujet S-12</span>
+                <strong>RÉINIT.</strong>
+              </button>
+              <button class="subject-row live" type="button" data-p13-gate data-subject-title="Sujet P-13 // Panam Palmer" data-subject-detail="Profil mobile, endurance élevée, refus persistant d’abandonner un binôme." data-subject-hint="Corrélations répétées avec N-17. Relation non qualifiée.">
+                <span>Sujet P-13</span>
+                <strong>ACTIF</strong>
+              </button>
+              <button class="subject-row live" type="button" data-c14-gate data-subject-title="Sujet C-14 // Caïn Voss" data-subject-detail="Profil proche de la supervision. Ancienne corrélation terrain avec N-17." data-subject-hint="Dossier discret. Présence répétée près des décisions de M. Duval.">
+                <span>Sujet C-14</span>
+                <strong>ACTIF</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet L-15" data-subject-detail="Conditionnement partiel. Obéissance correcte, sang-froid insuffisant." data-subject-hint="Pas de foyer en France.">
+                <span>Sujet L-15</span>
+                <strong>PARTIEL</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet E-16" data-subject-detail="Résistance élevée à la douleur. Rejet total de l’autorité privée." data-subject-hint="Mention : morsure, pas mémoire visuelle.">
+                <span>Sujet E-16</span>
+                <strong>BRISÉ</strong>
+              </button>
+              <button class="subject-row live" type="button" data-n17-gate>
+                <span>Sujet N-17</span>
+                <strong>ACTIF</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet B-18" data-subject-detail="Transfert extérieur annulé. Sujet trop visible, trop bavard." data-subject-hint="Aucun superviseur nommé.">
+                <span>Sujet B-18</span>
+                <strong>ANNULÉ</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet H-19" data-subject-detail="Aptitude aux armes confirmée. Contrôle émotionnel trop faible." data-subject-hint="Confusion possible, mais la phase diffère.">
+                <span>Sujet H-19</span>
+                <strong>NON STABLE</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet G-20" data-subject-detail="Sabotage interne d’un exercice. Retiré après incident instructeur." data-subject-hint="Mention : punition collective.">
+                <span>Sujet G-20</span>
+                <strong>RETIRÉ</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet Y-21" data-subject-detail="Profil froid, mais incapable d’agir sans validation." data-subject-hint="Trop propre pour être N-17.">
+                <span>Sujet Y-21</span>
+                <strong>INUTILE</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet O-22" data-subject-detail="Réaction au stress correcte. Faille : panique au noir complet." data-subject-hint="Le bon sujet ne panique pas.">
+                <span>Sujet O-22</span>
+                <strong>ÉCHEC</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet W-23" data-subject-detail="Récupéré en zone portuaire. Aucun passé familial exploitable." data-subject-hint="Fausse piste maritime.">
+                <span>Sujet W-23</span>
+                <strong>CLASSÉ</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet F-24" data-subject-detail="Agressivité dirigée contre l’encadrement. Cycle interrompu." data-subject-hint="Non-respect supérieur, mais pas N.">
+                <span>Sujet F-24</span>
+                <strong>EXCLU</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet X-25" data-subject-detail="Sujet docile. Aucun signe de dissociation sous pression." data-subject-hint="Obéissance trop parfaite.">
+                <span>Sujet X-25</span>
+                <strong>ARCHIVÉ</strong>
+              </button>
+              <button class="subject-row muted" type="button" data-subject-title="Sujet I-26" data-subject-detail="Fort potentiel physique, mémoire faible, observation moyenne." data-subject-hint="Ce dossier ne regarde jamais les portes.">
+                <span>Sujet I-26</span>
+                <strong>INCOMPLET</strong>
+              </button>
+            </div>
+
+            <div class="terminal-card subject-preview">
+              <p class="kicker">Consultation registre</p>
+              <h3 id="subjectPreviewTitle">Selectionner un Sujet</h3>
+              <p id="subjectPreviewDetail"></p>
+              <p class="hint-line" id="subjectPreviewHint"></p>
+              <button class="btn primary hidden" type="button" id="subjectPreviewOpen" data-n17-gate>Ouvrir la fiche</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-n17" data-page="n17">
+          <div class="section-head">
+            <p class="kicker">Sujet consultable</p>
+            <h2>Sujet N-17</h2>
+          </div>
+
+          <div class="lock-panel hidden" id="n17Lock">
+            <div>
+              <span class="lock-status">Verrou retiré</span>
+              <p>Fiche restaurée. Validation nominale retirée.</p>
+            </div>
+            <form class="code-form" id="n17Form">
+              <label for="n17Code">Accès dossier</label>
+              <div class="code-line">
+                <input id="n17Code" type="text" autocomplete="off" placeholder="ACCÈS" />
+                <button class="btn primary" type="submit">Valider</button>
+              </div>
+              <p class="form-feedback" id="n17Feedback" aria-live="polite"></p>
+            </form>
+          </div>
+
+          <article class="case-file n17-case" id="n17File">
+            <div class="file-stamp">SCELLÉ OUVERT // ACCÈS PARTIEL</div>
+
+            <div class="n17-hero">
+              <figure class="n17-portrait">
+                <img id="nadirProfileImage" src="./assets/images/nadir-profile.svg?v=ascalon-20260607-vercel" alt="Portrait opérationnel du Sujet N-17" />
+                <figcaption>Portrait opérationnel // N-17</figcaption>
+              </figure>
+
+              <div class="n17-identity-panel">
+                <p class="kicker">ASCALON / Registre sujet</p>
+                <h3>Nadir Delgado</h3>
+                <p>
+                  Sujet prioritaire du programme ASCALON. Les synthèses internes le décrivent comme l’élément
+                  le plus abouti du cycle : observation froide, endurance rare, précision longue distance et
+                  capacité à rester fonctionnel sous pression extrême.
+                </p>
+                <div class="n17-status-grid" aria-label="Résumé opérationnel du sujet">
+                  <span><strong>Spécialité</strong> Tireur d’élite</span>
+                  <span><strong>Classement</strong> Élément supérieur</span>
+                  <span><strong>Supervision</strong> M. Duval</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="case-grid">
+              <div>
+                <p class="field-label">Nom</p>
+                <p>Nadir</p>
+              </div>
+              <div>
+                <p class="field-label">Désignation</p>
+                <p>Sujet N-17</p>
+              </div>
+              <div>
+                <p class="field-label">Origines</p>
+                <p>Maroc / Bolivie</p>
+              </div>
+              <div>
+                <p class="field-label">Statut</p>
+                <p>Actif</p>
+              </div>
+              <div>
+                <p class="field-label">Superviseur</p>
+                <p>M. Duval</p>
+              </div>
+              <div>
+                <p class="field-label">Phase</p>
+                <p>Précision / intervention</p>
+              </div>
+            </div>
+
+            <div class="observation">
+              <p class="field-label">Observation</p>
+              <p>
+                Le sujet présente une réponse émotionnelle faible, une mémoire visuelle rare et une résistance
+                inhabituelle au stress. Plusieurs annexes évoquent isolement, privation, contention et interrogatoires
+                prolongés. Le mot torture apparaît une seule fois, sans signature.
+              </p>
+              <p>
+                Les mentions liées à M. Duval restent incomplètes. Aucun motif lisible. Seulement des validations,
+                des silences et des dates retirées.
+              </p>
+            </div>
+
+            <ul class="fragment-lines">
+              <li><strong>Historique :</strong> placement en foyer après rupture familiale classée sensible.</li>
+              <li><strong>Éducation :</strong> isolement, dressage nocturne, ordres répétés jusqu’à rupture.</li>
+              <li><strong>Incident :</strong> sujet non réceptif. M. Duval valide l’usage de la force sans limitation claire.</li>
+              <li><strong>Conséquence :</strong> interventions chirurgicales non détaillées, classées comme “coût acceptable de correction”.</li>
+              <li><strong>Âge critique :</strong> tortures militaires introduites dès ses 10 ans sous couvert d’entraînement.</li>
+              <li><strong>Note interne :</strong> Nadir n’a pas obéi. Il a appris à quitter son propre corps.</li>
+            </ul>
+          </article>
+        </section>
+
+        <section class="page" id="page-p13" data-page="p13">
+          <div class="section-head">
+            <p class="kicker">Sujet consultable</p>
+            <h2>Sujet P-13</h2>
+          </div>
+
+          <article class="case-file n17-case p13-case">
+            <div class="file-stamp">SCELLÉ OUVERT // LIAISON PARTIELLE</div>
+
+            <div class="n17-hero">
+              <figure class="n17-portrait p13-portrait">
+                <img id="panamProfileImage" src="./assets/images/panam-profile.svg?v=ascalon-20260607-vercel" alt="Portrait opérationnel du Sujet P-13" />
+                <figcaption>Portrait opérationnel // P-13</figcaption>
+              </figure>
+
+              <div class="n17-identity-panel p13-identity-panel">
+                <p class="kicker">ASCALON / Registre sujet</p>
+                <h3>Panam Palmer</h3>
+                <p>
+                  Profil retenu hors cycle standard. Le sujet P-13 n’entre pas dans les schémas d’obéissance pure :
+                  elle fonctionne par décision rapide, loyauté sélective et lecture instinctive du terrain.
+                </p>
+                <div class="n17-status-grid" aria-label="Résumé opérationnel du sujet P-13">
+                  <span><strong>Statut</strong> Actif périphérique</span>
+                  <span><strong>Phase</strong> Liaison instable</span>
+                  <span><strong>Usage</strong> Mobile / extraction</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="case-grid">
+              <div>
+                <p class="field-label">Nom</p>
+                <p>Panam Palmer</p>
+              </div>
+              <div>
+                <p class="field-label">Désignation</p>
+                <p>Sujet P-13</p>
+              </div>
+              <div>
+                <p class="field-label">Origines</p>
+                <p>Convois périphériques / zones frontalières</p>
+              </div>
+              <div>
+                <p class="field-label">Statut</p>
+                <p>Actif périphérique</p>
+              </div>
+              <div>
+                <p class="field-label">Supervision</p>
+                <p>Cellule mobile ASCALON</p>
+              </div>
+              <div>
+                <p class="field-label">Phase</p>
+                <p>Liaison instable</p>
+              </div>
+            </div>
+
+            <div class="observation">
+              <p class="field-label">Observation</p>
+              <p>
+                P-13 présente une autonomie élevée, une agressivité défensive contrôlée et une capacité rare à maintenir
+                un itinéraire sous pression. Les rapports lui attribuent des décisions non validées mais efficaces,
+                notamment lors d’extractions en terrain ouvert et de transferts sous surveillance.
+              </p>
+              <p>
+                Plusieurs dossiers signalent une proximité opérationnelle avec N-17. Les termes utilisés restent
+                administratifs : “corrélation”, “recouvrement de trajectoire”, “réponse coordonnée”. Aucun rapport ne
+                nomme clairement la nature du lien.
+              </p>
+            </div>
+
+            <ul class="fragment-lines">
+              <li><strong>Aptitude relevée :</strong> conduite offensive, lecture de convoi, extraction rapide, tir de couverture.</li>
+              <li><strong>Comportement :</strong> refuse les ordres qui condamnent un binôme encore récupérable.</li>
+              <li><strong>Faiblesse déclarée :</strong> loyauté trop visible, discipline verticale insuffisante.</li>
+              <li><strong>Note terrain :</strong> P-13 ne suit pas toujours la route prévue, mais revient rarement seule.</li>
+              <li><strong>Signal croisé :</strong> présence confirmée près de N-17 sur plusieurs fenêtres non consécutives.</li>
+              <li><strong>Conclusion :</strong> utile en mouvement, dangereuse en attachement, impossible à classer comme simple soutien.</li>
+            </ul>
+          </article>
+        </section>
+
+        <section class="page" id="page-c14" data-page="c14">
+          <div class="section-head">
+            <p class="kicker">Sujet consultable</p>
+            <h2>Sujet C-14</h2>
+          </div>
+
+          <article class="case-file n17-case c14-case">
+            <div class="file-stamp">SCELLÉ OUVERT // PROXIMITÉ SUPERVISION</div>
+
+            <div class="n17-hero">
+              <figure class="n17-portrait c14-portrait">
+                <img id="cainProfileImage" src="./assets/images/cain-profile.svg?v=ascalon-20260610-cain" alt="Portrait opérationnel du Sujet C-14" />
+                <figcaption>Portrait opérationnel // C-14</figcaption>
+              </figure>
+
+              <div class="n17-identity-panel c14-identity-panel">
+                <p class="kicker">ASCALON / Registre sujet</p>
+                <h3>Caïn Voss</h3>
+                <p>
+                  Profil maintenu dans une zone de confiance contrôlée. C-14 présente une apparence volontairement
+                  ordinaire, une condition athlétique superficielle mais durable, et des réflexes compatibles avec
+                  un cycle avancé de survie, de mobilité et de décision rapide.
+                </p>
+                <div class="n17-status-grid" aria-label="Résumé opérationnel du sujet C-14">
+                  <span><strong>Statut</strong> Actif rapproché</span>
+                  <span><strong>Phase</strong> Liaison supervision</span>
+                  <span><strong>Usage</strong> Reconnaissance / appui</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="case-grid">
+              <div>
+                <p class="field-label">Nom</p>
+                <p>Caïn Voss</p>
+              </div>
+              <div>
+                <p class="field-label">Désignation</p>
+                <p>Sujet C-14</p>
+              </div>
+              <div>
+                <p class="field-label">Morphologie</p>
+                <p>Svelte / athlétique superficiel</p>
+              </div>
+              <div>
+                <p class="field-label">Statut</p>
+                <p>Actif rapproché</p>
+              </div>
+              <div>
+                <p class="field-label">Supervision</p>
+                <p>Canal Duval</p>
+              </div>
+              <div>
+                <p class="field-label">Phase</p>
+                <p>Confiance surveillée</p>
+              </div>
+            </div>
+
+            <div class="observation">
+              <p class="field-label">Observation</p>
+              <p>
+                C-14 n’est pas classé comme force brute. Les évaluations le décrivent comme un sujet adaptable :
+                visage rarement fixé, posture banale, langage peu ostentatoire, mais récupération physique rapide
+                et sang-froid utilisable en environnement dégradé.
+              </p>
+              <p>
+                Les premières opérations le placent à proximité de N-17 sans qualifier la relation. Les derniers
+                rapports le rapprochent davantage de M. Duval : relais discret, témoin utile, présence tolérée dans
+                des briefings normalement fermés.
+              </p>
+            </div>
+
+            <ul class="fragment-lines">
+              <li><strong>Aptitude relevée :</strong> survie, déplacement discret, lecture de menace, appui à distance moyenne.</li>
+              <li><strong>Comportement :</strong> apprécie les profils efficaces, calmes et peu démonstratifs.</li>
+              <li><strong>Ancien lien :</strong> corrélation terrain avec N-17 sur trois fenêtres opérationnelles.</li>
+              <li><strong>État actuel :</strong> conserve un accès indirect à la supervision, sans rattachement public.</li>
+              <li><strong>Risque :</strong> loyauté illisible. Le sujet comprend trop vite ce qu’on ne lui dit pas.</li>
+              <li><strong>Note interne :</strong> C-14 ne cherche pas toujours à être vu. C’est précisément ce qui le rend utile.</li>
+            </ul>
+          </article>
+        </section>
+
+        <section class="page page-cartography" id="page-cartography" data-page="cartography">
+          <div class="section-head ops-head">
+            <p class="kicker">ASCALON / CARTOGRAPHIE OPÉRATIONNELLE</p>
+            <h2>Théâtre mondial</h2>
+          </div>
+
+          <div class="ops-command">
+            <section class="ops-map-shell operation-map" aria-label="Carte tactique des opérations">
+              <div class="ops-map-toolbar">
+                <span>RÉSEAU PRIVÉ // PLANISPHÈRE OPÉRATIONNEL</span>
+                <strong id="operationCount">20 signaux</strong>
+                <div class="ops-map-controls" aria-label="Contrôles de carte">
+                  <button type="button" id="operationZoomOut" aria-label="Zoom arrière">−</button>
+                  <button type="button" id="operationResetMap">Reset</button>
+                  <button type="button" id="operationZoomIn" aria-label="Zoom avant">+</button>
+                </div>
+              </div>
+
+              <div class="ops-map-viewport" id="operationMap">
+                <div class="map-horizon" aria-hidden="true"></div>
+                <div class="briefing-backdrop" aria-hidden="true">
+                  <div class="briefing-panel panel-left"></div>
+                  <div class="briefing-panel panel-right"></div>
+                  <div class="briefing-panel panel-bottom"></div>
+                </div>
+                <div class="ops-map-stage map-stage" id="operationMapStage">
+                  <img
+                    class="official-world-map world-map"
+                    id="operationOfficialMap"
+                    src="./assets/images/world-map-relief.png"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <canvas class="earth-canvas" id="operationEarthCanvas" width="1920" height="1280" aria-hidden="true"></canvas>
+                  <div class="ops-map-grid" aria-hidden="true"></div>
+                  <div class="ops-map-depth" aria-hidden="true"></div>
+                  <svg class="world-map-svg" viewBox="0 0 100 100" aria-hidden="true">
+                    <path class="world-land" d="M13 20 22 15 33 19 39 28 35 39 28 45 19 42 12 32Z" />
+                    <path class="world-land" d="M28 48 36 54 38 66 34 80 29 90 25 76 20 66 22 55Z" />
+                    <path class="world-land" d="M48 22 58 18 70 22 82 21 93 30 88 43 72 42 64 36 55 38 48 32Z" />
+                    <path class="world-land" d="M50 40 59 37 67 48 65 63 58 72 52 64 48 51Z" />
+                    <path class="world-land" d="M76 58 88 61 92 72 83 78 72 70Z" />
+                    <path class="world-land island" d="M42 34 45 33 46 37 43 39 40 37Z" />
+                    <path class="world-land island" d="M55 75 61 77 60 83 53 82Z" />
+                  </svg>
+                  <svg class="ops-lines" id="operationLines" viewBox="0 0 100 100" aria-hidden="true"></svg>
+                  <div class="operation-points" id="operationPoints"></div>
+                </div>
+                <svg class="mission-laser-layer" id="operationLaserLayer" aria-hidden="true"></svg>
+
+                <article class="operation-briefing-card hidden" id="operationBriefingCard" aria-live="polite">
+                  <button class="window-close operation-window-close" type="button" id="closeOperationPreview" aria-label="Fermer cette fenêtre">×</button>
+                  <div class="briefing-card-head">
+                    <span>LP ASSET TRACKING</span>
+                    <strong id="operationBriefingIndex">SIGNAL 00</strong>
+                  </div>
+                  <div class="briefing-asset-frame">
+                    <div class="briefing-asset-placeholder" aria-hidden="true">
+                      <span></span>
+                    </div>
+                    <div class="briefing-card-glow" aria-hidden="true"></div>
+                  </div>
+                  <div class="briefing-card-body">
+                    <p class="kicker">Operation file</p>
+                    <h3 id="operationBriefingTitle">Sélectionner une mission</h3>
+                    <dl>
+                      <div><dt>Localisation</dt><dd id="operationBriefingLocation">---</dd></div>
+                      <div><dt>Année</dt><dd id="operationBriefingYear">---</dd></div>
+                      <div><dt>Type</dt><dd id="operationBriefingType">---</dd></div>
+                      <div><dt>Bilan</dt><dd id="operationBriefingImpact">---</dd></div>
+                      <div><dt>Statut</dt><dd id="operationBriefingStatus">---</dd></div>
+                      <div><dt>Sujet(s)</dt><dd id="operationBriefingSubjects">---</dd></div>
+                      <div><dt>Classification</dt><dd id="operationBriefingClass">---</dd></div>
+                    </dl>
+                  </div>
+                </article>
+
+                <aside class="operation-contact-strip" id="operationContactStrip" aria-label="Liste des missions"></aside>
+                <button class="mission-list-toggle hidden" type="button" id="missionListToggle">Index missions</button>
+                <p class="map-help">Clic gauche : déplacer // clic droit : rotation // molette : zoom</p>
+              </div>
+
+              <div class="ops-hidden-message hidden" id="operationHiddenMessage">
+                <p>Corrélation temporelle détectée.</p>
+                <p>Cinq dossiers ouverts. Continuité opérationnelle confirmée.</p>
+              </div>
+            </section>
+
+            <aside class="ops-side">
+              <section class="subject-ghost">
+                <div>
+                  <p class="kicker">Registre cartographique</p>
+                  <h3>Index opérations</h3>
+                  <p>Entrées classées par zone, année, type, statut et bilan estimé.</p>
+                  <p>Aucune note personnelle. Données brutes uniquement.</p>
+                </div>
+              </section>
+
+              <section class="operation-file" id="operationFile" aria-live="polite">
+                <p class="kicker">Dossier opérationnel</p>
+                <div class="operation-empty" id="operationEmpty">
+                  <h3>Sélectionner un signal</h3>
+                  <p>Chaque point correspond à une entrée localisée. Les cadres vides sont réservés aux images futures.</p>
+                </div>
+
+                <div class="operation-details hidden" id="operationDetails">
+                  <button class="window-close operation-window-close" type="button" data-close-operation-panel aria-label="Fermer cette fenêtre">×</button>
+                  <figure class="operation-visual">
+                    <img id="operationImage" src="./assets/images/operations/no-signal.svg" alt="" />
+                    <figcaption>Emplacement image opérationnelle</figcaption>
+                  </figure>
+                  <div class="classification-gauge" aria-label="Niveau de classification">
+                    <span>Niveau de classification</span>
+                    <div><i id="classificationFill"></i></div>
+                  </div>
+                  <h3 id="operationTitle">OPERATION</h3>
+                  <dl class="operation-meta">
+                    <div><dt>Localisation</dt><dd id="operationLocation"></dd></div>
+                    <div><dt>Année</dt><dd id="operationYear"></dd></div>
+                    <div><dt>Sujet(s) impliqué(s)</dt><dd id="operationSubjects"></dd></div>
+                    <div><dt>Type</dt><dd id="operationType"></dd></div>
+                    <div><dt>Bilan humain estimé</dt><dd id="operationImpact"></dd></div>
+                    <div><dt>Statut</dt><dd id="operationStatus"></dd></div>
+                  </dl>
+                  <p class="operation-note hidden" id="operationNote"></p>
+                  <button class="btn ghost" type="button" id="closeOperationFile">Fermer dossier</button>
+                </div>
+
+                <form class="operation-lock hidden" id="operationLockForm">
+                  <button class="window-close operation-window-close" type="button" data-close-operation-panel aria-label="Fermer cette fenêtre">×</button>
+                  <h3>ACCÈS REFUSÉ — CODE REQUIS</h3>
+                  <p id="operationLockHint">Ce dossier exige une clé interne.</p>
+                  <label for="operationUnlockCode">Code opération</label>
+                  <div class="code-line">
+                    <input id="operationUnlockCode" type="text" autocomplete="off" placeholder="CODE" />
+                    <button class="btn primary" type="submit">Déverrouiller</button>
+                  </div>
+                  <p class="form-feedback" id="operationLockFeedback" aria-live="polite"></p>
+                </form>
+              </section>
+            </aside>
+          </div>
+
+          <div class="operation-alert hidden" id="operationAlert">
+            <strong id="operationAlertTitle">CANAL SECONDAIRE OUVERT</strong>
+            <span id="operationAlertText">Données restaurées. Niveau de classification maximal.</span>
+          </div>
+        </section>
+
+        <section class="page" id="page-messages" data-page="messages">
+          <div class="section-head">
+            <p class="kicker">Entrée locale</p>
+            <h2>Console</h2>
+          </div>
+
+          <div class="console-frame">
+            <div class="terminal-log large-log" id="terminalLog" aria-live="polite">
+              <p><span>sys</span> scellé local ouvert.</p>
+              <p><span>sync</span> dernière synchronisation : inconnue.</p>
+              <p><span>cmd</span> attente d’un mot exact.</p>
+            </div>
+
+            <form class="console-form" id="consoleForm">
+              <label for="consoleInput">Console</label>
+              <div class="console-line">
+                <span>&gt;</span>
+                <input id="consoleInput" type="text" autocomplete="off" placeholder="commande" />
+              </div>
+            </form>
+          </div>
+
+          <div class="document-block">
+            <p>
+              Les fichiers ne donnent jamais tout. Ils donnent assez pour continuer.
+            </p>
+            <p>
+              Les retours trop complets ont été retirés du circuit.
+            </p>
+          </div>
+        </section>
+
+        <section class="page" id="page-error" data-page="error">
+          <div class="error-page">
+            <p class="classification">ARCHIVE MANQUANTE</p>
+            <h2>ERREUR 404 — FICHIER RETIRÉ</h2>
+            <p>Les sujets non viables ne sont jamais archivés longtemps.</p>
+            <button class="btn primary" type="button" data-page="home">Retour</button>
+          </div>
+        </section>
+
+        <footer class="footnote">
+          <span>Dernière synchronisation : inconnue.</span>
+          <button class="silent-link" type="button" data-page="error">entrée retirée</button>
+        </footer>
+      </section>
+    </main>
+
+    <script src="./js/main.js?v=ascalon-20260610-structure"></script>
+  </body>
+</html>

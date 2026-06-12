@@ -1,0 +1,44 @@
+<svg width="720" height="900" viewBox="0 0 720 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="steel" x1="170" y1="168" x2="565" y2="662" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f0eee6"/>
+      <stop offset="0.22" stop-color="#8f8b82"/>
+      <stop offset="0.52" stop-color="#d7d3c8"/>
+      <stop offset="0.78" stop-color="#4d4d48"/>
+      <stop offset="1" stop-color="#b9b5aa"/>
+    </linearGradient>
+    <linearGradient id="darkSteel" x1="260" y1="180" x2="455" y2="610" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d9d6cc"/>
+      <stop offset="0.4" stop-color="#676761"/>
+      <stop offset="1" stop-color="#e4e0d6"/>
+    </linearGradient>
+    <linearGradient id="red" x1="240" y1="545" x2="485" y2="612" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2e0506"/>
+      <stop offset="0.55" stop-color="#8b1d20"/>
+      <stop offset="1" stop-color="#2c0507"/>
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadow)">
+    <path d="M201 522C181 478 178 428 194 382C211 333 247 294 293 273" stroke="url(#steel)" stroke-width="22"/>
+    <path d="M427 273C473 294 509 333 526 382C542 428 539 478 519 522" stroke="url(#steel)" stroke-width="22"/>
+    <path d="M202 581C230 622 276 651 330 658" stroke="url(#steel)" stroke-width="22"/>
+    <path d="M518 581C490 622 444 651 390 658" stroke="url(#steel)" stroke-width="22"/>
+    <path d="M360 150L396 338L496 548H450L374 392L360 338L346 392L270 548H224L324 338L360 150Z" fill="url(#steel)"/>
+    <path d="M360 150V338" stroke="#0a0b0b" stroke-width="7"/>
+    <path d="M360 397L388 469V694L360 790L332 694V469L360 397Z" fill="url(#darkSteel)"/>
+    <path d="M360 427V737" stroke="#050606" stroke-width="7"/>
+    <path d="M234 548H317V574H185L176 548H234Z" fill="url(#steel)"/>
+    <path d="M486 548H403V574H535L544 548H486Z" fill="url(#steel)"/>
+    <path d="M258 592H304L336 654H312L258 592Z" fill="url(#red)"/>
+    <path d="M462 592H416L384 654H408L462 592Z" fill="url(#red)"/>
+  </g>
+
+  <text x="360" y="830" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="64" letter-spacing="28" fill="url(#steel)">ASCALON</text>
+  <path d="M206 868H332" stroke="#3d3d39" stroke-width="3"/>
+  <path d="M388 868H514" stroke="#3d3d39" stroke-width="3"/>
+  <path d="M360 886L347 862H373L360 886Z" stroke="#7a171c" stroke-width="5"/>
+</svg>

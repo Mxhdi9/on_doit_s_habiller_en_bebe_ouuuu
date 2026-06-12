@@ -1,0 +1,10 @@
+{
+  "name": "ascalon-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site ARG RP FiveM ASCALON, pret pour GitHub et Vercel.",
+  "scripts": {
+    "start": "node preview-server.cjs",
+    "preview": "node preview-server.cjs 4181"
+  }
+}

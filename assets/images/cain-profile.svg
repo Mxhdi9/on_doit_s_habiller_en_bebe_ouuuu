@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1400" role="img" aria-label="Portrait opérationnel du Sujet C-14">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#020303"/>
+      <stop offset="0.55" stop-color="#070908"/>
+      <stop offset="1" stop-color="#010101"/>
+    </linearGradient>
+    <radialGradient id="red" cx="32%" cy="55%" r="48%">
+      <stop offset="0" stop-color="#7f101a" stop-opacity=".72"/>
+      <stop offset=".5" stop-color="#7f101a" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#7f101a" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="scan" width="1" height="9" patternUnits="userSpaceOnUse">
+      <rect width="1" height="1" fill="#f0e8d5" opacity=".08"/>
+    </pattern>
+  </defs>
+  <rect width="900" height="1400" fill="url(#bg)"/>
+  <rect width="900" height="1400" fill="url(#red)"/>
+  <path d="M450 76 622 540H278Z" fill="none" stroke="#cfc8b8" stroke-width="38" opacity=".48"/>
+  <path d="M185 286C92 398 77 545 151 663M715 286c93 112 108 259 34 377" fill="none" stroke="#cfc8b8" stroke-width="38" opacity=".4"/>
+  <path d="M274 632h352" stroke="#cfc8b8" stroke-width="34" opacity=".48"/>
+  <ellipse cx="450" cy="560" rx="128" ry="150" fill="#030303"/>
+  <path d="M305 820c20-155 77-235 145-235s125 80 145 235l35 354H270Z" fill="#050505"/>
+  <path d="M234 492h432" stroke="#7a1119" stroke-width="62" opacity=".65"/>
+  <g opacity=".78">
+    <rect x="178" y="422" width="548" height="32" fill="#050505"/>
+    <rect x="156" y="463" width="594" height="24" fill="#050505"/>
+    <rect x="206" y="504" width="490" height="30" fill="#050505"/>
+    <rect x="180" y="548" width="560" height="22" fill="#050505"/>
+    <rect x="232" y="588" width="450" height="34" fill="#050505"/>
+  </g>
+  <rect width="900" height="1400" fill="url(#scan)"/>
+  <text x="450" y="1260" fill="#d2b66f" font-family="monospace" font-size="28" text-anchor="middle" letter-spacing="8">C-14</text>
+  <text x="450" y="1304" fill="#d8d0bd" font-family="monospace" font-size="16" text-anchor="middle" opacity=".6">PORTRAIT PARTIEL / VISAGE NON CONSIGNÉ</text>
+</svg>

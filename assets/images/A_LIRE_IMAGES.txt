@@ -1,0 +1,14 @@
+Medias image a placer avant deploiement :
+
+- assets/images/dex-photo.png
+- assets/images/world-map-relief.png
+- assets/images/archive/accueil.png
+- assets/images/archive/cam01-exterieur.png
+- assets/images/archive/cam02-entree.png
+- assets/images/archive/cam03-couloir.png
+- assets/images/archive/cam04-salon.png
+- assets/images/archive/cam05-cuisine.png
+- assets/images/archive/cam06-chambre.png
+
+Les fichiers ascalon-logo.svg et dex-reveal.svg sont deja fournis.
+Les images d'operations vont dans assets/images/operations/.

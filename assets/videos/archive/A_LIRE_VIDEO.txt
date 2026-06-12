@@ -1,0 +1,7 @@
+Dépose ici les vidéos publiables du site.
+
+Exemple :
+
+- cam06-couloir.mp4
+
+Les références doivent être ajoutées dans `js/main.js`.

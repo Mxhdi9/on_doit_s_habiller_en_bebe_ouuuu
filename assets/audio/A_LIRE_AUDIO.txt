@@ -1,0 +1,6 @@
+Audio global du site :
+
+- ascalon-ambient.mp3
+
+Le fichier est charge par index.html avec un volume initial de 50%.
+Le bouton discret "Audio 50%" permet de couper ou relancer l'ambiance.

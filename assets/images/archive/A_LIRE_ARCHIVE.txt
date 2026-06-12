@@ -1,0 +1,11 @@
+Depose ici les images de l'archive camera :
+
+- accueil.png
+- cam01-exterieur.png
+- cam02-entree.png
+- cam03-couloir.png
+- cam04-salon.png
+- cam05-cuisine.png
+- cam06-chambre.png
+
+Ces noms sont utilisés directement par `js/main.js`.

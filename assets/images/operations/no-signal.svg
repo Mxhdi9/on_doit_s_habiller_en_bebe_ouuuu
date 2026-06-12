@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Archive operationnelle indisponible</title>
+  <desc id="desc">Visuel tactique sombre utilise quand une image d'operation est manquante.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#02060b"/>
+      <stop offset="0.48" stop-color="#07111b"/>
+      <stop offset="1" stop-color="#160607"/>
+    </linearGradient>
+    <radialGradient id="pulse" cx="50%" cy="45%" r="60%">
+      <stop offset="0" stop-color="#a91f2b" stop-opacity="0.26"/>
+      <stop offset="0.4" stop-color="#2d7688" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#91d7d5" stroke-opacity="0.08" stroke-width="1"/>
+    </pattern>
+    <pattern id="scan" width="1" height="7" patternUnits="userSpaceOnUse">
+      <rect width="1" height="1" fill="#fff" opacity="0.08"/>
+    </pattern>
+    <filter id="rough">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="17"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 0.1"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1200" height="760" fill="url(#bg)"/>
+  <rect width="1200" height="760" fill="url(#pulse)"/>
+  <rect width="1200" height="760" fill="url(#grid)"/>
+  <rect width="1200" height="760" fill="url(#scan)"/>
+  <rect width="1200" height="760" filter="url(#rough)" opacity="0.35"/>
+  <g fill="none" stroke="#b01c26" stroke-opacity="0.62">
+    <path d="M180 180 C300 110 420 150 540 224 S790 335 980 180" stroke-width="2"/>
+    <path d="M220 520 C360 430 460 498 580 420 S790 295 1010 500" stroke-width="2"/>
+    <path d="M190 190 1010 500M220 520 980 180" stroke-width="1" stroke-dasharray="12 12" opacity="0.45"/>
+  </g>
+  <g fill="#b01c26">
+    <circle cx="180" cy="180" r="7"/>
+    <circle cx="540" cy="224" r="7"/>
+    <circle cx="980" cy="180" r="7"/>
+    <circle cx="220" cy="520" r="7"/>
+    <circle cx="580" cy="420" r="7"/>
+    <circle cx="1010" cy="500" r="7"/>
+  </g>
+  <g font-family="Consolas, 'Courier New', monospace" fill="#d8d0c2">
+    <text x="64" y="82" font-size="22" letter-spacing="4">ASCALON // ARCHIVE OPERATIONNELLE</text>
+    <text x="64" y="128" font-size="14" fill="#8fb8b2" letter-spacing="3">SOURCE VISUELLE NON RENSEIGNEE</text>
+    <text x="64" y="648" font-size="14" fill="#d39c52" letter-spacing="2">REMPLACER CE FICHIER PAR UNE IMAGE D'OPERATION DANS /assets/images/operations/</text>
+    <text x="64" y="690" font-size="12" fill="#5f6e6d" letter-spacing="2">N-17 // PRESENCE NON CONFIRMEE // CLASSIFICATION VARIABLE</text>
+  </g>
+</svg>

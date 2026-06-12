@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1400" role="img" aria-labelledby="title desc">
+  <title id="title">Portrait non restauré du Sujet N-17</title>
+  <desc id="desc">Image de secours ASCALON pour le dossier Nadir.</desc>
+  <defs>
+    <radialGradient id="redGlow" cx="43%" cy="58%" r="58%">
+      <stop offset="0" stop-color="#7b1119" stop-opacity=".55"/>
+      <stop offset=".45" stop-color="#1a0708" stop-opacity=".36"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#878277"/>
+      <stop offset=".42" stop-color="#d4cdbb"/>
+      <stop offset=".58" stop-color="#4c4c48"/>
+      <stop offset="1" stop-color="#1b1c1b"/>
+    </linearGradient>
+    <pattern id="scan" width="100%" height="9" patternUnits="userSpaceOnUse">
+      <rect width="100%" height="1" fill="#fff" opacity=".045"/>
+    </pattern>
+  </defs>
+  <rect width="900" height="1400" fill="#020303"/>
+  <rect width="900" height="1400" fill="url(#redGlow)"/>
+  <g opacity=".32" stroke="url(#metal)" stroke-width="24" fill="none">
+    <path d="M214 512A250 250 0 0 1 385 292"/>
+    <path d="M686 512A250 250 0 0 0 515 292"/>
+    <path d="M224 735A250 250 0 0 0 384 906"/>
+    <path d="M676 735A250 250 0 0 1 516 906"/>
+  </g>
+  <path d="M450 170 620 746H280Z" fill="none" stroke="url(#metal)" stroke-width="28" opacity=".42"/>
+  <path d="M450 170v890" stroke="url(#metal)" stroke-width="20" opacity=".48"/>
+  <path d="M280 660h340" stroke="url(#metal)" stroke-width="20" opacity=".42"/>
+  <g transform="translate(0 170)">
+    <path d="M450 505c-92 0-156 74-156 172v220h312V677c0-98-64-172-156-172Z" fill="#050606"/>
+    <circle cx="450" cy="420" r="106" fill="#050606"/>
+    <path d="M324 702c38 40 77 58 126 58s88-18 126-58" fill="none" stroke="#6f1119" stroke-width="16" opacity=".55"/>
+    <path d="M370 418c38 20 124 20 160 0" stroke="#151717" stroke-width="34" stroke-linecap="round"/>
+  </g>
+  <rect x="96" y="1130" width="708" height="116" rx="10" fill="#050606" stroke="#d2b66f" stroke-opacity=".18"/>
+  <text x="450" y="1186" fill="#f0e8d5" font-family="Courier New, monospace" font-size="36" text-anchor="middle" letter-spacing="7">SUJET N-17</text>
+  <text x="450" y="1228" fill="#d2b66f" font-family="Courier New, monospace" font-size="18" text-anchor="middle">PORTRAIT SOURCE NON RESTAURÉ</text>
+  <rect width="900" height="1400" fill="url(#scan)"/>
+</svg>
