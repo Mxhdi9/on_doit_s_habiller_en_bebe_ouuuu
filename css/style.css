@@ -14,7 +14,7 @@
   --green: #647154;
   --green-soft: rgba(100, 113, 84, 0.16);
   --seal: rgba(210, 182, 111, 0.08);
-  --category-bg-image: url("./assets/images/archive/accueil.svg");
+  --category-bg-image: url("/assets/images/ascalon-bg.png");
 }
 
 * {
