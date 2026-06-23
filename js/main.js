@@ -13,6 +13,7 @@ const PANAM_PHOTO_FILE = "./assets/images/subjects/panam.png";
 const PANAM_PHOTO_FALLBACK = "./assets/images/subjects/panam.png";
 const CAIN_PHOTO_FILE = "./assets/images/subjects/cain-voss.png";
 const CAIN_PHOTO_FALLBACK = "./assets/images/subjects/cain-voss.png";
+const VITO_PHOTO_FILE = "/local-media/subjects/vito";
 const CATEGORY_BACKGROUND_FILE = "./assets/images/archive/accueil.png";
 
 const fragmentCodes = {
@@ -54,6 +55,7 @@ const dexImage = document.getElementById("dexImage");
 const dexFallbackNote = document.getElementById("dexFallbackNote");
 const panamProfileImage = document.getElementById("panamProfileImage");
 const cainProfileImage = document.getElementById("cainProfileImage");
+const vitoProfileImage = document.getElementById("vitoProfileImage");
 const entryGate = document.getElementById("entryGate");
 const entryForm = document.getElementById("entryForm");
 const entryCode = document.getElementById("entryCode");
@@ -82,6 +84,7 @@ let dexTriedLocalPhoto = false;
 let nadirProfileFallbackApplied = false;
 let panamProfileFallbackApplied = false;
 let cainProfileFallbackApplied = false;
+let vitoProfileFallbackApplied = false;
 let archiveVaultInput = "";
 let entryInput = "";
 let activeOperationId = null;
@@ -216,6 +219,7 @@ function applyStaticMediaSources() {
   setMediaSource(document.getElementById("nadirProfileImage"), NADIR_PHOTO_FILE, "nadir");
   setMediaSource(panamProfileImage, PANAM_PHOTO_FILE, "panam");
   setMediaSource(cainProfileImage, CAIN_PHOTO_FILE, "cain");
+  setMediaSource(vitoProfileImage, VITO_PHOTO_FILE, "vito");
   setMediaSource(dexImage, DEX_PHOTO_FILE, "dex");
 }
 
@@ -335,6 +339,15 @@ cainProfileImage?.addEventListener("error", () => {
 
   cainProfileFallbackApplied = true;
   cainProfileImage.src = CAIN_PHOTO_FALLBACK;
+});
+
+vitoProfileImage?.addEventListener("error", () => {
+  if (vitoProfileFallbackApplied) {
+    return;
+  }
+
+  vitoProfileFallbackApplied = true;
+  vitoProfileImage.src = fallbackImageDataUri("V-10", "PORTRAIT LOCAL ABSENT");
 });
 
 archiveCoverImage.src = mediaUrl(GAME_MEDIA.cover, "cover");
@@ -1145,8 +1158,9 @@ function updateSubjectPreview(row) {
   const isN17 = row.hasAttribute("data-n17-gate");
   const isP13 = row.hasAttribute("data-p13-gate");
   const isC14 = row.hasAttribute("data-c14-gate");
+  const isV10 = row.hasAttribute("data-v10-gate");
 
-  selectedSubjectAction = isN17 ? "n17" : isP13 ? "p13" : isC14 ? "c14" : null;
+  selectedSubjectAction = isN17 ? "n17" : isP13 ? "p13" : isC14 ? "c14" : isV10 ? "v10" : null;
 
   subjectPreviewTitle.textContent = isN17
     ? "Sujet N-17 // dossier actif"
@@ -1159,7 +1173,13 @@ function updateSubjectPreview(row) {
     : row.dataset.subjectHint || "Aucun indice exploitable.";
 
   subjectPreviewOpen.classList.toggle("hidden", !selectedSubjectAction);
-  subjectPreviewOpen.textContent = isP13 ? "Ouvrir P-13" : isC14 ? "Ouvrir C-14" : "Ouvrir la fiche";
+  subjectPreviewOpen.textContent = isP13
+    ? "Ouvrir P-13"
+    : isC14
+      ? "Ouvrir C-14"
+      : isV10
+        ? "Ouvrir V-10"
+        : "Ouvrir la fiche";
 }
 
 subjectRows.forEach((row) => {
@@ -1180,6 +1200,11 @@ subjectRows.forEach((row) => {
 
     if (row.hasAttribute("data-c14-gate")) {
       showPage("c14");
+      return;
+    }
+
+    if (row.hasAttribute("data-v10-gate")) {
+      showPage("v10");
     }
   });
 });
@@ -1198,6 +1223,11 @@ subjectPreviewOpen?.addEventListener("click", () => {
 
   if (selectedSubjectAction === "c14") {
     showPage("c14");
+    return;
+  }
+
+  if (selectedSubjectAction === "v10") {
+    showPage("v10");
   }
 });
 n17NameForm?.addEventListener("submit", handleN17NameGate);

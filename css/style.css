@@ -837,6 +837,44 @@ input:focus {
   margin: 0;
 }
 
+.v10-case {
+  background:
+    radial-gradient(circle at 70% 16%, rgba(141, 19, 32, 0.32), transparent 34%),
+    radial-gradient(circle at 30% 22%, rgba(226, 204, 146, 0.1), transparent 30%),
+    linear-gradient(180deg, rgba(10, 12, 12, 0.98), rgba(3, 4, 4, 0.94));
+}
+
+.v10-portrait {
+  border-color: rgba(141, 19, 32, 0.34);
+}
+
+.v10-portrait::before {
+  content: "V-10";
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 2;
+  padding: 5px 9px;
+  border: 1px solid rgba(226, 204, 146, 0.24);
+  border-radius: 999px;
+  color: rgba(226, 204, 146, 0.84);
+  background: rgba(2, 3, 3, 0.54);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.v10-portrait img {
+  object-position: center top;
+  filter: contrast(1.1) saturate(1.02) brightness(0.92);
+}
+
+.v10-identity-panel {
+  background:
+    linear-gradient(135deg, rgba(141, 19, 32, 0.2), transparent 38%),
+    linear-gradient(225deg, rgba(226, 204, 146, 0.09), transparent 36%),
+    rgba(4, 6, 6, 0.64);
+}
+
 .p13-case {
   background:
     radial-gradient(circle at 72% 20%, rgba(98, 113, 84, 0.18), transparent 36%),
