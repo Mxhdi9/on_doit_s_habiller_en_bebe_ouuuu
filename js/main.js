@@ -228,11 +228,11 @@ const GAME_MEDIA = {
   cam03: "./assets/images/archive/cam3.png",
   cam04: "./assets/images/archive/cam4.png",
   cam05: "./assets/images/archive/cam5.png",
-  cam06: "./assets/videos/archive/camchambre1.mp4",
+  cam06: "./assets/images/archive/camchambre1.mp4",
   cam06Image: "./assets/images/archive/cam6.png",
 };
 
-const MEDIA_REFRESH_TOKEN = "ascalon-20260624-dex-fix";
+const MEDIA_REFRESH_TOKEN = "ascalon-20260624-maman-video-fix";
 
 function mediaUrl(src, key = "") {
   const resolved = src;
