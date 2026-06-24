@@ -232,7 +232,7 @@ const GAME_MEDIA = {
   cam06Image: "./assets/images/archive/cam6.png",
 };
 
-const MEDIA_REFRESH_TOKEN = "ascalon-20260612-vercel-media";
+const MEDIA_REFRESH_TOKEN = "ascalon-20260624-dex-fix";
 
 function mediaUrl(src, key = "") {
   const resolved = src;
