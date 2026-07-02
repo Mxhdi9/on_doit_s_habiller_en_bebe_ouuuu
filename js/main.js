@@ -59,6 +59,7 @@ const VITO_PHOTO_FILE = [
   "FSeW6H+8PamsfWrOKS01I6KUjBpQCelUYWEApRnPFOC+v6Uv0oAUrmHA6rzUNWFbFRvHn5lxz2oER0UpUjqMUlABRRRQAUUUUAFFFFABRRRQAlFFFAC0UUUAFFFFAwoopVVmOFBNAJXEoqwlqT9849hUypHH0UZ96nmN40JPfQqpA784wPU1MkCL1+Y/pT2YtRmldm0acEPUADAGB0p0DfLsPVeKjUmkY7SHHXofepsdCnbUss2Rz1qKQ8ULIGHvTHNFjSc01oMz371BN9/8BU38VQzfeH+6KtHn1dYkdPT7v40ynp938ao5x1FLRQISjPaiigBd1N2q3bH0oNFACGM/wkGmEEdRipKXdxg80CIqKkKofb6U0xt25+lADaKKKACikpaACikooAWiilRS7BR1JxQNK+glSJC79Bgepq1HCka9MsO9KxqOY61hrayZElui8sdx/SphhRgDA9qZuppaluax5Y7D2emE5ppNFOxLncUmlFIBQWCdst6elAvNjiQoyfwHrTVyzbm/AUgHOW5NLuoFzdxT1yODSbj3pu6jNFhOYp5pjrnBP0pSelH8I+tMzk7oZsH+TQBjinUhpmIUtAPFFABSHrkUUZpiDrSUtIKACilooASiiigBd2fvAH600op+6cexpaSgQ0qV6ikqQHt29KjYYJFACUUUUALVixXM+7+6M1Xq7ZrtiLd2NTLY6MNHmqLyJJflc+hqFic1NMNyVAxyAfWpR2VtHYaTRmm0oqjlvcdSik74pGbHyrye5pFXtqKzbeBy38qQDb15NIBt6daKZDb3AmijFLQLUTFFLmm5oEwPQUfwD60Hp+NJ/D+NMlvQBQe1FHpQQKKKB0pKACiiimIKMUtJQAmfWlopOnBoAWkpaSgAoopPagA96R+gNLR1BFAiOiiigBa0lGyNV9BVCFd0qj3q8x4qJHfhFZOQ1j8tV89QPqKmzyRVdjtb6UIK0tmOPPSnCmp9/b69KUnauf4ugFMyj3BiR8q9T1NAG0YFCjAJ796XtSHvqNpaKSmS9Bc00miiglsKKWkpkh2/Gk/h/GlPT8aQdPxoEFB7UUHtQSL2oo7UlA2J0b60BvWhhmmkexpkj6KYMj6U4c0ALRRSUAHTiijtSexoAKBSZo7UCFoopKAGngmilYZNFAEtoP3ufQVZJqC0HLH8KlY81D3PQo+7TI2OGpkozhhSyUinIKmmYSd24jAeQfSrDAFg1VuhqwhzEv5UMKLvdMD94j2pvanN98flTTSNJaCGkpaSmZMKKKSgkXNJmikpkNh2oHQ/Wigd6BC0lFHegB3YUlHakoGxaKSimSLSUUUALSUUUAFNPWlzSGgQlLSCigBaKKKAFFFJRQBPajEZPvSseaIeIxTZDhqjqd17U0Nao+hp",
   "7dM0w81SOae4NzzUsByMe9Q1JAcOfpQ9gpv30TSdM0xutPbkVH2qUdE9wNJRSUzJhSUUUzNhSUUUyBaT1oo9aBi0d6SgdaBIdSUUlIpi0UlFMkWikooAKKKSgQUhpaaaAFoFJS0AFLSUtACUUtFAFn7qAegqOTkZp7HiozyKg7JvoNB7U09aDwaM5qjmbuNNOjOHFJSDgimJOzuWs0zuaAaG6g1J0t3QlIaWmmgyYUlLSGmQwpKKKZIUtJRQAtFJRQA6koopDCikopiFpKKKBBSUUUAFIaWkoABS0lLQAUUUUAFFFFAFhqj70UVJ0z3GN1pKKKZg9wpKKKYiVTkU4jiiipN47CU00UUEMSiiimSJRRRTJCiiigAooooAKKKKACiiigApKKKBBRRRQAUlFFABS0UUAFFFFABRRRQB/9k=",
 ].join("");
+const VITO_PHOTO_SOURCE = "./assets/images/subjects/vito.png";
 const CATEGORY_BACKGROUND_FILE = "./assets/images/archive/accueil.png";
 
 const fragmentCodes = {
@@ -67,6 +68,25 @@ const fragmentCodes = {
   contrat: "PAPIER",
   bolivie: "SUD",
   cataleya: "LIEN",
+};
+
+const subjectConsoleDetections = {
+  NADIR: "Sujet N-17 détecté. Dossier existant.",
+  DELGADO: "Sujet N-17 détecté. Dossier existant.",
+  NADIRDELGADO: "Sujet N-17 détecté. Dossier existant.",
+  N17: "Sujet N-17 détecté. Dossier existant.",
+  PANAM: "Sujet P-13 détecté. Dossier existant.",
+  PALMER: "Sujet P-13 détecté. Dossier existant.",
+  PANAMPALMER: "Sujet P-13 détecté. Dossier existant.",
+  P13: "Sujet P-13 détecté. Dossier existant.",
+  CAIN: "Sujet C-14 détecté. Dossier existant.",
+  VOSS: "Sujet C-14 détecté. Dossier existant.",
+  CAINVOSS: "Sujet C-14 détecté. Dossier existant.",
+  C14: "Sujet C-14 détecté. Dossier existant.",
+  VITO: "Sujet V-10 détecté. Dossier existant.",
+  VITCH: "Sujet V-10 détecté. Dossier existant.",
+  VITOVITCH: "Sujet V-10 détecté. Dossier existant.",
+  V10: "Sujet V-10 détecté. Dossier existant.",
 };
 
 const state = {
@@ -232,7 +252,7 @@ const GAME_MEDIA = {
   cam06Image: "./assets/images/archive/cam6.png",
 };
 
-const MEDIA_REFRESH_TOKEN = "ascalon-20260624-maman-video-fix";
+const MEDIA_REFRESH_TOKEN = "ascalon-20260702-vito-console-fix";
 
 function mediaUrl(src, key = "") {
   const resolved = src;
@@ -264,7 +284,7 @@ function applyStaticMediaSources() {
   setMediaSource(document.getElementById("nadirProfileImage"), NADIR_PHOTO_FILE, "nadir");
   setMediaSource(panamProfileImage, PANAM_PHOTO_FILE, "panam");
   setMediaSource(cainProfileImage, CAIN_PHOTO_FILE, "cain");
-  setMediaSource(vitoProfileImage, VITO_PHOTO_FILE, "vito");
+  setMediaSource(vitoProfileImage, VITO_PHOTO_SOURCE, "vito");
   setMediaSource(dexImage, DEX_PHOTO_FILE, "dex");
 }
 
@@ -1044,7 +1064,12 @@ function visualPulse(text) {
 }
 
 function normalizeCode(value) {
-  return value.trim().replace(/\s+/g, "").toUpperCase();
+  return value
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "")
+    .toUpperCase();
 }
 
 function updateEntryDisplay() {
@@ -2503,6 +2528,11 @@ function handleConsoleCommand() {
   if (command === "EFFACER" || command === "CLEAR") {
     terminalLog.innerHTML = "";
     appendConsoleLine("sys", "tampon vidé.");
+    return;
+  }
+
+  if (subjectConsoleDetections[command]) {
+    appendConsoleLine("sys", subjectConsoleDetections[command]);
     return;
   }
 
