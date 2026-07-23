@@ -7,6 +7,7 @@ const INITIAL_AMBIENT_VOLUME = 50;
 const ARCHIVE_VAULT_CODE = "5556904";
 const DEX_PHOTO_FILE = "./assets/images/Dex.png";
 const DEX_PHOTO_FALLBACK = "./assets/images/Dex.png";
+const SMASHER_LOCAL_IMAGE_FILE = "/local-media/smasher";
 const SMASHER_IMAGE_FILE = "./assets/images/smasher.png";
 const NADIR_PHOTO_FILE = "./assets/images/subjects/nadir.png";
 const NADIR_PHOTO_FALLBACK = "./assets/images/subjects/nadir.png";
@@ -122,6 +123,7 @@ const dexFallbackNote = document.getElementById("dexFallbackNote");
 const smasherModal = document.getElementById("smasherModal");
 const closeSmasher = document.getElementById("closeSmasher");
 const smasherImage = document.getElementById("smasherImage");
+const smasherFallback = document.getElementById("smasherFallback");
 const panamProfileImage = document.getElementById("panamProfileImage");
 const cainProfileImage = document.getElementById("cainProfileImage");
 const vitoProfileImage = document.getElementById("vitoProfileImage");
@@ -154,6 +156,7 @@ let nadirProfileFallbackApplied = false;
 let panamProfileFallbackApplied = false;
 let cainProfileFallbackApplied = false;
 let vitoProfileFallbackApplied = false;
+let smasherTriedPackagedImage = false;
 let archiveVaultInput = "";
 let entryInput = "";
 let activeOperationId = null;
@@ -2210,7 +2213,10 @@ function openSmasherModal() {
     return;
   }
 
-  smasherImage.src = mediaUrl(SMASHER_IMAGE_FILE, "smasher");
+  smasherTriedPackagedImage = false;
+  smasherFallback?.classList.add("hidden");
+  smasherImage.classList.remove("hidden");
+  smasherImage.src = mediaUrl(SMASHER_LOCAL_IMAGE_FILE, "smasher");
   smasherModal.classList.remove("hidden");
   body.classList.add("smasher-open");
   visualPulse("SMASHER");
@@ -2244,6 +2250,17 @@ smasherModal?.addEventListener("click", (event) => {
   if (event.target === smasherModal) {
     closeSmasherModal();
   }
+});
+
+smasherImage?.addEventListener("error", () => {
+  if (smasherTriedPackagedImage) {
+    smasherImage.classList.add("hidden");
+    smasherFallback?.classList.remove("hidden");
+    return;
+  }
+
+  smasherTriedPackagedImage = true;
+  smasherImage.src = mediaUrl(SMASHER_IMAGE_FILE, "smasher");
 });
 
 document.addEventListener("keydown", (event) => {

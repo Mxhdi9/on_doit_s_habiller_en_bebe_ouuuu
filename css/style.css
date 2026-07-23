@@ -1316,6 +1316,12 @@ input:focus {
   opacity: 1;
 }
 
+.smasher-fallback {
+  color: rgba(226, 204, 146, 0.78);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
 body.smasher-open {
   overflow: hidden;
 }
