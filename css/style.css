@@ -1317,9 +1317,38 @@ input:focus {
 }
 
 .smasher-fallback {
+  position: fixed;
+  top: calc(50% - 18px);
+  left: 50%;
+  z-index: 2;
+  margin: 0;
+  transform: translate(-50%, -50%);
   color: rgba(226, 204, 146, 0.78);
   font-size: 0.82rem;
   text-transform: uppercase;
+}
+
+.smasher-upload {
+  position: fixed;
+  top: calc(50% + 28px);
+  left: 50%;
+  z-index: 2;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid rgba(226, 204, 146, 0.3);
+  border-radius: 4px;
+  color: rgba(240, 232, 213, 0.78);
+  background: rgba(2, 3, 3, 0.56);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  backdrop-filter: blur(8px);
+}
+
+.smasher-upload:hover {
+  color: rgba(240, 232, 213, 0.96);
+  border-color: rgba(226, 204, 146, 0.5);
+  background: rgba(20, 4, 5, 0.72);
 }
 
 body.smasher-open {

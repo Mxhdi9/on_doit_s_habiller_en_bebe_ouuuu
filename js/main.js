@@ -9,8 +9,7 @@ const DEX_PHOTO_FILE = "./assets/images/Dex.png";
 const DEX_PHOTO_FALLBACK = "./assets/images/Dex.png";
 const SMASHER_LOCAL_IMAGE_FILE = "/local-media/smasher";
 const SMASHER_IMAGE_FILE = "./assets/images/smasher.png";
-const SMASHER_DESKTOP_IMAGE_FILE = "file:///C:/Users/MEHDI/Desktop/smasher.png";
-const SMASHER_IMAGE_SOURCES = [SMASHER_IMAGE_FILE, SMASHER_LOCAL_IMAGE_FILE, SMASHER_DESKTOP_IMAGE_FILE];
+const SMASHER_STORAGE_KEY = "ascalonSmasherImage";
 const NADIR_PHOTO_FILE = "./assets/images/subjects/nadir.png";
 const NADIR_PHOTO_FALLBACK = "./assets/images/subjects/nadir.png";
 const PANAM_PHOTO_FILE = "./assets/images/subjects/panam.png";
@@ -126,6 +125,8 @@ const smasherModal = document.getElementById("smasherModal");
 const closeSmasher = document.getElementById("closeSmasher");
 const smasherImage = document.getElementById("smasherImage");
 const smasherFallback = document.getElementById("smasherFallback");
+const loadSmasherFile = document.getElementById("loadSmasherFile");
+const smasherFileInput = document.getElementById("smasherFileInput");
 const panamProfileImage = document.getElementById("panamProfileImage");
 const cainProfileImage = document.getElementById("cainProfileImage");
 const vitoProfileImage = document.getElementById("vitoProfileImage");
@@ -159,6 +160,7 @@ let panamProfileFallbackApplied = false;
 let cainProfileFallbackApplied = false;
 let vitoProfileFallbackApplied = false;
 let smasherImageSourceIndex = 0;
+let smasherImageSources = [];
 let archiveVaultInput = "";
 let entryInput = "";
 let activeOperationId = null;
@@ -261,7 +263,7 @@ const GAME_MEDIA = {
   cam06Image: "./assets/images/archive/cam6.png",
 };
 
-const MEDIA_REFRESH_TOKEN = "ascalon-20260723-smasher-back";
+const MEDIA_REFRESH_TOKEN = "ascalon-20260723-smasher-loader";
 
 function mediaUrl(src, key = "") {
   const resolved = src;
@@ -2215,18 +2217,83 @@ function openSmasherModal() {
     return;
   }
 
+  smasherImageSources = buildSmasherSources();
   smasherImageSourceIndex = 0;
-  smasherFallback?.classList.add("hidden");
-  smasherImage.classList.remove("hidden");
-  smasherImage.src = mediaUrl(SMASHER_IMAGE_SOURCES[smasherImageSourceIndex], "smasher");
   smasherModal.classList.remove("hidden");
   body.classList.add("smasher-open");
   visualPulse("SMASHER");
+
+  if (!smasherImageSources.length) {
+    showSmasherFallback();
+    return;
+  }
+
+  showSmasherImage(smasherImageSources[smasherImageSourceIndex]);
 }
 
 function closeSmasherModal() {
   smasherModal?.classList.add("hidden");
   body.classList.remove("smasher-open");
+}
+
+function getStoredSmasherImage() {
+  try {
+    return localStorage.getItem(SMASHER_STORAGE_KEY) || "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function buildSmasherSources() {
+  return [getStoredSmasherImage(), SMASHER_IMAGE_FILE, SMASHER_LOCAL_IMAGE_FILE].filter(Boolean);
+}
+
+function showSmasherFallback() {
+  smasherImage?.classList.add("hidden");
+  smasherFallback?.classList.remove("hidden");
+  loadSmasherFile?.classList.remove("hidden");
+}
+
+function showSmasherImage(src) {
+  if (!smasherImage) {
+    return;
+  }
+
+  smasherFallback?.classList.add("hidden");
+  loadSmasherFile?.classList.add("hidden");
+  smasherImage.classList.remove("hidden");
+  smasherImage.src = mediaUrl(src, "smasher");
+}
+
+function storeSmasherImage(dataUrl) {
+  try {
+    localStorage.setItem(SMASHER_STORAGE_KEY, dataUrl);
+  } catch (error) {
+    appendConsoleLine("sys", "cache SMASHER indisponible. Image affichee pour cette session.");
+  }
+}
+
+function loadSmasherImageFile(file) {
+  if (!file || !file.type.startsWith("image/")) {
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    const dataUrl = typeof reader.result === "string" ? reader.result : "";
+
+    if (!dataUrl) {
+      showSmasherFallback();
+      return;
+    }
+
+    storeSmasherImage(dataUrl);
+    smasherImageSources = [dataUrl, SMASHER_IMAGE_FILE, SMASHER_LOCAL_IMAGE_FILE];
+    smasherImageSourceIndex = 0;
+    showSmasherImage(dataUrl);
+  });
+  reader.addEventListener("error", showSmasherFallback);
+  reader.readAsDataURL(file);
 }
 
 function revealDexImage() {
@@ -2255,14 +2322,30 @@ smasherModal?.addEventListener("click", (event) => {
 });
 
 smasherImage?.addEventListener("error", () => {
-  if (smasherImageSourceIndex >= SMASHER_IMAGE_SOURCES.length - 1) {
-    smasherImage.classList.add("hidden");
-    smasherFallback?.classList.remove("hidden");
+  if (smasherImageSourceIndex >= smasherImageSources.length - 1) {
+    showSmasherFallback();
     return;
   }
 
   smasherImageSourceIndex += 1;
-  smasherImage.src = mediaUrl(SMASHER_IMAGE_SOURCES[smasherImageSourceIndex], "smasher");
+  showSmasherImage(smasherImageSources[smasherImageSourceIndex]);
+});
+
+smasherImage?.addEventListener("load", () => {
+  smasherFallback?.classList.add("hidden");
+  loadSmasherFile?.classList.add("hidden");
+  smasherImage.classList.remove("hidden");
+});
+
+loadSmasherFile?.addEventListener("click", () => {
+  if (smasherFileInput) {
+    smasherFileInput.value = "";
+    smasherFileInput.click();
+  }
+});
+
+smasherFileInput?.addEventListener("change", () => {
+  loadSmasherImageFile(smasherFileInput.files?.[0]);
 });
 
 document.addEventListener("keydown", (event) => {
