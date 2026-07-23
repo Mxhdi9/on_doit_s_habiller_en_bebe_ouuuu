@@ -2216,7 +2216,7 @@ function openSmasherModal() {
   smasherTriedPackagedImage = false;
   smasherFallback?.classList.add("hidden");
   smasherImage.classList.remove("hidden");
-  smasherImage.src = mediaUrl(SMASHER_LOCAL_IMAGE_FILE, "smasher");
+  smasherImage.src = mediaUrl(SMASHER_IMAGE_FILE, "smasher");
   smasherModal.classList.remove("hidden");
   body.classList.add("smasher-open");
   visualPulse("SMASHER");
@@ -2260,7 +2260,7 @@ smasherImage?.addEventListener("error", () => {
   }
 
   smasherTriedPackagedImage = true;
-  smasherImage.src = mediaUrl(SMASHER_IMAGE_FILE, "smasher");
+  smasherImage.src = mediaUrl(SMASHER_LOCAL_IMAGE_FILE, "smasher");
 });
 
 document.addEventListener("keydown", (event) => {
