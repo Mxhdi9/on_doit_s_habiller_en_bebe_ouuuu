@@ -263,7 +263,7 @@ const GAME_MEDIA = {
   cam06Image: "./assets/images/archive/cam6.png",
 };
 
-const MEDIA_REFRESH_TOKEN = "ascalon-20260723-smasher-loader";
+const MEDIA_REFRESH_TOKEN = "ascalon-20260723-smasher-direct";
 
 function mediaUrl(src, key = "") {
   const resolved = src;
@@ -2245,7 +2245,11 @@ function getStoredSmasherImage() {
 }
 
 function buildSmasherSources() {
-  return [getStoredSmasherImage(), SMASHER_IMAGE_FILE, SMASHER_LOCAL_IMAGE_FILE].filter(Boolean);
+  return [
+    getStoredSmasherImage(),
+    SMASHER_IMAGE_FILE,
+    SMASHER_LOCAL_IMAGE_FILE,
+  ].filter(Boolean);
 }
 
 function showSmasherFallback() {
