@@ -9,6 +9,8 @@ const DEX_PHOTO_FILE = "./assets/images/Dex.png";
 const DEX_PHOTO_FALLBACK = "./assets/images/Dex.png";
 const SMASHER_LOCAL_IMAGE_FILE = "/local-media/smasher";
 const SMASHER_IMAGE_FILE = "./assets/images/smasher.png";
+const SMASHER_DESKTOP_IMAGE_FILE = "file:///C:/Users/MEHDI/Desktop/smasher.png";
+const SMASHER_IMAGE_SOURCES = [SMASHER_IMAGE_FILE, SMASHER_LOCAL_IMAGE_FILE, SMASHER_DESKTOP_IMAGE_FILE];
 const NADIR_PHOTO_FILE = "./assets/images/subjects/nadir.png";
 const NADIR_PHOTO_FALLBACK = "./assets/images/subjects/nadir.png";
 const PANAM_PHOTO_FILE = "./assets/images/subjects/panam.png";
@@ -156,7 +158,7 @@ let nadirProfileFallbackApplied = false;
 let panamProfileFallbackApplied = false;
 let cainProfileFallbackApplied = false;
 let vitoProfileFallbackApplied = false;
-let smasherTriedPackagedImage = false;
+let smasherImageSourceIndex = 0;
 let archiveVaultInput = "";
 let entryInput = "";
 let activeOperationId = null;
@@ -264,7 +266,7 @@ const MEDIA_REFRESH_TOKEN = "ascalon-20260723-smasher-back";
 function mediaUrl(src, key = "") {
   const resolved = src;
 
-  if (!resolved || resolved.startsWith("data:")) {
+  if (!resolved || resolved.startsWith("data:") || resolved.startsWith("file:")) {
     return resolved;
   }
 
@@ -2213,10 +2215,10 @@ function openSmasherModal() {
     return;
   }
 
-  smasherTriedPackagedImage = false;
+  smasherImageSourceIndex = 0;
   smasherFallback?.classList.add("hidden");
   smasherImage.classList.remove("hidden");
-  smasherImage.src = mediaUrl(SMASHER_IMAGE_FILE, "smasher");
+  smasherImage.src = mediaUrl(SMASHER_IMAGE_SOURCES[smasherImageSourceIndex], "smasher");
   smasherModal.classList.remove("hidden");
   body.classList.add("smasher-open");
   visualPulse("SMASHER");
@@ -2253,14 +2255,14 @@ smasherModal?.addEventListener("click", (event) => {
 });
 
 smasherImage?.addEventListener("error", () => {
-  if (smasherTriedPackagedImage) {
+  if (smasherImageSourceIndex >= SMASHER_IMAGE_SOURCES.length - 1) {
     smasherImage.classList.add("hidden");
     smasherFallback?.classList.remove("hidden");
     return;
   }
 
-  smasherTriedPackagedImage = true;
-  smasherImage.src = mediaUrl(SMASHER_LOCAL_IMAGE_FILE, "smasher");
+  smasherImageSourceIndex += 1;
+  smasherImage.src = mediaUrl(SMASHER_IMAGE_SOURCES[smasherImageSourceIndex], "smasher");
 });
 
 document.addEventListener("keydown", (event) => {
