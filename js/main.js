@@ -7,6 +7,7 @@ const INITIAL_AMBIENT_VOLUME = 50;
 const ARCHIVE_VAULT_CODE = "5556904";
 const DEX_PHOTO_FILE = "./assets/images/Dex.png";
 const DEX_PHOTO_FALLBACK = "./assets/images/Dex.png";
+const SMASHER_IMAGE_FILE = "./assets/images/smasher.png";
 const NADIR_PHOTO_FILE = "./assets/images/subjects/nadir.png";
 const NADIR_PHOTO_FALLBACK = "./assets/images/subjects/nadir.png";
 const PANAM_PHOTO_FILE = "./assets/images/subjects/panam.png";
@@ -118,6 +119,9 @@ const dexSpoiler = document.getElementById("dexSpoiler");
 const dexFigure = document.getElementById("dexFigure");
 const dexImage = document.getElementById("dexImage");
 const dexFallbackNote = document.getElementById("dexFallbackNote");
+const smasherModal = document.getElementById("smasherModal");
+const closeSmasher = document.getElementById("closeSmasher");
+const smasherImage = document.getElementById("smasherImage");
 const panamProfileImage = document.getElementById("panamProfileImage");
 const cainProfileImage = document.getElementById("cainProfileImage");
 const vitoProfileImage = document.getElementById("vitoProfileImage");
@@ -252,7 +256,7 @@ const GAME_MEDIA = {
   cam06Image: "./assets/images/archive/cam6.png",
 };
 
-const MEDIA_REFRESH_TOKEN = "ascalon-20260702-vito-console-fix";
+const MEDIA_REFRESH_TOKEN = "ascalon-20260723-smasher-back";
 
 function mediaUrl(src, key = "") {
   const resolved = src;
@@ -2201,6 +2205,22 @@ function closeDexModal() {
   dexModal.classList.add("hidden");
 }
 
+function openSmasherModal() {
+  if (!smasherModal || !smasherImage) {
+    return;
+  }
+
+  smasherImage.src = mediaUrl(SMASHER_IMAGE_FILE, "smasher");
+  smasherModal.classList.remove("hidden");
+  body.classList.add("smasher-open");
+  visualPulse("SMASHER");
+}
+
+function closeSmasherModal() {
+  smasherModal?.classList.add("hidden");
+  body.classList.remove("smasher-open");
+}
+
 function revealDexImage() {
   dexSpoiler.classList.add("hidden");
   dexTriedLocalPhoto = false;
@@ -2216,6 +2236,19 @@ revealDex.addEventListener("click", revealDexImage);
 dexModal.addEventListener("click", (event) => {
   if (event.target === dexModal) {
     closeDexModal();
+  }
+});
+
+closeSmasher?.addEventListener("click", closeSmasherModal);
+smasherModal?.addEventListener("click", (event) => {
+  if (event.target === smasherModal) {
+    closeSmasherModal();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && smasherModal && !smasherModal.classList.contains("hidden")) {
+    closeSmasherModal();
   }
 });
 
@@ -2522,6 +2555,12 @@ function handleConsoleCommand() {
   if (command === "DEX") {
     appendConsoleLine("sys", responses.DEX);
     openDexModal();
+    return;
+  }
+
+  if (command === "SMASHER") {
+    appendConsoleLine("sys", "signal SMASHER extrait.");
+    openSmasherModal();
     return;
   }
 

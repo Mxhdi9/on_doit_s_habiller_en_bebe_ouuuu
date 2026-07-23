@@ -1273,6 +1273,53 @@ input:focus {
   background: rgba(0, 0, 0, 0.86);
 }
 
+.smasher-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #080000;
+}
+
+.smasher-modal img {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  object-position: center;
+  background: #080000;
+}
+
+.smasher-close {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 2;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid rgba(226, 204, 146, 0.22);
+  border-radius: 4px;
+  color: rgba(240, 232, 213, 0.68);
+  background: rgba(2, 3, 3, 0.42);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  opacity: 0.58;
+  backdrop-filter: blur(8px);
+}
+
+.smasher-close:hover {
+  color: rgba(240, 232, 213, 0.96);
+  border-color: rgba(226, 204, 146, 0.42);
+  background: rgba(20, 4, 5, 0.64);
+  opacity: 1;
+}
+
+body.smasher-open {
+  overflow: hidden;
+}
+
 .image-modal-panel {
   position: relative;
   width: min(1180px, 96vw);
@@ -1632,6 +1679,35 @@ input:focus {
 
 .section-head {
   border-bottom-color: rgba(210, 182, 111, 0.2);
+}
+
+.subject-back {
+  position: sticky;
+  top: 94px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  min-width: 0;
+  min-height: 30px;
+  margin: 0 0 14px;
+  padding: 6px 10px;
+  border: 1px solid rgba(226, 204, 146, 0.12);
+  border-radius: 4px;
+  color: rgba(226, 204, 146, 0.58);
+  background: rgba(2, 3, 3, 0.34);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  opacity: 0.72;
+  backdrop-filter: blur(8px);
+}
+
+.subject-back:hover {
+  color: rgba(240, 232, 213, 0.9);
+  border-color: rgba(226, 204, 146, 0.26);
+  background: rgba(226, 204, 146, 0.07);
+  opacity: 1;
+  transform: translateX(-2px);
 }
 
 .principle-card,
@@ -6702,6 +6778,10 @@ body.cartography-view {
 
   .n17-status-grid {
     grid-template-columns: 1fr;
+  }
+
+  .subject-back {
+    top: 76px;
   }
 
   .ambient-control {
