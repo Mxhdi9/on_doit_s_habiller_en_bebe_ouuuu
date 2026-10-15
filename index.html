@@ -6,6 +6,418 @@
     <meta name="robots" content="noindex, nofollow" />
     <title>ASCALON</title>
     <link rel="stylesheet" href="./css/style.css?v=ascalon-20260725-nodal-os" />
+    <!-- NODAL OS : styles inclus pour un remplacement en deux fichiers. -->
+    <style id="nodalOsStyles">
+/* NODAL OS: responsive workspace, archive navigation and protected records. */
+.nodal-login-back { position: absolute; top: max(18px, env(safe-area-inset-top)); left: 18px; z-index: 3; min-height: 38px; padding: 0 12px; border: 1px solid #ffffff55; border-radius: 4px; color: #fff; background: #061a4f66; font-size: .78rem; }
+.nodal-login-back:hover { background: #061a4faa; }
+.nodal-os {
+  --nodal-taskbar-height: calc(48px + env(safe-area-inset-bottom, 0px));
+  --nodal-focus: #1684df;
+  --nodal-ink: #1c2b3d;
+  --nodal-muted: #657184;
+  --nodal-line: #e2e7ef;
+  height: 100vh;
+  height: 100dvh;
+  isolation: isolate;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+.nodal-os :where(button, input) { font-family: inherit; -webkit-tap-highlight-color: transparent; }
+.nodal-os button { touch-action: manipulation; }
+.nodal-os :is(button, input, [tabindex]):focus-visible { outline: 2px solid var(--nodal-focus); outline-offset: 2px; }
+.nodal-os button:disabled { opacity: .38; cursor: default; }
+.nodal-os [hidden] { display: none !important; }
+.nodal-os :is(.nodal-window-body, .nodal-explorer-content, .nodal-start-menu) {
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #a3afc1 transparent;
+}
+
+/* Static texture and opacity entrances keep full-screen compositing light. */
+.nodal-os::before { inset: 0; transform: none; }
+.nodal-particles { animation: none; }
+.nodal-noise { opacity: .035; mix-blend-mode: normal; }
+.nodal-scanlines { opacity: .07; }
+.nodal-boot, .nodal-login, .nodal-desktop { animation: nodalOsFadeIn 220ms ease-out both; }
+.nodal-login::before { filter: none; }
+.nodal-desktop-field::before { box-shadow: 0 0 20px #44c4ff99, 0 0 75px #0c8df05c; }
+.nodal-desktop-console, .nodal-start-menu { backdrop-filter: none; }
+
+.nodal-icons {
+  top: 18px;
+  bottom: calc(var(--nodal-taskbar-height) + 18px);
+  align-content: start;
+  max-width: 100px;
+  grid-template-columns: 94px;
+  gap: 10px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.nodal-icon { min-height: 82px; gap: 5px; line-height: 1.25; }
+.nodal-icon span:last-child { overflow-wrap: anywhere; }
+.nodal-icon-symbol.nodal-medical-symbol,
+.nodal-icon-symbol.nodal-experiments-symbol,
+.nodal-icon-symbol.nodal-contracts-symbol,
+.nodal-icon-symbol.nodal-vault-symbol {
+  display: grid;
+  place-items: center;
+  width: 33px;
+  height: 34px;
+  border: 1px solid #ffffff80;
+  border-radius: 5px;
+  color: #e9f6ff;
+  background: linear-gradient(145deg, #518dab, #214663);
+  box-shadow: 0 2px 5px #0003;
+  font-size: 1.25rem;
+  text-shadow: none;
+}
+.nodal-icon-symbol.nodal-medical-symbol { background: linear-gradient(145deg, #53a7a0, #20645f); }
+.nodal-icon-symbol.nodal-experiments-symbol { background: linear-gradient(145deg, #7d7fc4, #42447a); }
+.nodal-icon-symbol.nodal-contracts-symbol { background: linear-gradient(145deg, #af716b, #6b3835); }
+.nodal-session-status {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #cbdef2;
+  font-size: .66rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.nodal-session-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #78bda9;
+  box-shadow: 0 0 0 3px #78bda91a;
+}
+
+/* The window area ends above the taskbar, including mobile safe areas. */
+.nodal-windows { bottom: var(--nodal-taskbar-height); }
+.nodal-window {
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100% - 16px);
+  max-height: calc(100dvh - var(--nodal-taskbar-height) - 24px);
+  border-radius: 7px;
+  border-color: #687c9270;
+  box-shadow: 0 16px 48px #0005, 0 2px 8px #0003;
+  animation: nodalOsWindowIn 150ms ease-out both;
+}
+.nodal-window.is-active { border-color: #528bb9; box-shadow: 0 18px 55px #0006, 0 0 0 1px #397bae45; }
+.nodal-window.is-dragging { animation: none; user-select: none; }
+.nodal-window.is-dragging .nodal-window-body { pointer-events: none; }
+.nodal-window.is-maximized {
+  top: 8px !important;
+  left: 8px !important;
+  width: calc(100% - 16px) !important;
+  height: calc(100% - 16px) !important;
+  max-height: none;
+}
+.nodal-window-header, .nodal-window.explorer-window .nodal-window-header {
+  flex: 0 0 auto;
+  min-height: 38px;
+  gap: 8px;
+  padding: 0 0 0 13px;
+  touch-action: none;
+}
+.nodal-window-header strong, .nodal-window.explorer-window .nodal-window-header strong { font-size: .75rem; line-height: 1.2; }
+.nodal-window-controls { display: flex; align-self: stretch; align-items: stretch; }
+.nodal-window-controls button, .nodal-window.explorer-window .nodal-window-controls button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  min-width: 40px;
+  height: 37px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.nodal-window-controls button:hover, .nodal-window.explorer-window .nodal-window-controls button:hover { background: #8a9bb533; }
+.nodal-window-controls button[data-nodal-close]:hover,
+.nodal-window.explorer-window .nodal-window-controls button[data-nodal-close]:hover { color: #fff; background: #be342f; }
+.nodal-window-controls button:focus-visible { position: relative; outline-offset: -4px; }
+.nodal-window-body { flex: 1 1 auto; min-height: 0; max-height: none; overflow: auto; }
+
+.nodal-window.explorer-window {
+  width: min(1060px, calc(100vw - 130px));
+  height: min(680px, calc(100dvh - var(--nodal-taskbar-height) - 48px));
+  max-height: calc(100dvh - var(--nodal-taskbar-height) - 24px);
+  border-color: #65778c;
+  background: #fff;
+}
+.nodal-window.explorer-window .nodal-window-header { color: #243346; border-bottom: 1px solid #dce2ea; background: #f8faff; }
+.nodal-window.explorer-window .nodal-window-body {
+  display: flex;
+  max-height: none;
+  overflow: hidden;
+  padding: 0;
+  color: var(--nodal-ink);
+}
+.nodal-window.explorer-window .nodal-window-body p { color: #657184; }
+.nodal-window.explorer-window .nodal-window-body strong { color: #2c415d; }
+.nodal-explorer-ui {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 0;
+  color: var(--nodal-ink);
+  font-size: .79rem;
+}
+.nodal-explorer-ribbon { align-items: center; min-height: 45px; gap: 4px; padding: 5px 12px; border-bottom: 1px solid var(--nodal-line); background: #f7f9fc; }
+.nodal-explorer-ribbon button { min-width: 0; min-height: 32px; padding: 6px 11px; border-radius: 4px; color: #3c4a5d; font-size: .72rem; }
+.nodal-explorer-ribbon button:hover { border-color: #d5e3f4; background: #eaf2fc; }
+.nodal-explorer-address {
+  grid-template-columns: repeat(3, 29px) minmax(0, 1fr) minmax(140px, 220px);
+  gap: 5px;
+  min-height: 48px;
+  padding: 7px 12px;
+  border-bottom-color: var(--nodal-line);
+}
+.nodal-explorer-address > button {
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  color: #4d5e73;
+  background: transparent;
+  font-size: 1rem;
+}
+.nodal-explorer-address > button:not(:disabled):hover { background: #eaf1fb; }
+.nodal-breadcrumbs {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 31px;
+  gap: 3px;
+  overflow-x: auto;
+  padding: 2px 6px;
+  border: 1px solid #dbe2eb;
+  border-radius: 4px;
+  background: #f9fbfe;
+  scrollbar-width: none;
+}
+.nodal-breadcrumbs button { flex: 0 0 auto; min-height: 25px; padding: 3px 6px; border: 0; border-radius: 3px; color: #3c4f68; background: transparent; font-size: .72rem; white-space: nowrap; }
+.nodal-breadcrumbs button:hover { background: #e1ecfa; }
+.nodal-breadcrumbs > span { color: #94a3b5; font-size: .7rem; }
+.nodal-explorer-address input { width: 100%; min-width: 0; height: 31px; padding: 0 10px; border: 1px solid #dbe2eb; border-radius: 4px; color: #293a51; background: #f9fbfe; font-size: .72rem; }
+.nodal-explorer-address input::placeholder { color: #7a8799; }
+.nodal-explorer-main { grid-template-columns: 176px minmax(0, 1fr); min-height: 0; overflow: hidden; }
+.nodal-explorer-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  gap: 3px;
+  padding: 12px 8px;
+  border-right: 1px solid var(--nodal-line);
+  background: #f7f9fc;
+}
+.nodal-explorer-sidebar button { flex: 0 0 auto; min-height: 36px; padding: 8px 10px; border: 1px solid transparent; border-radius: 4px; color: #4a5b70; background: transparent; text-align: left; font-size: .74rem; line-height: 1.3; }
+.nodal-explorer-sidebar button:hover { background: #e9eff8; }
+.nodal-explorer-sidebar button[aria-current="page"] { border-color: #d4e4f8; color: #135f9c; background: #e2edfb; font-weight: 600; }
+.nodal-explorer-sidebar :is(span, strong) { padding: 5px; }
+.nodal-explorer-content { min-width: 0; min-height: 0; padding: 22px 24px 30px; overflow: auto; }
+.nodal-explorer-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #edf0f5; }
+.nodal-explorer-content .nodal-explorer-heading h3 { margin: 0; color: #273b56; font-size: 1.15rem; font-weight: 600; }
+.nodal-explorer-heading p, .nodal-window-body .nodal-search-summary { margin: 4px 0 0; color: var(--nodal-muted); font-size: .73rem; line-height: 1.5; }
+.nodal-explorer-heading > span, .nodal-explorer-heading > small { color: #657184; font-size: .68rem; }
+.nodal-explorer-content .nodal-section-heading { margin: 20px 0 11px; color: #53627a; font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.nodal-folder-grid { grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.nodal-folder-tile { position: relative; grid-template-columns: 42px minmax(0, 1fr); min-height: 80px; gap: 12px; padding: 12px; border: 1px solid #e5eaf2; border-radius: 6px; background: #fdfefe; }
+.nodal-folder-tile:hover { border-color: #bcd5f1; background: #f0f6fe; }
+.nodal-window-body .nodal-folder-tile strong { color: #293b52; font-size: .77rem; font-weight: 600; line-height: 1.4; }
+.nodal-folder-tile small { margin-top: 5px; color: #6c798b; font-size: .66rem; line-height: 1.4; }
+.nodal-lock-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: fit-content;
+  padding: 3px 6px;
+  border: 1px solid #e4d8bb;
+  border-radius: 3px;
+  color: #80652e;
+  background: #faf5e9;
+  font-size: .6rem;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.nodal-folder-tile > .nodal-lock-badge { position: absolute; right: 8px; top: 8px; }
+.nodal-folder-icon .nodal-lock-badge { position: absolute; bottom: -4px; right: -4px; z-index: 1; min-width: 16px; padding: 1px 3px; }
+.nodal-file-list { display: grid; gap: 5px; min-width: 0; }
+.nodal-file-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; min-height: 63px; padding: 10px 12px; border: 1px solid #e7ebf2; border-radius: 5px; color: #32455e; background: #fff; text-align: left; }
+.nodal-file-row:hover { border-color: #bad3f0; background: #f0f6fe; }
+.nodal-file-row > span:first-child { display: grid; place-items: center; width: 30px; height: 35px; border: 1px solid #d4deeb; border-radius: 3px; color: #4c709b; background: #f3f7fc; font-size: 1rem; }
+.nodal-window-body .nodal-file-row strong { display: block; color: #2c415d; font-size: .76rem; font-weight: 600; overflow-wrap: anywhere; }
+.nodal-file-row small { display: block; margin-top: 4px; color: #748195; font-size: .66rem; line-height: 1.4; }
+.nodal-file-meta { color: #748195; font-size: .65rem; white-space: nowrap; }
+.nodal-empty-state { display: grid; align-content: center; justify-items: center; min-height: 180px; padding: 32px 22px; border: 1px dashed #d9e1ed; border-radius: 6px; color: #61748b; background: #f9fbfe; text-align: center; line-height: 1.6; }
+.nodal-window-body .nodal-empty-state p { max-width: 340px; margin: 6px 0; color: #6f7e90; font-size: .77rem; }
+.nodal-window-body .nodal-empty-state strong { color: #3e5572; }
+.nodal-explorer-status { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px; min-height: 28px; padding: 6px 13px; border-top-color: var(--nodal-line); color: #69798e; background: #f8faff; font-size: .65rem; }
+
+/* Readable dossier pages retain the archive's restrained institutional styling. */
+.nodal-window.document-window { width: min(750px, calc(100vw - 140px)); height: min(750px, calc(100dvh - var(--nodal-taskbar-height) - 48px)); color: #273449; background: #e9edf3; }
+.document-window .nodal-window-body { padding: 20px; background: #e9edf3; }
+.nodal-document { min-height: 100%; padding: clamp(22px, 3vw, 42px); border: 1px solid #d7dee8; border-radius: 2px; color: #344154; background: #fff; box-shadow: 0 2px 8px #22365206; font-family: "Segoe UI", Arial, sans-serif; font-size: .82rem; line-height: 1.8; }
+.nodal-document-header { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 2px solid #263f5d; }
+.nodal-document-classification { display: inline-block; margin: 0 0 15px; padding: 4px 8px; border: 1px solid #d9b6b3; border-radius: 2px; color: #984a45; background: #fcf4f3; font-family: "Courier New", monospace; font-size: .63rem; font-weight: 700; letter-spacing: .1em; line-height: 1.5; text-transform: uppercase; }
+.nodal-document-header h2, .nodal-document-header h3 { margin: 0 0 8px; color: #233c5b; font-size: clamp(1.22rem, 2.2vw, 1.7rem); line-height: 1.3; }
+.nodal-window-body .nodal-document-header p { margin: 6px 0 0; color: #728095; font-size: .73rem; }
+.nodal-document-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px 24px; margin: 0 0 30px; padding: 17px 20px; border: 1px solid #e2e8f0; border-radius: 4px; background: #f8faff; }
+.nodal-document-meta > div { min-width: 0; }
+.nodal-document-meta dt { margin-bottom: 2px; color: #7d8a9a; font-size: .62rem; letter-spacing: .05em; text-transform: uppercase; }
+.nodal-document-meta dd { margin: 0; color: #344c69; font-size: .75rem; overflow-wrap: anywhere; }
+.nodal-document-section { margin-top: 24px; }
+.nodal-document-section h3, .nodal-document-section h4 { margin: 0 0 9px; color: #2a4567; font-size: .8rem; font-weight: 700; letter-spacing: .025em; }
+.nodal-window-body .nodal-document p, .nodal-window-body .nodal-document li { color: #4b586c; }
+.nodal-window-body .nodal-document .nodal-document-classification { color: #984a45; }
+.nodal-window-body .nodal-document strong { color: #334a66; }
+.nodal-document-section ul { margin: 10px 0; padding-left: 20px; }
+.nodal-document-footer { margin-top: 35px; padding-top: 16px; border-top: 1px solid #dce3ee; color: #8b96a6; font-family: "Courier New", monospace; font-size: .64rem; letter-spacing: .03em; line-height: 1.6; }
+.nodal-document-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.nodal-document-actions button, .nodal-explorer-heading button { min-height: 31px; padding: 6px 10px; border: 1px solid #d1deed; border-radius: 4px; color: #3a5c85; background: #f5f9ff; font-size: .7rem; }
+.nodal-document-actions button:hover, .nodal-explorer-heading button:hover { background: #e7f0fc; }
+
+.nodal-vault-dialog { width: min(430px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); margin: auto; padding: 0; overflow-y: auto; border: 1px solid #6b829c; border-radius: 10px; color: #dce7f5; background: #121f31; box-shadow: 0 25px 100px #0008; font-family: "Segoe UI", Arial, sans-serif; }
+.nodal-vault-dialog[open] { animation: nodalOsWindowIn 140ms ease-out both; }
+.nodal-vault-dialog::backdrop { background: #030b199e; }
+.nodal-vault-form { display: grid; gap: 12px; padding: 30px; }
+.nodal-vault-mark { display: grid; place-items: center; width: 45px; height: 45px; margin-bottom: 3px; border: 1px solid #b49b6459; border-radius: 9px; color: #d9bf86; background: #ad8c4621; font-size: 1.3rem; }
+.nodal-vault-form h2 { margin: 0; color: #f3f6fc; font-size: 1.3rem; line-height: 1.35; }
+.nodal-vault-form > p { margin: 0; color: #9baec7; font-size: .79rem; line-height: 1.65; }
+.nodal-vault-label { display: block; margin-top: 7px; color: #c6d6eb; font-size: .74rem; }
+.nodal-vault-form input[type="password"] { width: 100%; height: 43px; padding: 9px 12px; border: 1px solid #45607f; border-radius: 5px; color: #edf4ff; background: #0b1729; font-size: 1rem; }
+.nodal-vault-form input[aria-invalid="true"] { border-color: #cf827d; }
+.nodal-vault-form .nodal-vault-feedback { min-height: 20px; color: #e3b6a2; font-size: .73rem; line-height: 1.5; }
+.nodal-vault-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 3px; }
+.nodal-vault-actions button { min-height: 38px; padding: 8px 15px; border: 1px solid #506985; border-radius: 4px; color: #dbe8f8; background: #1a2d46; font-size: .76rem; }
+.nodal-vault-actions button[type="submit"] { border-color: #4187bf; color: #fff; background: #276da5; }
+.nodal-vault-actions button:hover { filter: brightness(1.13); }
+.nodal-vault-form[aria-busy="true"] { cursor: progress; }
+
+.nodal-taskbar { display: flex; align-items: stretch; min-height: var(--nodal-taskbar-height); height: var(--nodal-taskbar-height); padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 250; background: #060d19f7; }
+.nodal-taskbar > button { flex: 0 0 46px; min-height: 47px; }
+.nodal-taskbar-search { flex: 0 1 270px; min-width: 150px; height: 47px; background: #dce9ff17; }
+.nodal-taskbar-search input { width: 100%; min-width: 0; height: 47px; font-size: .75rem; }
+.nodal-running-apps { flex: 1 1 0; display: flex; align-items: stretch; min-width: 0; gap: 3px; overflow-x: auto; padding: 3px 5px; scrollbar-width: none; }
+.nodal-taskbar .nodal-running-app { position: relative; flex: 0 1 156px; min-width: 75px; min-height: 41px; overflow: hidden; padding: 0 10px; border-radius: 4px; color: #b8c9e0; background: #e1edff0a; font-size: .69rem; text-align: left; text-overflow: ellipsis; text-transform: none; white-space: nowrap; }
+.nodal-running-app::after { content: ""; position: absolute; right: 10px; bottom: 0; left: 10px; height: 2px; background: #778aa4; }
+.nodal-taskbar .nodal-running-app[aria-pressed="true"] { color: #f3f7ff; background: #a5cdff24; }
+.nodal-running-app[aria-pressed="true"]::after { background: #66b8f1; }
+.nodal-taskbar .nodal-lock-button { color: #c6d5e7; font-size: 1rem; }
+.nodal-tray { flex: 0 0 auto; min-width: 90px; height: 47px; padding: 0 12px; }
+.nodal-start-menu { bottom: var(--nodal-taskbar-height); min-height: 0; max-height: calc(100dvh - var(--nodal-taskbar-height) - 16px); overflow-y: auto; padding: 14px 10px 10px; border-radius: 0 8px 0 0; background: #172334; }
+.nodal-start-menu button { min-height: 45px; border-radius: 4px; font-size: .78rem; }
+.nodal-start-menu .nodal-power { margin-top: 16px; padding-top: 12px; }
+.nodal-start-menu .nodal-lock-button { color: #dac795; }
+.nodal-notification { bottom: calc(var(--nodal-taskbar-height) + 16px); right: 18px; z-index: 240; max-width: min(360px, calc(100vw - 36px)); border-color: #547a9c; color: #e2edfb; background: #102036f5; font-size: .74rem; line-height: 1.6; text-transform: none; pointer-events: none; }
+
+@keyframes nodalOsFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes nodalOsWindowIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 960px) {
+  .nodal-taskbar-search { flex-basis: 195px; }
+  .nodal-tray { min-width: 73px; padding: 0 9px; }
+  .nodal-tray span { display: none; }
+  .nodal-session-status { right: 16px; font-size: .6rem; }
+  .nodal-window.explorer-window { width: calc(100vw - 124px); }
+  .nodal-explorer-main { grid-template-columns: 151px minmax(0, 1fr); }
+  .nodal-explorer-content { padding: 18px; }
+  .nodal-explorer-sidebar button { padding: 8px; font-size: .7rem; }
+  .nodal-folder-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+}
+@media (max-width: 820px) {
+  .nodal-window.explorer-window { left: 10px !important; width: calc(100vw - 20px); }
+  .nodal-explorer-main { grid-template-columns: 142px minmax(0, 1fr); }
+  .nodal-explorer-sidebar { display: flex; }
+  .nodal-folder-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+  .nodal-drive-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+}
+@media (max-width: 640px) {
+  .nodal-taskbar-search { display: none; }
+  .nodal-taskbar > button { flex-basis: 44px; }
+  .nodal-taskbar .nodal-running-app { min-width: 74px; font-size: .65rem; }
+  .nodal-tray { min-width: 60px; }
+  .nodal-icons { left: 7px; top: 13px; max-width: 88px; grid-template-columns: 82px; }
+  .nodal-icon { min-height: 78px; font-size: .62rem; }
+  .nodal-session-status { max-width: 200px; line-height: 1.6; text-align: right; }
+  .nodal-window, .nodal-window.small, .nodal-window.explorer-window, .nodal-window.document-window, .nodal-window.is-maximized {
+    top: 8px !important;
+    left: 8px !important;
+    width: calc(100% - 16px) !important;
+    height: calc(100% - 16px) !important;
+    max-height: none;
+  }
+  .nodal-window-header, .nodal-window.explorer-window .nodal-window-header { min-height: 42px; }
+  .nodal-window-controls button, .nodal-window.explorer-window .nodal-window-controls button { width: 39px; min-width: 39px; height: 41px; }
+  .nodal-window-controls [data-nodal-maximize] { display: none !important; }
+  .nodal-explorer-ribbon { padding: 5px 8px; gap: 0; }
+  .nodal-explorer-ribbon button { min-height: 34px; padding: 6px 9px; font-size: .67rem; }
+  .nodal-explorer-address { grid-template-columns: repeat(3, 28px) minmax(0, 1fr); gap: 5px; padding: 7px 9px; }
+  .nodal-explorer-address input { grid-column: 1 / -1; height: 34px; font-size: .76rem; }
+  .nodal-explorer-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .nodal-explorer-sidebar { flex-direction: row; gap: 4px; overflow-x: auto; overflow-y: hidden; padding: 7px 9px; border-right: 0; border-bottom: 1px solid var(--nodal-line); scrollbar-width: none; }
+  .nodal-explorer-sidebar button { min-height: 34px; padding: 7px 10px; font-size: .68rem; white-space: nowrap; }
+  .nodal-explorer-sidebar > :is(span, strong) { display: none; }
+  .nodal-explorer-content { padding: 17px 13px 24px; }
+  .nodal-explorer-heading { margin-bottom: 16px; padding-bottom: 13px; }
+  .nodal-explorer-content .nodal-explorer-heading h3 { font-size: 1.05rem; }
+  .nodal-folder-grid { grid-template-columns: 1fr; gap: 8px; }
+  .nodal-folder-tile { min-height: 75px; padding: 10px; }
+  .nodal-file-row { grid-template-columns: 30px minmax(0, 1fr); gap: 9px; padding: 10px; }
+  .nodal-file-meta { grid-column: 2; font-size: .62rem; }
+  .nodal-file-row:has(.nodal-file-meta) { row-gap: 5px; }
+  .nodal-explorer-status { font-size: .61rem; }
+  .document-window .nodal-window-body { padding: 10px; }
+  .nodal-document { padding: 22px 19px; font-size: .78rem; }
+  .nodal-document-meta { grid-template-columns: 1fr; padding: 13px 15px; gap: 10px; }
+  .nodal-document-header { margin-bottom: 19px; padding-bottom: 19px; }
+  .nodal-vault-form { padding: 25px; }
+  .nodal-start-menu { width: min(352px, calc(100vw - 8px)); }
+}
+@media (max-width: 390px) {
+  .nodal-taskbar > .nodal-task-app[data-nodal-window="trash"] { display: none; }
+  .nodal-taskbar .nodal-running-app { min-width: 70px; }
+  .nodal-explorer-ribbon button { padding-inline: 7px; }
+}
+@media (max-height: 560px) {
+  .nodal-login-avatar { width: 84px; height: 84px; }
+  .nodal-login-avatar span { transform: scale(.57); }
+  .nodal-login-system { margin-bottom: 9px; }
+  .nodal-login-panel h2 { margin-top: 12px; font-size: 2rem; }
+  .nodal-login-route { margin-bottom: 12px; }
+  .nodal-login-footer { bottom: 12px; }
+  .nodal-signal { top: 15px; }
+  .nodal-boot-card { min-height: 0; padding: 25px; }
+  .nodal-boot-card h2 { margin-bottom: 16px; }
+  .nodal-boot-log { gap: 6px; font-size: .72rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nodal-os, .nodal-os *, .nodal-os *::before, .nodal-os *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+    </style>
   </head>
   <body class="locked">
     <div class="noise"></div>
@@ -85,7 +497,7 @@
       <input class="hidden" id="smasherFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
     </div>
 
-    <div class="nodal-os hidden" id="nodalOs" aria-hidden="true">
+    <div class="nodal-os hidden" id="nodalOs" aria-hidden="true" role="dialog" aria-modal="true" aria-label="NODAL OS">
       <div class="nodal-noise" aria-hidden="true"></div>
       <div class="nodal-scanlines" aria-hidden="true"></div>
       <div class="nodal-particles" aria-hidden="true"></div>
@@ -100,6 +512,7 @@
       </section>
 
       <section class="nodal-login hidden" id="nodalLogin" aria-labelledby="nodalLoginTitle">
+        <button class="nodal-login-back" type="button" data-nodal-exit>← Retour à la console</button>
         <div class="nodal-login-panel">
           <p class="nodal-login-system">ASCALON INTERNAL ACCESS</p>
           <div class="nodal-login-avatar" aria-hidden="true">
@@ -139,6 +552,18 @@
             <span class="nodal-icon-symbol nodal-explorer-symbol"></span>
             <span>EXPLORATEUR</span>
           </button>
+          <button class="nodal-icon" type="button" data-nodal-folder="medical">
+            <span class="nodal-icon-symbol nodal-medical-symbol" aria-hidden="true">✚</span>
+            <span>Médical · verrouillé</span>
+          </button>
+          <button class="nodal-icon" type="button" data-nodal-folder="experiments">
+            <span class="nodal-icon-symbol nodal-experiments-symbol" aria-hidden="true">⌬</span>
+            <span>Expériences · verrouillé</span>
+          </button>
+          <button class="nodal-icon" type="button" data-nodal-folder="contracts">
+            <span class="nodal-icon-symbol nodal-contracts-symbol" aria-hidden="true">▤</span>
+            <span>Contrats · verrouillé</span>
+          </button>
         </div>
 
         <section class="nodal-desktop-console hidden" aria-label="Console interne NODAL OS">
@@ -153,7 +578,7 @@
         </section>
 
         <div class="nodal-windows" id="nodalWindows"></div>
-        <div class="nodal-notification hidden" id="nodalNotification">MÉMOIRE PARTIELLEMENT RESTAURÉE</div>
+        <div class="nodal-notification hidden" id="nodalNotification" role="status">MÉMOIRE PARTIELLEMENT RESTAURÉE</div>
 
         <nav class="nodal-start-menu hidden" id="nodalStartMenu" aria-label="Menu NODAL">
           <div class="nodal-start-user">
@@ -171,6 +596,9 @@
             <span class="nodal-icon-symbol nodal-trash-symbol"></span>
             Corbeille
           </button>
+          <button type="button" class="nodal-lock-button" data-nodal-lock>
+            <span aria-hidden="true">◈</span> Reverrouiller les archives
+          </button>
           <button class="nodal-power" type="button" id="nodalExit">
             <span class="nodal-power-glyph" aria-hidden="true"></span>
             Éteindre NODAL OS
@@ -178,11 +606,11 @@
         </nav>
 
         <footer class="nodal-taskbar">
-          <button class="nodal-start-button" type="button" id="nodalStartButton" aria-label="Ouvrir le menu NODAL">
+          <button class="nodal-start-button" type="button" id="nodalStartButton" aria-label="Ouvrir le menu NODAL" aria-expanded="false" aria-controls="nodalStartMenu">
             <span class="nodal-start-logo" aria-hidden="true"></span>
           </button>
           <form class="nodal-taskbar-search" id="nodalTaskbarSearchForm">
-            <input id="nodalTaskbarSearch" type="text" autocomplete="off" placeholder="Rechercher dans NODAL" />
+            <input id="nodalTaskbarSearch" type="search" autocomplete="off" placeholder="Rechercher dans NODAL" aria-label="Rechercher dans NODAL" />
           </form>
           <button class="nodal-task-app" type="button" data-nodal-window="trash" aria-label="Corbeille">
             <span class="nodal-icon-symbol nodal-trash-symbol"></span>
@@ -190,7 +618,7 @@
           <button class="nodal-task-app" type="button" data-nodal-window="explorer" aria-label="Explorateur de fichiers">
             <span class="nodal-icon-symbol nodal-explorer-symbol"></span>
           </button>
-          <span class="nodal-task-spacer"></span>
+          <div class="nodal-running-apps" id="nodalRunningApps" aria-label="Fenêtres ouvertes"></div>
           <div class="nodal-tray">
             <span>RÉSEAU LOCAL</span>
             <time>02:13</time>
@@ -1064,6 +1492,6 @@
       </section>
     </main>
 
-    <script src="./js/main.js?v=ascalon-20260725-nodal-os"></script>
+    <script src="./js/main.js?v=20261015-nodal-complet"></script>
   </body>
 </html>

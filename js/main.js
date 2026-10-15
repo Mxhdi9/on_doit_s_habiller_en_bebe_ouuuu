@@ -2,6 +2,11 @@ const pages = document.querySelectorAll(".page");
 const navButtons = document.querySelectorAll("button[data-page]");
 const navLinks = document.querySelectorAll(".nav-link");
 const body = document.body;
+const pageByName = new Map([...pages].map((page) => [page.dataset.page, page]));
+const pageScrollPositions = new Map();
+const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+let activePageName = document.querySelector(".page.active")?.dataset.page || "home";
+let accessFlashTimer = null;
 const ACCESS_CODE = "7236";
 const INITIAL_AMBIENT_VOLUME = 50;
 const ARCHIVE_VAULT_CODE = "5556904";
@@ -164,7 +169,6 @@ const nodalStartButton = document.getElementById("nodalStartButton");
 const nodalStartMenu = document.getElementById("nodalStartMenu");
 const nodalTaskbarSearchForm = document.getElementById("nodalTaskbarSearchForm");
 const nodalTaskbarSearch = document.getElementById("nodalTaskbarSearch");
-const nodalIcons = document.querySelectorAll("[data-nodal-window]");
 const nodalWindows = document.getElementById("nodalWindows");
 const nodalNotification = document.getElementById("nodalNotification");
 const nodalDesktopConsoleForm = document.getElementById("nodalDesktopConsoleForm");
@@ -277,6 +281,9 @@ const operationMapTransform = {
 };
 let missionOrbitFrame = null;
 let missionOrbitBase = null;
+let missionLaserFrame = null;
+let missionLaserElements = null;
+let operationEarthSize = "";
 
 const GAME_MEDIA = {
   cover: "./assets/images/archive/accueil.png",
@@ -1078,9 +1085,19 @@ navButtons.forEach((button) => {
 });
 
 function showPage(pageName) {
-  pages.forEach((page) => {
-    page.classList.toggle("active", page.dataset.page === pageName);
-  });
+  const nextPage = pageByName.get(pageName);
+  if (!nextPage || pageName === activePageName) {
+    return;
+  }
+
+  pageScrollPositions.set(activePageName, window.scrollY);
+  const previousPage = pageByName.get(activePageName);
+  previousPage?.classList.remove("active");
+  previousPage?.setAttribute("aria-hidden", "true");
+  nextPage.style.animation = reducedMotionQuery.matches ? "none" : "";
+  nextPage.classList.add("active");
+  nextPage.removeAttribute("aria-hidden");
+  activePageName = pageName;
 
   navLinks.forEach((link) => {
     link.classList.toggle("active", link.dataset.page === pageName);
@@ -1088,16 +1105,22 @@ function showPage(pageName) {
 
   body.classList.toggle("home-view", pageName === "home");
   body.classList.toggle("cartography-view", pageName === "cartography");
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  // Restore the destination immediately instead of scrolling across two layouts.
+  window.scrollTo({ top: pageScrollPositions.get(pageName) || 0, behavior: "instant" });
+  syncMissionAnimation();
   visualPulse(pageName === "error" ? "FICHIER RETIRÉ" : "ACCÈS LOCAL");
 }
 
 function visualPulse(text) {
+  window.clearTimeout(accessFlashTimer);
   accessFlash.textContent = text;
+  accessFlash.style.animation = reducedMotionQuery.matches ? "none" : "";
   accessFlash.classList.remove("show");
-  void accessFlash.offsetWidth;
+  if (!reducedMotionQuery.matches) {
+    void accessFlash.offsetWidth;
+  }
   accessFlash.classList.add("show");
-  window.setTimeout(() => accessFlash.classList.remove("show"), 540);
+  accessFlashTimer = window.setTimeout(() => accessFlash.classList.remove("show"), 540);
 }
 
 function normalizeCode(value) {
@@ -1445,14 +1468,23 @@ function seededRandom(seed) {
 }
 
 function drawOperationEarth() {
-  if (!operationEarthCanvas) {
+  if (!operationEarthCanvas || activePageName !== "cartography") {
     return;
   }
 
   const canvas = operationEarthCanvas;
-  const ctx = canvas.getContext("2d");
   const width = canvas.width;
   const height = canvas.height;
+  const size = `${width}x${height}`;
+  // The seeded background depends only on canvas size. Avoid regenerating its
+  // full pixel noise on each viewport resize or while the map is hidden.
+  if (operationEarthSize === size) {
+    return;
+  }
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return;
+  }
   const random = seededRandom(17091997);
 
   ctx.clearRect(0, 0, width, height);
@@ -1562,6 +1594,21 @@ function drawOperationEarth() {
     data[i + 2] = clampNumber(data[i + 2] + noise, 0, 255);
   }
   ctx.putImageData(image, 0, 0);
+  operationEarthSize = size;
+}
+
+function isMissionMapVisible() {
+  return activePageName === "cartography" && !document.hidden && !body.classList.contains("nodal-os-open");
+}
+
+function scheduleMissionLaser() {
+  if (missionLaserFrame !== null || !isMissionMapVisible()) {
+    return;
+  }
+  missionLaserFrame = window.requestAnimationFrame(() => {
+    missionLaserFrame = null;
+    updateMissionLaser();
+  });
 }
 
 function applyOperationMapTransform() {
@@ -1586,7 +1633,7 @@ function applyOperationMapTransform() {
     rotateZ(${operationMapTransform.rotate}deg)
     scale(${stageScale})
   `;
-  window.requestAnimationFrame(updateMissionLaser);
+  scheduleMissionLaser();
 }
 
 function resetOperationMapView() {
@@ -1610,7 +1657,7 @@ function zoomOperationMap(direction) {
 }
 
 function handleOperationMapHover(event) {
-  if (!operationMap || operationMapPointer) {
+  if (!operationMap || operationMapPointer || reducedMotionQuery.matches) {
     return;
   }
 
@@ -1670,7 +1717,7 @@ function updateBriefingPreview(operation = null) {
   operationBriefingStatus.textContent = operation ? operation.status : "---";
   operationBriefingSubjects.textContent = operation ? operationSubjectsFor(operation) : "---";
   operationBriefingClass.textContent = operation ? `${operation.classification}%` : "---";
-  window.requestAnimationFrame(updateMissionLaser);
+  scheduleMissionLaser();
 }
 
 function focusOperationMap(operation) {
@@ -1692,13 +1739,16 @@ function focusOperationMap(operation) {
 }
 
 function updateMissionLaser() {
-  if (!operationLaserLayer || !operationMap || !operationBriefingCard) {
+  if (!operationLaserLayer || !operationMap || !operationBriefingCard || !isMissionMapVisible()) {
     return;
   }
 
   const activePoint = operationPoints?.querySelector(".operation-point.active");
   if (!activePoint || operationBriefingCard.classList.contains("hidden")) {
-    operationLaserLayer.innerHTML = "";
+    if (missionLaserElements) {
+      operationLaserLayer.replaceChildren();
+      missionLaserElements = null;
+    }
     return;
   }
 
@@ -1711,7 +1761,8 @@ function updateMissionLaser() {
   const y2 = cardRect.top + cardRect.height * 0.58 - mapRect.top;
 
   operationLaserLayer.setAttribute("viewBox", `0 0 ${mapRect.width} ${mapRect.height}`);
-  operationLaserLayer.innerHTML = `
+  if (!missionLaserElements) {
+    operationLaserLayer.innerHTML = `
     <defs>
       <filter id="missionLaserGlow">
         <feGaussianBlur stdDeviation="3" result="blur"></feGaussianBlur>
@@ -1724,7 +1775,21 @@ function updateMissionLaser() {
     <line class="mission-laser-shadow" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>
     <line class="mission-laser" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>
     <circle class="mission-laser-lock" cx="${x1}" cy="${y1}" r="8"></circle>
-  `;
+    `;
+    missionLaserElements = {
+      lines: operationLaserLayer.querySelectorAll("line"),
+      lock: operationLaserLayer.querySelector("circle"),
+    };
+  }
+  // Keep the SVG/filter nodes while orbiting; only the geometry changes.
+  missionLaserElements.lines.forEach((line) => {
+    line.setAttribute("x1", x1);
+    line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2);
+    line.setAttribute("y2", y2);
+  });
+  missionLaserElements.lock.setAttribute("cx", x1);
+  missionLaserElements.lock.setAttribute("cy", y1);
 }
 
 function setMissionListCollapsed(collapsed) {
@@ -1744,6 +1809,9 @@ function stopMissionOrbit() {
 
 function startMissionOrbit(operation) {
   stopMissionOrbit();
+  if (reducedMotionQuery.matches || !isMissionMapVisible()) {
+    return;
+  }
   missionOrbitBase = {
     operation,
     startedAt: performance.now(),
@@ -1754,7 +1822,8 @@ function startMissionOrbit(operation) {
   operationMap?.classList.add("mission-orbiting");
 
   const orbit = (time) => {
-    if (!missionOrbitBase || activeOperationId !== operation.id) {
+    if (!missionOrbitBase || activeOperationId !== operation.id || !isMissionMapVisible() || reducedMotionQuery.matches) {
+      stopMissionOrbit();
       return;
     }
 
@@ -1768,6 +1837,38 @@ function startMissionOrbit(operation) {
 
   missionOrbitFrame = window.requestAnimationFrame(orbit);
 }
+
+function syncMissionAnimation() {
+  if (!isMissionMapVisible()) {
+    stopMissionOrbit();
+    if (missionLaserFrame !== null) {
+      window.cancelAnimationFrame(missionLaserFrame);
+      missionLaserFrame = null;
+    }
+    return;
+  }
+
+  drawOperationEarth();
+  scheduleMissionLaser();
+  if (reducedMotionQuery.matches) {
+    stopMissionOrbit();
+    resetOperationMapHover();
+    return;
+  }
+  if (!missionOrbitBase && activeOperationId && !operationDetails?.classList.contains("hidden")) {
+    const operation = operations.find((item) => item.id === activeOperationId);
+    if (operation) {
+      startMissionOrbit(operation);
+    }
+  }
+}
+
+document.addEventListener("visibilitychange", syncMissionAnimation);
+document.addEventListener("ascalon:overlaychange", syncMissionAnimation);
+reducedMotionQuery.addEventListener("change", () => {
+  pageByName.get(activePageName).style.animation = reducedMotionQuery.matches ? "none" : "";
+  syncMissionAnimation();
+});
 
 function renderOperationContactStrip() {
   if (!operationContactStrip) {
@@ -2069,7 +2170,6 @@ if (operationMap && operationMapStage) {
     }
 
     applyOperationMapTransform();
-    updateMissionLaser();
   });
 
   const stopOperationMapInteraction = (event) => {
@@ -2108,7 +2208,7 @@ operationZoomIn.addEventListener("click", () => zoomOperationMap(1));
 operationResetMap.addEventListener("click", resetOperationMapView);
 window.addEventListener("resize", () => {
   drawOperationEarth();
-  updateMissionLaser();
+  scheduleMissionLaser();
 });
 
 function renderArchiveVault() {
@@ -2189,7 +2289,7 @@ document.addEventListener("keydown", (event) => {
   const archivesPage = document.getElementById("page-archives");
   const archivesActive = archivesPage?.classList.contains("active");
 
-  if (!archivesActive || state.archiveVaultUnlocked || body.classList.contains("locked")) {
+  if (!archivesActive || state.archiveVaultUnlocked || body.classList.contains("locked") || body.classList.contains("nodal-os-open")) {
     return;
   }
 
@@ -2636,652 +2736,6 @@ dossierTriggers.forEach((trigger) => {
 
 window.startMamanArchive = startMamanArchive;
 
-const nodalWindowDefinitions = {
-  explorer: {
-    title: "Explorateur de fichiers",
-    variant: "explorer-window",
-    content: () => renderNodalExplorer(),
-  },
-  dossier: {
-    title: "DOSSIER N.D.R",
-    content: () => `
-      <dl class="nodal-data-list">
-        <div><dt>Nom</dt><dd>Nadir Delgado</dd></div>
-        <div><dt>Alias</dt><dd>N-17</dd></div>
-        <div><dt>Statut</dt><dd>Actif / non récupéré</dd></div>
-        <div><dt>Programme</dt><dd>ASCALON</dd></div>
-        <div><dt>Superviseur</dt><dd>M. Duval</dd></div>
-        <div><dt>Note</dt><dd>Le sujet présente une résistance anormale aux protocoles de conditionnement.</dd></div>
-      </dl>
-    `,
-  },
-  archives: {
-    title: "ASCALON_ARCHIVES",
-    content: () => `
-      <ul class="nodal-lines">
-        <li>Projet : ASCALON</li>
-        <li>But officiel : formation d’opératifs privés</li>
-        <li>But réel : [CENSURÉ]</li>
-        <li>Sujet principal : N-17</li>
-        <li>Incident initial : [FRAGMENT MANQUANT]</li>
-        <li>Statut Duval : inconnu</li>
-      </ul>
-    `,
-  },
-  operations: {
-    title: "OPERATIONS",
-    content: () => `
-      <div class="nodal-lines">
-        <button class="nodal-operation" type="button">OP. NIGHT GLASS — Los Santos — statut : archivé</button>
-        <button class="nodal-operation" type="button">OP. ALTIPLANO — Bolivie — statut : anomalie</button>
-        <button class="nodal-operation" type="button">OP. DEAD SIGNAL — Liberty City — statut : fragmenté</button>
-        <button class="nodal-operation" type="button" data-nodal-action="cataleya-trace">OP. CATALEYA TRACE — [CENSURÉ] — statut : verrouillé</button>
-      </div>
-    `,
-  },
-  photos: {
-    title: "PHOTOS",
-    content: () => renderNodalPhotos(),
-  },
-  transmissions: {
-    title: "TRANSMISSIONS",
-    content: () => `
-      <p><strong>Transmission interceptée.</strong></p>
-      <p>Source : inconnue</p>
-      <p>Destinataire : N-17</p>
-      <p>Message :</p>
-      <p>“Tu pensais avoir disparu. Mais ASCALON ne perd jamais ses sujets.”</p>
-    `,
-  },
-  audio: {
-    title: "AUDIO_LOGS",
-    content: () => `
-      <div class="nodal-lines">
-        <button class="nodal-audio-file" type="button" data-nodal-audio="audio_0213.wav">audio_0213.wav</button>
-        <button class="nodal-audio-file" type="button" data-nodal-audio="duval_note_07.wav">duval_note_07.wav</button>
-        <button class="nodal-audio-file" type="button" data-nodal-audio="n17_breathing_test.wav">n17_breathing_test.wav</button>
-        <button class="nodal-audio-file" type="button" data-nodal-audio="cataleya_trace.wav">cataleya_trace.wav</button>
-      </div>
-    `,
-  },
-  trash: {
-    title: "Corbeille",
-    variant: "explorer-window trash-window",
-    content: () => `
-      <div class="nodal-explorer-ui">
-        <div class="nodal-explorer-ribbon">
-          <button type="button">Restaurer</button>
-          <button type="button">Supprimer</button>
-          <button type="button">Propriétés</button>
-        </div>
-        <div class="nodal-explorer-address">
-          <span>Ce PC</span>
-          <span>›</span>
-          <strong>Corbeille</strong>
-        </div>
-        <div class="nodal-explorer-main">
-          <aside class="nodal-explorer-sidebar">
-            <span>Accès rapide</span>
-            <span>Ce PC</span>
-            <span>Réseau</span>
-          </aside>
-          <div class="nodal-explorer-content">
-            <p class="nodal-recycle-note">1 élément masqué détecté.</p>
-            <button class="nodal-trash-file" type="button" data-nodal-action="trash-secret">duval_contact.tmp</button>
-            <div class="nodal-trash-secret hidden" data-nodal-trash-secret>
-              <p><strong>Fichier :</strong> duval_contact.tmp</p>
-              <p><strong>Contenu :</strong></p>
-              <p>“Il reviendra quand il aura quelque chose à perdre.”</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    `,
-  },
-};
-
-function renderNodalExplorer() {
-  const folders = [
-    ["dossier", "DOSSIER_NDR", "Dossier disciplinaire"],
-    ["archives", "ASCALON_ARCHIVES", "Archive interne"],
-    ["operations", "OPERATIONS", "Index opérationnel"],
-    ["photos", "PHOTOS", "Images locales"],
-    ["transmissions", "TRANSMISSIONS", "Messages interceptés"],
-    ["audio", "AUDIO_LOGS", "Fichiers corrompus"],
-  ];
-
-  return `
-    <div class="nodal-explorer-ui">
-      <div class="nodal-explorer-ribbon">
-        <button type="button">Fichier</button>
-        <button type="button">Ordinateur</button>
-        <button type="button">Affichage</button>
-        <button type="button">Propriétés</button>
-        <button type="button">Ouvrir</button>
-        <button type="button">Renommer</button>
-        <button type="button">Paramètres</button>
-      </div>
-      <div class="nodal-explorer-address">
-        <span>⌂</span>
-        <span>Ce PC</span>
-        <span>›</span>
-        <strong>DOSSIER N.D.R</strong>
-        <input type="text" value="Rechercher dans : Ce PC" readonly />
-      </div>
-      <div class="nodal-explorer-main">
-        <aside class="nodal-explorer-sidebar">
-          <span>Accès rapide</span>
-          <span>OneDrive</span>
-          <strong>Ce PC</strong>
-          <span>Bureau</span>
-          <span>Documents</span>
-          <span>Images</span>
-          <span>Musique</span>
-          <span>Objets 3D</span>
-          <span>Téléchargements</span>
-          <span>Vidéos</span>
-          <span>Réseau</span>
-        </aside>
-        <div class="nodal-explorer-content">
-          <h3>Dossiers (6)</h3>
-          <div class="nodal-folder-grid">
-            ${folders
-              .map(
-                ([id, label, detail]) => `
-                  <button class="nodal-folder-tile" type="button" data-nodal-window="${id}">
-                    <span class="nodal-folder-icon" aria-hidden="true"></span>
-                    <span>
-                      <strong>${label}</strong>
-                      <small>${detail}</small>
-                    </span>
-                  </button>
-                `,
-              )
-              .join("")}
-          </div>
-          <h3>Périphériques et lecteurs (4)</h3>
-          <div class="nodal-drive-grid">
-            <div class="nodal-drive-tile">
-              <span class="nodal-drive-icon" aria-hidden="true"></span>
-              <strong>Disque local (C:)</strong>
-              <i><b style="width: 72%"></b></i>
-              <small>37,3 Go libres sur 447 Go</small>
-            </div>
-            <div class="nodal-drive-tile">
-              <span class="nodal-drive-icon" aria-hidden="true"></span>
-              <strong>500Go Clone de C (D:)</strong>
-              <i><b style="width: 46%"></b></i>
-              <small>159 Go libres sur 465 Go</small>
-            </div>
-            <div class="nodal-drive-tile">
-              <span class="nodal-drive-icon" aria-hidden="true"></span>
-              <strong>2To BGarracuda (E:)</strong>
-              <i><b style="width: 61%"></b></i>
-              <small>503 Go libres sur 1,81 To</small>
-            </div>
-            <div class="nodal-drive-tile warning">
-              <span class="nodal-drive-icon" aria-hidden="true"></span>
-              <strong>1 To Interne sauvegarde (F:)</strong>
-              <i><b style="width: 89%"></b></i>
-              <small>101 Go libres sur 931 Go</small>
-            </div>
-          </div>
-        </div>
-      </div>
-      <footer class="nodal-explorer-status">11 élément(s)</footer>
-    </div>
-  `;
-}
-
-function renderNodalPhotos() {
-  const photos = [
-    "./assets/images/nodal/photo-01.jpg",
-    "./assets/images/nodal/photo-02.jpg",
-    "./assets/images/nodal/photo-03.jpg",
-  ];
-
-  return `
-    <div class="nodal-photo-grid">
-      ${photos
-        .map(
-          (src) => `
-            <figure class="nodal-photo-card">
-              <img src="${src}" alt="" data-nodal-photo />
-              <div class="nodal-photo-fallback">IMAGE MANQUANTE</div>
-              <figcaption>${src}</figcaption>
-            </figure>
-          `,
-        )
-        .join("")}
-    </div>
-  `;
-}
-
-function resetNodalOs() {
-  nodalBootTimers.forEach((timer) => window.clearTimeout(timer));
-  nodalBootTimers = [];
-  nodalWrongAttempts = 0;
-  nodalWindowZ = 210;
-  nodalMemoryNoticeShown = false;
-  nodalOpenedWindowIds.clear();
-
-  if (nodalBootLog) {
-    nodalBootLog.innerHTML = "";
-  }
-
-  nodalLogin?.classList.add("hidden");
-  nodalDesktop?.classList.add("hidden");
-  nodalDesktop?.classList.remove("restoring");
-  nodalBoot?.classList.remove("hidden");
-  nodalNotification?.classList.add("hidden");
-  nodalStartMenu?.classList.add("hidden");
-
-  if (nodalPassword) {
-    nodalPassword.value = "";
-  }
-
-  if (nodalTaskbarSearch) {
-    nodalTaskbarSearch.value = "";
-  }
-
-  if (nodalLoginFeedback) {
-    nodalLoginFeedback.textContent = "";
-  }
-
-  nodalLogin?.querySelector(".nodal-login-panel")?.classList.remove("alert");
-
-  if (nodalWindows) {
-    nodalWindows.innerHTML = "";
-  }
-
-  if (nodalDesktopConsoleLog) {
-    nodalDesktopConsoleLog.innerHTML = `
-      <p><span>nodal</span> terminal secondaire actif.</p>
-      <p><span>sys</span> mémoire N-17 fragmentée.</p>
-    `;
-  }
-}
-
-function startNodalSequence() {
-  if (!nodalOs || !nodalBoot || !nodalBootLog || !nodalLogin) {
-    appendConsoleLine("sys", "module NODAL indisponible.");
-    return;
-  }
-
-  resetNodalOs();
-  appendConsoleLine("sys", "SIGNAL ACCROCHÉ");
-  body.classList.add("nodal-os-open");
-  nodalOs.classList.remove("hidden");
-  nodalOs.setAttribute("aria-hidden", "false");
-  nodalBoot.style.animation = "none";
-  void nodalBoot.offsetWidth;
-  nodalBoot.style.animation = "";
-
-  const bootLines = [
-    "Connexion au nœud local...",
-    "Commande : connect 192.168.1.1",
-    "Adresse : 192.168.1.1",
-    "PING 192.168.1.1...",
-    "ROUTE INTERNE TROUVÉE",
-    "NOEUD : NDR-CORE-7",
-    "SESSION FANTÔME DÉTECTÉE",
-    "UTILISATEUR DORMANT DÉTECTÉ : N-17",
-    "CHARGEMENT DE NODAL OS...",
-  ];
-
-  bootLines.forEach((line, index) => {
-    const timer = window.setTimeout(() => {
-      const entry = document.createElement("p");
-      const label = document.createElement("span");
-      label.textContent = index < 2 ? "route" : "sys";
-      entry.append(label, ` ${line}`);
-      nodalBootLog.appendChild(entry);
-    }, 260 + index * 310);
-    nodalBootTimers.push(timer);
-  });
-
-  nodalBootTimers.push(
-    window.setTimeout(() => {
-      nodalBoot.classList.add("hidden");
-      nodalLogin.classList.remove("hidden");
-      nodalPassword?.focus();
-    }, 3300),
-  );
-}
-
-function handleNodalLogin(event) {
-  event.preventDefault();
-
-  if (!nodalPassword || !nodalLoginFeedback) {
-    return;
-  }
-
-  if (nodalPassword.value === NODAL_PASSWORD) {
-    nodalLoginFeedback.textContent = "ACCÈS AUTORISÉ\nBienvenue, N-17.\nRestauration du bureau...";
-    nodalBootTimers.push(
-      window.setTimeout(() => {
-        nodalLogin?.classList.add("hidden");
-        nodalDesktop?.classList.remove("hidden");
-        nodalDesktop?.classList.add("restoring");
-        nodalTaskbarSearch?.focus();
-        window.setTimeout(() => nodalDesktop?.classList.remove("restoring"), 1500);
-      }, 980),
-    );
-    return;
-  }
-
-  nodalWrongAttempts += 1;
-  nodalPassword.value = "";
-  nodalLoginFeedback.textContent = "ACCÈS REFUSÉ\nMot de passe invalide.\nTentative enregistrée.";
-
-  if (nodalWrongAttempts >= 3) {
-    nodalLoginFeedback.textContent += "\nALERTE : ACTIVITÉ NON AUTORISÉE";
-    const panel = nodalLogin.querySelector(".nodal-login-panel");
-    panel?.classList.remove("alert");
-    void panel?.offsetWidth;
-    panel?.classList.add("alert");
-  }
-}
-
-function closeNodalOs() {
-  nodalBootTimers.forEach((timer) => window.clearTimeout(timer));
-  nodalBootTimers = [];
-  nodalOs?.classList.add("hidden");
-  nodalOs?.setAttribute("aria-hidden", "true");
-  body.classList.remove("nodal-os-open");
-}
-
-function createNodalWindow(id, title, content, options = {}) {
-  if (!nodalWindows || !nodalDesktop) {
-    return null;
-  }
-
-  if (!options.allowMultiple) {
-    const existing = nodalWindows.querySelector(`[data-nodal-open="${id}"]`);
-    if (existing) {
-      focusNodalWindow(existing);
-      return existing;
-    }
-  }
-
-  const offset = (nodalWindows.children.length % 6) * 28;
-  const windowElement = document.createElement("article");
-  windowElement.className = `nodal-window${options.small ? " small" : ""}${options.variant ? ` ${options.variant}` : ""}`;
-  windowElement.dataset.nodalOpen = id;
-  windowElement.style.zIndex = `${++nodalWindowZ}`;
-  windowElement.style.left = `${window.innerWidth < 760 ? 18 : 292 + offset}px`;
-  windowElement.style.top = `${window.innerWidth < 760 ? 118 + offset : 82 + offset}px`;
-  windowElement.innerHTML = `
-    <header class="nodal-window-header" data-nodal-drag>
-      <strong>${title}</strong>
-      <button class="nodal-window-close" type="button" data-nodal-close aria-label="Fermer">×</button>
-    </header>
-    <div class="nodal-window-body">${content}</div>
-  `;
-
-  bindNodalWindowContent(windowElement);
-  bindNodalDrag(windowElement);
-  nodalWindows.appendChild(windowElement);
-  focusNodalWindow(windowElement);
-  return windowElement;
-}
-
-function openNodalWindow(id) {
-  const definition = nodalWindowDefinitions[id];
-
-  if (!definition) {
-    return;
-  }
-
-  const windowElement = createNodalWindow(id, definition.title, definition.content(), {
-    variant: definition.variant || "",
-  });
-
-  if (!windowElement) {
-    return;
-  }
-
-  nodalOpenedWindowIds.add(id);
-
-  if (nodalOpenedWindowIds.size >= 3 && !nodalMemoryNoticeShown) {
-    nodalMemoryNoticeShown = true;
-    showNodalNotification();
-  }
-}
-
-function openNodalPopup(title, lines) {
-  createNodalWindow(
-    `popup-${Date.now()}-${Math.round(Math.random() * 1000)}`,
-    title,
-    lines.map((line) => `<p>${line}</p>`).join(""),
-    { allowMultiple: true, small: true },
-  );
-}
-
-function focusNodalWindow(windowElement) {
-  windowElement.style.zIndex = `${++nodalWindowZ}`;
-}
-
-function bindNodalWindowContent(windowElement) {
-  windowElement.querySelectorAll("[data-nodal-photo]").forEach((image) => {
-    image.addEventListener(
-      "error",
-      () => {
-        image.closest(".nodal-photo-card")?.classList.add("missing");
-      },
-      { once: true },
-    );
-  });
-}
-
-function bindNodalDrag(windowElement) {
-  const header = windowElement.querySelector("[data-nodal-drag]");
-
-  if (!header) {
-    return;
-  }
-
-  let dragging = false;
-  let startX = 0;
-  let startY = 0;
-  let startLeft = 0;
-  let startTop = 0;
-
-  header.addEventListener("pointerdown", (event) => {
-    if (event.button !== 0 || event.target.closest("[data-nodal-close]")) {
-      return;
-    }
-
-    dragging = true;
-    const desktopRect = nodalDesktop?.getBoundingClientRect() || { left: 0, top: 0 };
-    const rect = windowElement.getBoundingClientRect();
-    startX = event.clientX;
-    startY = event.clientY;
-    startLeft = rect.left - desktopRect.left;
-    startTop = rect.top - desktopRect.top;
-    header.setPointerCapture?.(event.pointerId);
-    focusNodalWindow(windowElement);
-  });
-
-  header.addEventListener("pointermove", (event) => {
-    if (!dragging || !nodalDesktop) {
-      return;
-    }
-
-    const desktopRect = nodalDesktop.getBoundingClientRect();
-    const maxLeft = Math.max(8, desktopRect.width - windowElement.offsetWidth - 8);
-    const maxTop = Math.max(8, desktopRect.height - windowElement.offsetHeight - 48);
-    const nextLeft = Math.max(8, Math.min(maxLeft, startLeft + event.clientX - startX));
-    const nextTop = Math.max(8, Math.min(maxTop, startTop + event.clientY - startY));
-    windowElement.style.left = `${nextLeft}px`;
-    windowElement.style.top = `${nextTop}px`;
-  });
-
-  const stopDrag = (event) => {
-    dragging = false;
-    header.releasePointerCapture?.(event.pointerId);
-  };
-
-  header.addEventListener("pointerup", stopDrag);
-  header.addEventListener("pointercancel", stopDrag);
-}
-
-function showNodalNotification() {
-  if (!nodalNotification) {
-    return;
-  }
-
-  nodalNotification.classList.add("hidden");
-  void nodalNotification.offsetWidth;
-  nodalNotification.classList.remove("hidden");
-  window.setTimeout(() => nodalNotification.classList.add("hidden"), 4600);
-}
-
-function appendNodalDesktopLine(label, text) {
-  if (!nodalDesktopConsoleLog) {
-    return;
-  }
-
-  const line = document.createElement("p");
-  const labelNode = document.createElement("span");
-  labelNode.textContent = label;
-  line.append(labelNode, ` ${text}`);
-  nodalDesktopConsoleLog.appendChild(line);
-  nodalDesktopConsoleLog.scrollTop = nodalDesktopConsoleLog.scrollHeight;
-}
-
-function handleNodalDesktopCommand(event) {
-  event.preventDefault();
-
-  if (!nodalDesktopConsoleInput) {
-    return;
-  }
-
-  const rawCommand = nodalDesktopConsoleInput.value.trim();
-  const command = normalizeCode(rawCommand);
-
-  if (!command) {
-    return;
-  }
-
-  appendNodalDesktopLine(">", rawCommand);
-  nodalDesktopConsoleInput.value = "";
-
-  if (command === "CATALEYA") {
-    appendNodalDesktopLine("sys", "ANOMALIE ÉMOTIONNELLE DÉTECTÉE");
-    appendNodalDesktopLine("sys", "Le sujet N-17 n’est plus totalement contrôlable.");
-    return;
-  }
-
-  appendNodalDesktopLine("sys", "Commande locale non reconnue.");
-}
-
-nodalLoginForm?.addEventListener("submit", handleNodalLogin);
-nodalExit?.addEventListener("click", closeNodalOs);
-
-function closeNodalStartMenu() {
-  nodalStartMenu?.classList.add("hidden");
-}
-
-nodalStartButton?.addEventListener("click", (event) => {
-  event.stopPropagation();
-  nodalStartMenu?.classList.toggle("hidden");
-});
-
-nodalIcons.forEach((icon) => {
-  icon.addEventListener("click", () => {
-    openNodalWindow(icon.dataset.nodalWindow);
-    closeNodalStartMenu();
-  });
-});
-
-nodalDesktop?.addEventListener("click", (event) => {
-  if (!event.target.closest("#nodalStartMenu") && !event.target.closest("#nodalStartButton")) {
-    closeNodalStartMenu();
-  }
-});
-
-nodalWindows?.addEventListener("pointerdown", (event) => {
-  const windowElement = event.target.closest(".nodal-window");
-
-  if (windowElement) {
-    focusNodalWindow(windowElement);
-  }
-});
-
-nodalWindows?.addEventListener("click", (event) => {
-  const closeButton = event.target.closest("[data-nodal-close]");
-
-  if (closeButton) {
-    closeButton.closest(".nodal-window")?.remove();
-    return;
-  }
-
-  const windowLauncher = event.target.closest("[data-nodal-window]");
-
-  if (windowLauncher) {
-    openNodalWindow(windowLauncher.dataset.nodalWindow);
-    return;
-  }
-
-  const audioButton = event.target.closest("[data-nodal-audio]");
-
-  if (audioButton) {
-    openNodalPopup("Lecture impossible", [
-      "Lecture impossible.",
-      "Fichier corrompu.",
-      "Fragment restauré : 13 %",
-    ]);
-    return;
-  }
-
-  const action = event.target.closest("[data-nodal-action]");
-
-  if (!action) {
-    return;
-  }
-
-  if (action.dataset.nodalAction === "cataleya-trace") {
-    openNodalPopup("ACCÈS REFUSÉ", ["ACCÈS REFUSÉ", "Code émotionnel requis."]);
-  }
-
-  if (action.dataset.nodalAction === "trash-secret") {
-    action.closest(".nodal-window-body")?.querySelector("[data-nodal-trash-secret]")?.classList.remove("hidden");
-  }
-});
-
-nodalDesktopConsoleForm?.addEventListener("submit", handleNodalDesktopCommand);
-
-nodalTaskbarSearchForm?.addEventListener("submit", (event) => {
-  event.preventDefault();
-
-  if (!nodalTaskbarSearch) {
-    return;
-  }
-
-  const rawSearch = nodalTaskbarSearch.value.trim();
-  const command = normalizeCode(rawSearch);
-
-  if (!command) {
-    return;
-  }
-
-  if (command === "CATALEYA") {
-    appendNodalDesktopLine(">", rawSearch);
-    appendNodalDesktopLine("sys", "ANOMALIE ÉMOTIONNELLE DÉTECTÉE");
-    appendNodalDesktopLine("sys", "Le sujet N-17 n’est plus totalement contrôlable.");
-    openNodalPopup("ANOMALIE ÉMOTIONNELLE", [
-      "ANOMALIE ÉMOTIONNELLE DÉTECTÉE",
-      "Le sujet N-17 n’est plus totalement contrôlable.",
-    ]);
-    nodalTaskbarSearch.value = "";
-    return;
-  }
-
-  openNodalPopup("Recherche NODAL", ["Aucun résultat indexé.", "Mémoire locale fragmentée."]);
-  nodalTaskbarSearch.value = "";
-});
-
 consoleForm.addEventListener("submit", (event) => {
   event.preventDefault();
   handleConsoleCommand();
@@ -3379,3 +2833,511 @@ function appendConsoleLine(label, text) {
 document.getElementById("downloadReport")?.addEventListener("click", () => {
   alert("Rapport final indisponible — archive déplacée.");
 });
+
+
+/* Archives chiffrées NODAL OS : données incluses. */
+/* Archives NODAL : enveloppes AES-256-GCM, contenu authentifié. */
+window.NODAL_VAULT_DATA = {
+  "version": 1,
+  "iterations": 210000,
+  "folders": [
+    {
+      "id": "medical",
+      "title": "DOSSIERS MÉDICAUX",
+      "description": "3 dossiers cliniques sous scellés · accès personnel requis",
+      "classification": "SECRET MÉDICAL / N-17",
+      "sealed": {
+        "salt": "gQkVPMccQwX0wMYkPz/rmw==",
+        "iv": "VNUTvpKXYKEA8tIU",
+        "ciphertext": "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"
+      }
+    },
+    {
+      "id": "experiments",
+      "title": "EXPÉRIENCES ASCALON",
+      "description": "3 comptes rendus sous scellés · diffusion restreinte",
+      "classification": "CONFIDENTIEL ASCALON",
+      "sealed": {
+        "salt": "4eQD//ddEcjXgPQErZZLzw==",
+        "iv": "+oGCemCwvMXG5Nf1",
+        "ciphertext": "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"
+      }
+    },
+    {
+      "id": "contracts",
+      "title": "CONTRATS & MISSIONS",
+      "description": "3 archives opérationnelles sous scellés · accès personnel requis",
+      "classification": "SECRET OPÉRATIONNEL",
+      "sealed": {
+        "salt": "C3ZAmz9A8Qds2RRIA+4ZAg==",
+        "iv": "f2L+6Lgf46r/GR/O",
+        "ciphertext": "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"
+      }
+    }
+  ]
+};
+
+
+/* NODAL OS: local explorer, window manager and encrypted archives. */
+const nodalWindowDefinitions = {
+  explorer: {
+    title: "Explorateur de fichiers",
+    variant: "explorer-window",
+    content: () => renderNodalExplorer(),
+  },
+  dossier: {
+    title: "DOSSIER N.D.R",
+    content: () => `
+      <dl class="nodal-data-list">
+        <div><dt>Nom</dt><dd>Nadir Delgado</dd></div>
+        <div><dt>Alias</dt><dd>N-17</dd></div>
+        <div><dt>Statut</dt><dd>Actif / non récupéré</dd></div>
+        <div><dt>Programme</dt><dd>ASCALON</dd></div>
+        <div><dt>Superviseur</dt><dd>M. Duval</dd></div>
+        <div><dt>Note</dt><dd>Le sujet présente une résistance anormale aux protocoles de conditionnement.</dd></div>
+      </dl>
+    `,
+  },
+  archives: {
+    title: "ASCALON_ARCHIVES",
+    content: () => `
+      <ul class="nodal-lines">
+        <li>Projet : ASCALON</li>
+        <li>But officiel : formation d’opératifs privés</li>
+        <li>But réel : [CENSURÉ]</li>
+        <li>Sujet principal : N-17</li>
+        <li>Incident initial : [FRAGMENT MANQUANT]</li>
+        <li>Statut Duval : inconnu</li>
+      </ul>
+    `,
+  },
+  operations: {
+    title: "OPERATIONS",
+    content: () => `
+      <div class="nodal-lines">
+        <button class="nodal-operation" type="button">OP. NIGHT GLASS — Los Santos — statut : archivé</button>
+        <button class="nodal-operation" type="button">OP. ALTIPLANO — Bolivie — statut : anomalie</button>
+        <button class="nodal-operation" type="button">OP. DEAD SIGNAL — Liberty City — statut : fragmenté</button>
+        <button class="nodal-operation" type="button" data-nodal-action="cataleya-trace">OP. CATALEYA TRACE — [CENSURÉ] — statut : verrouillé</button>
+      </div>
+    `,
+  },
+  photos: {
+    title: "PHOTOS",
+    content: () => renderNodalPhotos(),
+  },
+  transmissions: {
+    title: "TRANSMISSIONS",
+    content: () => `
+      <p><strong>Transmission interceptée.</strong></p>
+      <p>Source : inconnue</p>
+      <p>Destinataire : N-17</p>
+      <p>Message :</p>
+      <p>“Tu pensais avoir disparu. Mais ASCALON ne perd jamais ses sujets.”</p>
+    `,
+  },
+  audio: {
+    title: "AUDIO_LOGS",
+    content: () => `
+      <div class="nodal-lines">
+        <button class="nodal-audio-file" type="button" data-nodal-audio="audio_0213.wav">audio_0213.wav</button>
+        <button class="nodal-audio-file" type="button" data-nodal-audio="duval_note_07.wav">duval_note_07.wav</button>
+        <button class="nodal-audio-file" type="button" data-nodal-audio="n17_breathing_test.wav">n17_breathing_test.wav</button>
+        <button class="nodal-audio-file" type="button" data-nodal-audio="cataleya_trace.wav">cataleya_trace.wav</button>
+      </div>
+    `,
+  },
+  trash: {
+    title: "Corbeille",
+    variant: "explorer-window trash-window",
+    content: () => `
+      <div class="nodal-explorer-ui">
+        <div class="nodal-explorer-ribbon">
+          <button type="button" data-nodal-action="trash-secret">Restaurer le fragment</button>
+          <button type="button" data-nodal-action="trash-properties">Propriétés</button>
+        </div>
+        <div class="nodal-explorer-address">
+          <button type="button" data-nodal-folder="root">Ce PC</button>
+          <span>›</span>
+          <strong>Corbeille</strong>
+        </div>
+        <div class="nodal-explorer-main">
+          <aside class="nodal-explorer-sidebar">
+            <span>Accès rapide</span>
+            <button type="button" data-nodal-folder="root">Ce PC / N.D.R</button>
+          </aside>
+          <div class="nodal-explorer-content">
+            <p class="nodal-recycle-note">1 élément masqué détecté.</p>
+            <button class="nodal-trash-file" type="button" data-nodal-action="trash-secret">duval_contact.tmp</button>
+            <div class="nodal-trash-secret hidden" data-nodal-trash-secret>
+              <p><strong>Fichier :</strong> duval_contact.tmp</p>
+              <p><strong>Contenu :</strong></p>
+              <p>“Il reviendra quand il aura quelque chose à perdre.”</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+  },
+};
+
+const nodalPublicFolders = [
+  {id:'dossier',title:'DOSSIER N.D.R',description:'Identité et suivi du sujet'},
+  {id:'archives',title:'ASCALON_ARCHIVES',description:'Index du programme'},
+  {id:'operations',title:'OPÉRATIONS',description:'Historique opérationnel'},
+  {id:'photos',title:'PHOTOS',description:'Fragments visuels'},
+  {id:'transmissions',title:'TRANSMISSIONS',description:'Messages interceptés'},
+  {id:'audio',title:'AUDIO_LOGS',description:'Enregistrements endommagés'},
+];
+const nodalVaultFolders = window.NODAL_VAULT_DATA?.folders || [];
+const nodalFolderCache = new Map();
+const nodalDocumentCache = new Map();
+const nodalExplorerState = {folder:'root',query:'',history:['root'],index:0};
+let nodalSession = 0, nodalUnlockRequest = 0, nodalUnlockTarget = null;
+let nodalNotificationTimer = 0, nodalSearchTimer = 0, nodalClockTimer = 0, nodalIdleTimer = 0;
+let nodalLoginPending = false, nodalReturnFocus = null, nodalDialogReturnFocus = null;
+const nodalRunningApps = document.getElementById('nodalRunningApps');
+const nodalVaultDialog = document.createElement('dialog');
+nodalVaultDialog.className = 'nodal-vault-dialog';
+nodalVaultDialog.setAttribute('aria-labelledby','nodalVaultTitle');
+nodalVaultDialog.setAttribute('aria-describedby','nodalVaultDescription');
+nodalVaultDialog.innerHTML = `<form class="nodal-vault-form">
+  <span class="nodal-vault-mark" aria-hidden="true">◈</span>
+  <p class="nodal-document-classification">ASCALON / ACCÈS RESTREINT</p>
+  <h2 id="nodalVaultTitle">Archive verrouillée</h2><p id="nodalVaultDescription"></p>
+  <label class="nodal-vault-label" for="nodalVaultPassword">Mot de passe de l’archive</label>
+  <input id="nodalVaultPassword" type="password" autocomplete="off" required maxlength="256" aria-describedby="nodalVaultFeedback" />
+  <p class="nodal-vault-feedback" id="nodalVaultFeedback" role="status"></p>
+  <div class="nodal-vault-actions"><button type="button" data-nodal-cancel>Annuler</button><button type="submit">Déverrouiller</button></div></form>`;
+nodalOs?.appendChild(nodalVaultDialog);
+const nodalVaultForm = nodalVaultDialog.querySelector('form');
+const nodalVaultPassword = document.getElementById('nodalVaultPassword');
+const nodalVaultFeedback = document.getElementById('nodalVaultFeedback');
+
+function nodalEscape(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
+function nodalSearchText(value) {
+  return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr').trim();
+}
+function nodalFolder(id) { return [...nodalPublicFolders,...nodalVaultFolders].find(folder => folder.id === id); }
+function nodalDocument(id) {
+  for (const [folderId,folder] of nodalFolderCache) {
+    const file = folder.documents.find(item => item.id === id);
+    if (file) return {...file,folderId};
+  }
+  return null;
+}
+function nodalFolderTile(folder) {
+  const locked = folder.sealed && !nodalFolderCache.has(folder.id);
+  return `<button class="nodal-folder-tile" type="button" data-nodal-folder="${nodalEscape(folder.id)}"><span class="nodal-folder-icon" aria-hidden="true"></span><span><strong>${nodalEscape(folder.title)}</strong><small>${nodalEscape(folder.description)}</small>${folder.sealed ? `<span class="nodal-lock-badge">${locked ? '◈ Verrouillé' : '◇ Dossier ouvert'}</span>` : ''}</span></button>`;
+}
+function nodalFileRow(file) {
+  return `<button class="nodal-file-row" type="button" data-nodal-document="${nodalEscape(file.id)}"><span aria-hidden="true">▤</span><span><strong>${nodalEscape(file.title)}</strong><small>${nodalEscape(file.reference)} · ${nodalEscape(file.kind)}</small></span><span class="nodal-file-meta">${nodalDocumentCache.has(file.id) ? '◇ Ouvert' : '◈ Mot de passe requis'}</span></button>`;
+}
+function nodalExplorerResults() {
+  const {folder,query} = nodalExplorerState;
+  const matches = item => nodalSearchText(`${item.title} ${item.description || ''} ${item.reference || ''} ${item.kind || ''}`).includes(nodalSearchText(query));
+  let count = 0, html = '';
+  if (query) {
+    const folders = [...nodalPublicFolders,...nodalVaultFolders].filter(matches);
+    const files = (folder === 'root' ? [...nodalFolderCache.values()].flatMap(item => item.documents) : nodalFolderCache.get(folder)?.documents || []).filter(matches);
+    count = folders.length + files.length;
+    html = `<h3 class="nodal-section-heading">Résultats pour « ${nodalEscape(query)} »</h3><p class="nodal-search-summary">Seuls les titres des documents de dossiers déverrouillés sont indexés.</p><div class="nodal-folder-grid">${folders.map(nodalFolderTile).join('')}</div><div class="nodal-file-list">${files.map(nodalFileRow).join('')}</div>`;
+  } else if (folder === 'root') {
+    count = nodalPublicFolders.length + nodalVaultFolders.length;
+    html = `<div class="nodal-explorer-heading"><div><p class="nodal-search-summary">POSTE N-17 / NDR-CORE-7</p><h3>Archives de Nadir Delgado</h3></div><span class="nodal-lock-badge">${nodalFolderCache.size} / ${nodalVaultFolders.length} dossiers ouverts</span></div><h3 class="nodal-section-heading">Archives classifiées</h3><div class="nodal-folder-grid">${nodalVaultFolders.map(nodalFolderTile).join('')}</div><h3 class="nodal-section-heading">Fichiers du poste</h3><div class="nodal-folder-grid">${nodalPublicFolders.map(nodalFolderTile).join('')}</div>`;
+  } else if (nodalFolderCache.has(folder)) {
+    const files = nodalFolderCache.get(folder).documents; count = files.length;
+    html = `<div class="nodal-explorer-heading"><h3>${nodalEscape(nodalFolder(folder)?.title)}</h3><span class="nodal-lock-badge">Dossier déverrouillé</span></div><p class="nodal-search-summary">Chaque document possède son propre verrou. Les autorisations sont limitées à cette session.</p><div class="nodal-file-list">${files.map(nodalFileRow).join('')}</div>`;
+  }
+  if (!count) html += '<div class="nodal-empty-state"><strong>Aucun élément trouvé</strong><p>Essayez un autre titre ou ouvrez un dossier classifié.</p></div>';
+  return {html,status:`${count} élément${count > 1 ? 's' : ''} · Archives locales · ${nodalFolderCache.size} dossier(s) déverrouillé(s)`};
+}
+function renderNodalExplorer() {
+  const {folder,index,history} = nodalExplorerState, result = nodalExplorerResults();
+  return `<div class="nodal-explorer-ui"><div class="nodal-explorer-ribbon">
+    <button type="button" data-nodal-folder="root">⌂ Accueil</button><button type="button" data-nodal-action="refresh">↻ Actualiser</button><button type="button" data-nodal-lock>◈ Reverrouiller les archives</button><button type="button" data-nodal-action="help">? Raccourcis</button></div>
+    <div class="nodal-explorer-address"><button type="button" data-nodal-history="-1" aria-label="Précédent" ${index === 0 ? 'disabled' : ''}>←</button><button type="button" data-nodal-history="1" aria-label="Suivant" ${index === history.length - 1 ? 'disabled' : ''}>→</button><button type="button" data-nodal-folder="root" aria-label="Dossier parent" ${folder === 'root' ? 'disabled' : ''}>↑</button>
+    <nav class="nodal-breadcrumbs" aria-label="Chemin du dossier"><button type="button" data-nodal-folder="root">Ce PC</button>${folder !== 'root' ? `<span aria-hidden="true">›</span><span aria-current="page">${nodalEscape(nodalFolder(folder)?.title)}</span>` : '<span aria-current="page">› N.D.R</span>'}</nav>
+    <input type="search" data-nodal-search aria-label="Rechercher dans les archives" placeholder="Rechercher dans les archives…" value="${nodalEscape(nodalExplorerState.query)}" autocomplete="off" /></div>
+    <div class="nodal-explorer-main"><aside class="nodal-explorer-sidebar" aria-label="Dossiers"><span>ACCÈS RAPIDE</span><button type="button" data-nodal-folder="root" ${folder === 'root' ? 'aria-current="page"' : ''}>⌂ Ce PC / N.D.R</button>
+    ${nodalVaultFolders.map(item => `<button type="button" data-nodal-folder="${nodalEscape(item.id)}" ${folder === item.id ? 'aria-current="page"' : ''}>${nodalFolderCache.has(item.id) ? '◇' : '◈'} ${nodalEscape(item.title)}</button>`).join('')}
+    <span>FICHIERS LOCAUX</span>${nodalPublicFolders.map(item => `<button type="button" data-nodal-folder="${item.id}">${item.title}</button>`).join('')}<button type="button" data-nodal-window="trash">Corbeille</button></aside><div class="nodal-explorer-content" tabindex="-1">${result.html}</div></div><footer class="nodal-explorer-status" role="status">${result.status}</footer></div>`;
+}
+function refreshNodalExplorer(resultsOnly = false) {
+  const explorer = nodalWindows?.querySelector('[data-nodal-open="explorer"]'); if (!explorer) return;
+  if (resultsOnly) { const result = nodalExplorerResults(); explorer.querySelector('.nodal-explorer-content').innerHTML = result.html; explorer.querySelector('.nodal-explorer-status').textContent = result.status; }
+  else explorer.querySelector('.nodal-window-body').innerHTML = renderNodalExplorer();
+}
+function navigateNodalFolder(id,historyIndex = null) {
+  if (id === 'root' || nodalVaultFolders.some(folder => folder.id === id)) {
+    const folder = nodalFolder(id);
+    if (folder?.sealed && !nodalFolderCache.has(id)) {
+      requestNodalUnlock({title:folder.title,sealed:folder.sealed,onUnlock:data => {nodalFolderCache.set(id,data); navigateNodalFolder(id,historyIndex);}}); return;
+    }
+    window.clearTimeout(nodalSearchTimer);
+    if (historyIndex !== null) nodalExplorerState.index = historyIndex;
+    else if (id !== nodalExplorerState.folder) {nodalExplorerState.history.splice(nodalExplorerState.index + 1); nodalExplorerState.history.push(id); nodalExplorerState.index = nodalExplorerState.history.length - 1;}
+    nodalExplorerState.folder = id; nodalExplorerState.query = ''; openNodalWindow('explorer'); refreshNodalExplorer();
+    nodalWindows.querySelector('[data-nodal-open="explorer"] .nodal-explorer-content')?.focus({preventScroll:true}); updateNodalDesktopLocks();
+  } else if (nodalPublicFolders.some(folder => folder.id === id)) openNodalWindow(id);
+}
+function renderNodalPhotos() {
+  const photos = [['./assets/images/subjects/nadir.png','N-17 / Portrait du sujet'],['./assets/images/subjects/panam.png','Panam / Contact identifié'],['./assets/images/subjects/cain-voss.png','Caïn Voss / Archive de surveillance']];
+  return `<div class="nodal-photo-grid">${photos.map(([src,caption]) => `<figure class="nodal-photo-card"><img src="${src}" alt="${caption}" loading="lazy" decoding="async" data-nodal-photo /><div class="nodal-photo-fallback">FRAGMENT INDISPONIBLE</div><figcaption>${caption}</figcaption></figure>`).join('')}</div>`;
+}
+function updateNodalDesktopLocks() {
+  nodalDesktop?.querySelectorAll('.nodal-icon[data-nodal-folder]').forEach(button => {const folder = nodalFolder(button.dataset.nodalFolder); button.lastElementChild.textContent = `${folder?.title || 'Archive'} · ${nodalFolderCache.has(folder?.id) ? 'ouvert' : 'verrouillé'}`;});
+}
+async function decryptNodalArchive(sealed,password) {
+  const bytes = base64 => Uint8Array.from(atob(base64),char => char.charCodeAt(0));
+  const material = await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);
+  const key = await crypto.subtle.deriveKey({name:'PBKDF2',salt:bytes(sealed.salt),iterations:window.NODAL_VAULT_DATA.iterations,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['decrypt']);
+  const plaintext = await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes(sealed.iv)},key,bytes(sealed.ciphertext));
+  return JSON.parse(new TextDecoder().decode(plaintext));
+}
+function requestNodalUnlock(target) {
+  if (!window.isSecureContext || !window.crypto?.subtle) {showNodalNotification('Archive chiffrée : ouvrez NODAL via HTTPS ou localhost.'); return;}
+  cancelNodalUnlock(); nodalUnlockTarget = target; nodalDialogReturnFocus = document.activeElement;
+  document.getElementById('nodalVaultTitle').textContent = target.title;
+  document.getElementById('nodalVaultDescription').textContent = target.documentId ? 'Document classifié. Une autorisation individuelle est requise.' : 'Dossier classifié. Saisissez son mot de passe pour afficher les fichiers.';
+  nodalVaultDialog.showModal(); nodalVaultPassword.focus();
+}
+function cancelNodalUnlock() {
+  nodalUnlockRequest++; nodalUnlockTarget = null; nodalVaultPassword.value = ''; nodalVaultPassword.removeAttribute('aria-invalid'); nodalVaultFeedback.textContent = '';
+  nodalVaultForm.setAttribute('aria-busy','false'); nodalVaultForm.querySelector('[type="submit"]').disabled = false; nodalVaultPassword.disabled = false;
+  if (nodalVaultDialog.open) nodalVaultDialog.close();
+  if (nodalDialogReturnFocus?.isConnected) nodalDialogReturnFocus.focus({preventScroll:true}); nodalDialogReturnFocus = null;
+}
+nodalVaultForm.addEventListener('submit',async event => {
+  event.preventDefault(); const target = nodalUnlockTarget;
+  if (!target || nodalVaultForm.getAttribute('aria-busy') === 'true') return;
+  const request = ++nodalUnlockRequest, session = nodalSession;
+  nodalVaultForm.setAttribute('aria-busy','true'); nodalVaultForm.querySelector('[type="submit"]').disabled = true;
+  nodalVaultFeedback.textContent = 'Vérification de l’autorisation…'; nodalVaultPassword.removeAttribute('aria-invalid');
+  const password = nodalVaultPassword.value; nodalVaultPassword.value = ''; nodalVaultPassword.disabled = true;
+  try {
+    const data = await decryptNodalArchive(target.sealed,password);
+    if (request !== nodalUnlockRequest || session !== nodalSession) return;
+    cancelNodalUnlock(); target.onUnlock(data); scheduleNodalArchiveLock();
+  } catch {
+    if (request !== nodalUnlockRequest || session !== nodalSession) return;
+    nodalVaultFeedback.textContent = 'Accès refusé. Mot de passe incorrect ou archive endommagée.'; nodalVaultPassword.setAttribute('aria-invalid','true'); nodalVaultPassword.disabled = false; nodalVaultPassword.focus();
+  } finally {
+    if (request === nodalUnlockRequest) {nodalVaultForm.setAttribute('aria-busy','false'); nodalVaultForm.querySelector('[type="submit"]').disabled = false; nodalVaultPassword.disabled = false;}
+  }
+});
+nodalVaultDialog.querySelector('[data-nodal-cancel]').addEventListener('click',cancelNodalUnlock);
+nodalVaultDialog.addEventListener('cancel',event => {event.preventDefault(); cancelNodalUnlock();});
+function renderNodalDocument(data) {
+  return `<article class="nodal-document"><header class="nodal-document-header"><p class="nodal-document-classification">${nodalEscape(data.classification)}</p><h2>${nodalEscape(data.title)}</h2><dl class="nodal-document-meta"><div><dt>Référence</dt><dd>${nodalEscape(data.reference)}</dd></div><div><dt>Sujet</dt><dd>${nodalEscape(data.subject)}</dd></div><div><dt>Date</dt><dd>${nodalEscape(data.date)}</dd></div></dl></header>${data.sections.map(section => `<section class="nodal-document-section"><h3>${nodalEscape(section.heading)}</h3>${String(section.body).split('\n').filter(Boolean).map(paragraph => `<p>${nodalEscape(paragraph)}</p>`).join('')}</section>`).join('')}<footer class="nodal-document-footer">${nodalEscape(data.footer)}</footer><div class="nodal-document-actions"><button type="button" data-nodal-lock>◈ Reverrouiller les archives</button></div></article>`;
+}
+function openNodalDocument(id) {
+  const file = nodalDocument(id); if (!file || !nodalFolderCache.has(file.folderId)) return;
+  const open = data => {const element = createNodalWindow(`document-${id}`,data.title,renderNodalDocument(data),{variant:'document-window'}); if (element) element.dataset.nodalProtected = file.folderId; refreshNodalExplorer(true);};
+  if (nodalDocumentCache.has(id)) open(nodalDocumentCache.get(id));
+  else requestNodalUnlock({title:file.title,sealed:file.sealed,documentId:id,onUnlock:data => {nodalDocumentCache.set(id,data); open(data);}});
+}
+function lockNodalArchives(notify = true) {
+  nodalSession++; cancelNodalUnlock(); window.clearTimeout(nodalSearchTimer); window.clearTimeout(nodalIdleTimer); nodalFolderCache.clear(); nodalDocumentCache.clear();
+  nodalWindows?.querySelectorAll('[data-nodal-protected]').forEach(element => element.remove());
+  Object.assign(nodalExplorerState,{folder:'root',query:'',history:['root'],index:0}); if (nodalTaskbarSearch) nodalTaskbarSearch.value = '';
+  refreshNodalExplorer(); updateNodalDesktopLocks(); updateNodalTaskbar();
+  if (notify) {showNodalNotification('Archives reverrouillées. Autorisations de session effacées.'); const explorer = nodalWindows.querySelector('[data-nodal-open="explorer"]:not(.hidden)'); if (explorer) focusNodalWindow(explorer,true);}
+}
+function scheduleNodalArchiveLock() {
+  window.clearTimeout(nodalIdleTimer);
+  if (nodalFolderCache.size) nodalIdleTimer = window.setTimeout(() => lockNodalArchives(),5 * 60 * 1000);
+}
+nodalOs?.addEventListener('pointerdown',scheduleNodalArchiveLock,{passive:true});
+nodalOs?.addEventListener('keydown',scheduleNodalArchiveLock);
+function updateNodalClock() {
+  const clock = nodalDesktop?.querySelector('.nodal-tray time'); if (!clock) return;
+  const now = new Date(); clock.dateTime = now.toISOString();
+  clock.textContent = new Intl.DateTimeFormat('fr-FR',{hour:'2-digit',minute:'2-digit'}).format(now);
+  clock.title = new Intl.DateTimeFormat('fr-FR',{dateStyle:'full'}).format(now);
+}
+function resetNodalOs() {
+  nodalBootTimers.forEach(window.clearTimeout); nodalBootTimers = [];
+  window.clearTimeout(nodalNotificationTimer); window.clearTimeout(nodalSearchTimer); window.clearInterval(nodalClockTimer);
+  lockNodalArchives(false); nodalWrongAttempts = 0; nodalWindowZ = 210; nodalMemoryNoticeShown = false; nodalOpenedWindowIds.clear(); nodalLoginPending = false;
+  nodalWindows?.replaceChildren(); updateNodalTaskbar(); nodalBootLog?.replaceChildren();
+  nodalLogin?.classList.add('hidden'); nodalDesktop?.classList.add('hidden'); nodalBoot?.classList.remove('hidden'); nodalNotification?.classList.add('hidden');
+  closeNodalStartMenu(); nodalPassword.value = ''; nodalLoginFeedback.textContent = '';
+  nodalLogin?.querySelector('.nodal-login-panel')?.classList.remove('alert'); nodalDesktopConsoleLog?.replaceChildren();
+}
+function startNodalSequence() {
+  if (!nodalOs || !nodalOs.classList.contains('hidden')) return;
+  nodalReturnFocus = document.activeElement; resetNodalOs(); appendConsoleLine('sys','SIGNAL ACCROCHÉ');
+  body.classList.add('nodal-os-open'); document.dispatchEvent(new CustomEvent('ascalon:overlaychange'));
+  document.querySelector('main.shell')?.setAttribute('inert',''); nodalOs.classList.remove('hidden'); nodalOs.setAttribute('aria-hidden','false');
+  nodalBoot.tabIndex = -1; nodalBoot.focus();
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  ['Connexion au nœud 192.168.1.1…','ROUTE INTERNE TROUVÉE / NDR-CORE-7','SESSION FANTÔME / UTILISATEUR N-17','CHARGEMENT DE NODAL OS…'].forEach((text,index) => nodalBootTimers.push(window.setTimeout(() => {
+    const line = document.createElement('p'); line.textContent = `sys > ${text}`; nodalBootLog.appendChild(line);
+  },reduced ? 0 : index * 180)));
+  nodalBootTimers.push(window.setTimeout(() => {nodalBoot.classList.add('hidden'); nodalLogin.classList.remove('hidden'); nodalPassword.focus();},reduced ? 100 : 900));
+}
+function handleNodalLogin(event) {
+  event.preventDefault(); if (nodalLoginPending) return;
+  if (nodalPassword.value === NODAL_PASSWORD) {
+    nodalPassword.value = ''; nodalLoginPending = true; nodalLoginFeedback.textContent = 'ACCÈS AUTORISÉ / Bienvenue, N-17.';
+    nodalBootTimers.push(window.setTimeout(() => {nodalLogin.classList.add('hidden'); nodalDesktop.classList.remove('hidden'); updateNodalClock(); nodalClockTimer = window.setInterval(updateNodalClock,30000); openNodalWindow('explorer');},220));
+  } else {
+    nodalWrongAttempts++; nodalPassword.value = ''; nodalLoginFeedback.textContent = `ACCÈS REFUSÉ / Mot de passe invalide.${nodalWrongAttempts >= 3 ? ' Activité non autorisée enregistrée.' : ''}`; nodalPassword.focus();
+  }
+}
+function closeNodalOs() {
+  resetNodalOs(); nodalOs?.classList.add('hidden'); nodalOs?.setAttribute('aria-hidden','true'); body.classList.remove('nodal-os-open');
+  document.querySelector('main.shell')?.removeAttribute('inert'); document.dispatchEvent(new CustomEvent('ascalon:overlaychange'));
+  if (nodalReturnFocus?.isConnected) nodalReturnFocus.focus({preventScroll:true});
+}
+function fitNodalWindow(element) {
+  if (element.classList.contains('is-maximized')) return;
+  element.style.left = `${Math.max(8,Math.min(parseFloat(element.style.left) || 8,nodalWindows.clientWidth - element.offsetWidth - 8))}px`;
+  element.style.top = `${Math.max(8,Math.min(parseFloat(element.style.top) || 8,nodalWindows.clientHeight - element.offsetHeight - 8))}px`;
+}
+function createNodalWindow(id,title,content,options = {}) {
+  if (!nodalWindows || nodalDesktop.classList.contains('hidden')) return null;
+  const existing = [...nodalWindows.children].find(element => element.dataset.nodalOpen === id);
+  if (existing) {existing.classList.remove('hidden'); fitNodalWindow(existing); focusNodalWindow(existing,true); return existing;}
+  const offset = (nodalWindows.children.length % 6) * 24, element = document.createElement('article');
+  element.className = `nodal-window ${options.small ? 'small' : ''} ${options.variant || ''}`;
+  element.dataset.nodalOpen = id; element.dataset.nodalTitle = title; element.setAttribute('aria-label',title); element.tabIndex = -1;
+  element.style.left = `${window.innerWidth < 760 ? 8 : 132 + offset}px`; element.style.top = `${window.innerWidth < 760 ? 8 : 36 + offset}px`;
+  element.innerHTML = `<header class="nodal-window-header" data-nodal-drag><strong>${nodalEscape(title)}</strong><div class="nodal-window-controls"><button type="button" data-nodal-minimize aria-label="Réduire">−</button><button type="button" data-nodal-maximize aria-label="Agrandir" aria-pressed="false">□</button><button class="nodal-window-close" type="button" data-nodal-close aria-label="Fermer">×</button></div></header><div class="nodal-window-body">${content}</div>`;
+  nodalWindows.appendChild(element); bindNodalDrag(element);
+  element.addEventListener('animationend',() => {element.style.animation = 'none';},{once:true});
+  element.querySelectorAll('[data-nodal-photo]').forEach(image => {const failed = () => image.closest('.nodal-photo-card')?.classList.add('missing'); image.addEventListener('error',failed,{once:true}); if (image.complete && !image.naturalWidth) failed();});
+  fitNodalWindow(element); focusNodalWindow(element,true); return element;
+}
+function openNodalWindow(id) {
+  const definition = nodalWindowDefinitions[id]; if (!definition) return;
+  createNodalWindow(id,definition.title,definition.content(),{variant:definition.variant || ''}); nodalOpenedWindowIds.add(id);
+  if (nodalOpenedWindowIds.size >= 3 && !nodalMemoryNoticeShown) {nodalMemoryNoticeShown = true; showNodalNotification('Mémoire partiellement restaurée.');}
+}
+function openNodalPopup(title,lines) {
+  return createNodalWindow(`notice-${nodalSearchText(title).replace(/[^a-z0-9]/g,'')}`,title,lines.map(line => `<p>${nodalEscape(line)}</p>`).join(''),{small:true});
+}
+function focusNodalWindow(element,keyboard = false) {
+  nodalWindows.querySelectorAll('.is-active').forEach(item => item.classList.remove('is-active'));
+  element.classList.add('is-active'); element.style.zIndex = `${++nodalWindowZ}`;
+  if (keyboard) element.focus({preventScroll:true}); updateNodalTaskbar();
+}
+function updateNodalTaskbar() {
+  if (!nodalRunningApps) return;
+  const windows = [...(nodalWindows?.children || [])];
+  for (const button of [...nodalRunningApps.children]) if (!windows.some(element => element.dataset.nodalOpen === button.dataset.nodalTask)) button.remove();
+  windows.forEach(element => {
+    let button = [...nodalRunningApps.children].find(item => item.dataset.nodalTask === element.dataset.nodalOpen);
+    if (!button) {button = document.createElement('button'); button.type = 'button'; button.className = 'nodal-running-app'; button.dataset.nodalTask = element.dataset.nodalOpen; button.textContent = element.dataset.nodalTitle; button.title = element.dataset.nodalTitle; nodalRunningApps.appendChild(button);}
+    button.setAttribute('aria-pressed',String(element.classList.contains('is-active') && !element.classList.contains('hidden')));
+    button.setAttribute('aria-label',`${element.classList.contains('hidden') ? 'Restaurer' : 'Afficher'} ${element.dataset.nodalTitle}`);
+  });
+}
+function closeNodalWindow(element) {
+  if (!element) return; element.remove();
+  const next = [...nodalWindows.children].filter(item => !item.classList.contains('hidden')).sort((a,b) => Number(b.style.zIndex) - Number(a.style.zIndex))[0];
+  if (next) focusNodalWindow(next,true); else nodalStartButton.focus(); updateNodalTaskbar();
+}
+function minimizeNodalWindow(element) {
+  element.classList.add('hidden'); element.classList.remove('is-active'); updateNodalTaskbar();
+  [...nodalRunningApps.children].find(button => button.dataset.nodalTask === element.dataset.nodalOpen)?.focus();
+}
+function maximizeNodalWindow(element) {
+  const maximized = element.classList.toggle('is-maximized'), button = element.querySelector('[data-nodal-maximize]');
+  button.setAttribute('aria-pressed',String(maximized)); button.setAttribute('aria-label',maximized ? 'Restaurer la taille' : 'Agrandir'); if (!maximized) fitNodalWindow(element);
+}
+function bindNodalDrag(element) {
+  const header = element.querySelector('[data-nodal-drag]'); let drag = null, frame = 0;
+  const paint = () => {frame = 0; if (drag) element.style.transform = `translate3d(${drag.x}px,${drag.y}px,0)`;};
+  header.addEventListener('pointerdown',event => {
+    if (event.button !== 0 || event.target.closest('button') || element.classList.contains('is-maximized') || window.innerWidth <= 820) return;
+    event.preventDefault(); const rect = element.getBoundingClientRect(), area = nodalWindows.getBoundingClientRect();
+    drag = {startX:event.clientX,startY:event.clientY,left:rect.left - area.left,top:rect.top - area.top,width:rect.width,height:rect.height,areaWidth:area.width,areaHeight:area.height,x:0,y:0};
+    element.classList.add('is-dragging'); header.setPointerCapture(event.pointerId);
+  });
+  header.addEventListener('pointermove',event => {
+    if (!drag) return;
+    drag.x = Math.max(8 - drag.left,Math.min(drag.areaWidth - drag.width - 8 - drag.left,event.clientX - drag.startX));
+    drag.y = Math.max(8 - drag.top,Math.min(drag.areaHeight - drag.height - 8 - drag.top,event.clientY - drag.startY));
+    if (!frame) frame = requestAnimationFrame(paint);
+  });
+  const finish = () => {if (!drag) return; cancelAnimationFrame(frame); frame = 0; element.style.left = `${drag.left + drag.x}px`; element.style.top = `${drag.top + drag.y}px`; element.style.transform = ''; element.classList.remove('is-dragging'); drag = null;};
+  header.addEventListener('pointerup',finish); header.addEventListener('pointercancel',finish); header.addEventListener('lostpointercapture',finish);
+  header.addEventListener('dblclick',event => {if (!event.target.closest('button')) maximizeNodalWindow(element);});
+}
+function showNodalNotification(message = 'Mémoire partiellement restaurée.') {
+  window.clearTimeout(nodalNotificationTimer); nodalNotification.textContent = message; nodalNotification.classList.remove('hidden'); nodalNotificationTimer = window.setTimeout(() => nodalNotification.classList.add('hidden'),4600);
+}
+function appendNodalDesktopLine(label,text) {
+  const line = document.createElement('p'); line.textContent = `${label} > ${text}`; nodalDesktopConsoleLog?.appendChild(line);
+  while (nodalDesktopConsoleLog?.children.length > 80) nodalDesktopConsoleLog.firstElementChild.remove();
+}
+function closeNodalStartMenu() {nodalStartMenu?.classList.add('hidden'); nodalStartButton?.setAttribute('aria-expanded','false');}
+nodalLoginForm?.addEventListener('submit',handleNodalLogin);
+nodalLogin?.querySelector('[data-nodal-exit]')?.addEventListener('click',closeNodalOs);
+nodalExit?.addEventListener('click',closeNodalOs);
+nodalStartButton?.addEventListener('click',() => {const opened = nodalStartMenu.classList.toggle('hidden') === false; nodalStartButton.setAttribute('aria-expanded',String(opened)); if (opened) nodalStartMenu.querySelector('button')?.focus();});
+nodalWindows?.addEventListener('pointerdown',event => {const element = event.target.closest('.nodal-window'); if (element) focusNodalWindow(element);});
+nodalDesktop?.addEventListener('click',event => {
+  const target = event.target.closest('button');
+  if (!event.target.closest('#nodalStartMenu, #nodalStartButton')) closeNodalStartMenu(); if (!target) return;
+  const element = target.closest('.nodal-window');
+  if (target.hasAttribute('data-nodal-close')) return closeNodalWindow(element);
+  if (target.hasAttribute('data-nodal-minimize')) return minimizeNodalWindow(element);
+  if (target.hasAttribute('data-nodal-maximize')) return maximizeNodalWindow(element);
+  if (target.hasAttribute('data-nodal-lock')) {closeNodalStartMenu(); lockNodalArchives(); return;}
+  if (target.dataset.nodalFolder) {closeNodalStartMenu(); navigateNodalFolder(target.dataset.nodalFolder); return;}
+  if (target.dataset.nodalWindow) {closeNodalStartMenu(); openNodalWindow(target.dataset.nodalWindow); return;}
+  if (target.dataset.nodalDocument) return openNodalDocument(target.dataset.nodalDocument);
+  if (target.dataset.nodalHistory) {const index = nodalExplorerState.index + Number(target.dataset.nodalHistory); if (index >= 0 && index < nodalExplorerState.history.length) navigateNodalFolder(nodalExplorerState.history[index],index); return;}
+  if (target.dataset.nodalTask) {
+    const item = [...nodalWindows.children].find(item => item.dataset.nodalOpen === target.dataset.nodalTask); if (!item) return;
+    if (item.classList.contains('is-active') && !item.classList.contains('hidden')) minimizeNodalWindow(item); else {item.classList.remove('hidden'); fitNodalWindow(item); focusNodalWindow(item,true);} return;
+  }
+  if (target.dataset.nodalAudio) return openNodalPopup('Lecture impossible',['Fichier corrompu.','Fragment restauré : 13 %']);
+  if (target.classList.contains('nodal-operation')) {if (target.dataset.nodalAction === 'cataleya-trace') return openNodalPopup('ACCÈS REFUSÉ',['Code émotionnel requis.']); return navigateNodalFolder('contracts');}
+  switch (target.dataset.nodalAction) {
+    case 'refresh': refreshNodalExplorer(); showNodalNotification('Index local actualisé.'); break;
+    case 'help': openNodalPopup('Raccourcis NODAL',['Ctrl + K : rechercher dans les archives.','Alt + ← / → : historique de l’explorateur.','Ctrl + Maj + L : reverrouiller les archives.','Échap : fermer le menu ou la fenêtre active.','Double-clic sur le titre : agrandir ou restaurer.','La barre des tâches permet de réduire et restaurer les fenêtres.','Les archives se reverrouillent après 5 minutes sans interaction.']); break;
+    case 'trash-secret': element.querySelector('[data-nodal-trash-secret]')?.classList.remove('hidden'); break;
+    case 'trash-properties': openNodalPopup('Corbeille / Propriétés',['1 fragment local récupérable.','Source : mémoire résiduelle NDR-CORE-7.']); break;
+  }
+});
+nodalWindows?.addEventListener('input',event => {
+  if (!event.target.matches('[data-nodal-search]')) return;
+  const query = event.target.value; window.clearTimeout(nodalSearchTimer);
+  nodalSearchTimer = window.setTimeout(() => {nodalExplorerState.query = query; refreshNodalExplorer(true);},90);
+});
+nodalTaskbarSearchForm?.addEventListener('submit',event => {
+  event.preventDefault(); const query = nodalTaskbarSearch.value.trim(); if (!query) return; closeNodalStartMenu();
+  if (normalizeCode(query) === 'CATALEYA') {openNodalPopup('ANOMALIE ÉMOTIONNELLE',['ANOMALIE ÉMOTIONNELLE DÉTECTÉE','Le sujet N-17 n’est plus totalement contrôlable.']); nodalTaskbarSearch.value = ''; return;}
+  navigateNodalFolder('root'); nodalExplorerState.query = query; refreshNodalExplorer(); nodalWindows.querySelector('[data-nodal-search]')?.focus();
+});
+nodalDesktopConsoleForm?.addEventListener('submit',event => {
+  event.preventDefault(); const command = nodalDesktopConsoleInput.value.trim(); nodalDesktopConsoleInput.value = '';
+  appendNodalDesktopLine('sys',normalizeCode(command) === 'CATALEYA' ? 'Le sujet N-17 n’est plus totalement contrôlable.' : 'Commande locale non reconnue.');
+});
+document.addEventListener('keydown',event => {
+  if (!body.classList.contains('nodal-os-open') || event.defaultPrevented || nodalVaultDialog.open) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    if (!nodalStartMenu.classList.contains('hidden')) {closeNodalStartMenu(); nodalStartButton.focus();}
+    else if (nodalDesktop.classList.contains('hidden')) closeNodalOs();
+    else {const active = nodalWindows.querySelector('.is-active:not(.hidden)'); if (active) closeNodalWindow(active); else closeNodalOs();}
+  }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k' && !nodalDesktop.classList.contains('hidden')) {event.preventDefault(); openNodalWindow('explorer'); nodalWindows.querySelector('[data-nodal-search]')?.focus();}
+  if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'l') {event.preventDefault(); lockNodalArchives();}
+  if (event.altKey && ['ArrowLeft','ArrowRight'].includes(event.key) && !nodalDesktop.classList.contains('hidden')) {event.preventDefault(); const index = nodalExplorerState.index + (event.key === 'ArrowLeft' ? -1 : 1); if (index >= 0 && index < nodalExplorerState.history.length) navigateNodalFolder(nodalExplorerState.history[index],index);}
+  if (event.key === 'Tab') {
+    const focusable = [...nodalOs.querySelectorAll('button,input,[tabindex="0"]')].filter(item => item.getClientRects().length && !item.disabled); if (!focusable.length) {event.preventDefault(); nodalBoot.focus(); return;}
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !nodalOs.contains(document.activeElement))) {event.preventDefault(); last.focus();}
+    else if (!event.shiftKey && (document.activeElement === last || !nodalOs.contains(document.activeElement))) {event.preventDefault(); first.focus();}
+  }
+});
+let nodalResizeFrame = 0;
+window.addEventListener('resize',() => {if (!body.classList.contains('nodal-os-open') || nodalResizeFrame) return; nodalResizeFrame = requestAnimationFrame(() => {nodalResizeFrame = 0; nodalWindows.querySelectorAll('.nodal-window').forEach(fitNodalWindow);});});
+window.addEventListener('pagehide',() => lockNodalArchives(false));
