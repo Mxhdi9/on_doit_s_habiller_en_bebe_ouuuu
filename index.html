@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <title>ASCALON</title>
-    <link rel="stylesheet" href="./css/style.css?v=ascalon-20260610-structure" />
+    <link rel="stylesheet" href="./css/style.css?v=ascalon-20260725-nodal-os" />
   </head>
   <body class="locked">
     <div class="noise"></div>
@@ -83,6 +83,120 @@
       <p class="smasher-fallback hidden" id="smasherFallback">Image SMASHER indisponible.</p>
       <button class="smasher-upload hidden" type="button" id="loadSmasherFile">Charger smasher.png</button>
       <input class="hidden" id="smasherFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
+    </div>
+
+    <div class="nodal-os hidden" id="nodalOs" aria-hidden="true">
+      <div class="nodal-noise" aria-hidden="true"></div>
+      <div class="nodal-scanlines" aria-hidden="true"></div>
+      <div class="nodal-particles" aria-hidden="true"></div>
+
+      <section class="nodal-boot" id="nodalBoot" aria-live="polite">
+        <p class="nodal-signal">SIGNAL ACCROCHÉ</p>
+        <div class="nodal-boot-card">
+          <p class="kicker">ASCALON / NODAL OS / DOSSIER N.D.R</p>
+          <h2>Redirection interne</h2>
+          <div class="nodal-boot-log" id="nodalBootLog"></div>
+        </div>
+      </section>
+
+      <section class="nodal-login hidden" id="nodalLogin" aria-labelledby="nodalLoginTitle">
+        <div class="nodal-login-panel">
+          <p class="nodal-login-system">ASCALON INTERNAL ACCESS</p>
+          <div class="nodal-login-avatar" aria-hidden="true">
+            <span></span>
+          </div>
+          <h2 id="nodalLoginTitle">N-17</h2>
+          <p class="nodal-login-route">NODAL OS // DOSSIER N.D.R</p>
+          <form class="nodal-login-form" id="nodalLoginForm">
+            <label class="hidden" for="nodalPassword">Mot de passe</label>
+            <div class="nodal-password-row">
+              <input id="nodalPassword" type="password" autocomplete="off" placeholder="Mot de passe" />
+              <button type="submit" aria-label="Accéder">→</button>
+            </div>
+            <p class="nodal-login-feedback" id="nodalLoginFeedback" aria-live="polite"></p>
+          </form>
+        </div>
+        <div class="nodal-login-footer">
+          <span>Système isolé // accès local uniquement</span>
+          <span>Dernière session : inconnue</span>
+          <span>État mémoire : fragmenté</span>
+        </div>
+      </section>
+
+      <section class="nodal-desktop hidden" id="nodalDesktop" aria-label="Bureau NODAL OS">
+        <div class="nodal-desktop-field" aria-hidden="true"></div>
+        <div class="nodal-watermark" aria-hidden="true">
+          <strong>NODAL OS</strong>
+          <span>ASCALON // NDR-CORE-7</span>
+        </div>
+
+        <div class="nodal-icons" aria-label="Fichiers du bureau NODAL OS">
+          <button class="nodal-icon" type="button" data-nodal-window="trash">
+            <span class="nodal-icon-symbol nodal-trash-symbol"></span>
+            <span>CORBEILLE</span>
+          </button>
+          <button class="nodal-icon" type="button" data-nodal-window="explorer">
+            <span class="nodal-icon-symbol nodal-explorer-symbol"></span>
+            <span>EXPLORATEUR</span>
+          </button>
+        </div>
+
+        <section class="nodal-desktop-console hidden" aria-label="Console interne NODAL OS">
+          <div class="nodal-desktop-console-log" id="nodalDesktopConsoleLog" aria-live="polite">
+            <p><span>nodal</span> terminal secondaire actif.</p>
+            <p><span>sys</span> mémoire N-17 fragmentée.</p>
+          </div>
+          <form class="nodal-desktop-console-form" id="nodalDesktopConsoleForm">
+            <span>&gt;</span>
+            <input id="nodalDesktopConsoleInput" type="text" autocomplete="off" placeholder="commande locale" />
+          </form>
+        </section>
+
+        <div class="nodal-windows" id="nodalWindows"></div>
+        <div class="nodal-notification hidden" id="nodalNotification">MÉMOIRE PARTIELLEMENT RESTAURÉE</div>
+
+        <nav class="nodal-start-menu hidden" id="nodalStartMenu" aria-label="Menu NODAL">
+          <div class="nodal-start-user">
+            <span class="nodal-start-avatar" aria-hidden="true"></span>
+            <div>
+              <strong>N-17</strong>
+              <small>ASCALON / NODAL OS</small>
+            </div>
+          </div>
+          <button type="button" data-nodal-window="explorer">
+            <span class="nodal-icon-symbol nodal-explorer-symbol"></span>
+            Explorateur de fichiers
+          </button>
+          <button type="button" data-nodal-window="trash">
+            <span class="nodal-icon-symbol nodal-trash-symbol"></span>
+            Corbeille
+          </button>
+          <button class="nodal-power" type="button" id="nodalExit">
+            <span class="nodal-power-glyph" aria-hidden="true"></span>
+            Éteindre NODAL OS
+          </button>
+        </nav>
+
+        <footer class="nodal-taskbar">
+          <button class="nodal-start-button" type="button" id="nodalStartButton" aria-label="Ouvrir le menu NODAL">
+            <span class="nodal-start-logo" aria-hidden="true"></span>
+          </button>
+          <form class="nodal-taskbar-search" id="nodalTaskbarSearchForm">
+            <input id="nodalTaskbarSearch" type="text" autocomplete="off" placeholder="Rechercher dans NODAL" />
+          </form>
+          <button class="nodal-task-app" type="button" data-nodal-window="trash" aria-label="Corbeille">
+            <span class="nodal-icon-symbol nodal-trash-symbol"></span>
+          </button>
+          <button class="nodal-task-app" type="button" data-nodal-window="explorer" aria-label="Explorateur de fichiers">
+            <span class="nodal-icon-symbol nodal-explorer-symbol"></span>
+          </button>
+          <span class="nodal-task-spacer"></span>
+          <div class="nodal-tray">
+            <span>RÉSEAU LOCAL</span>
+            <time>02:13</time>
+          </div>
+        </footer>
+      </section>
     </div>
 
     <div class="modal hidden" id="n17NameModal" role="dialog" aria-modal="true" aria-labelledby="n17NameTitle">
@@ -910,9 +1024,9 @@
 
           <div class="console-frame">
             <div class="terminal-log large-log" id="terminalLog" aria-live="polite">
-              <p><span>sys</span> scellé local ouvert.</p>
-              <p><span>sync</span> dernière synchronisation : inconnue.</p>
-              <p><span>cmd</span> attente d’un mot exact.</p>
+              <p><span>sys</span> ASCALON TERMINAL v1.7</p>
+              <p><span>sync</span> Connexion locale établie.</p>
+              <p><span>cmd</span> Tapez une commande...</p>
             </div>
 
             <form class="console-form" id="consoleForm">
@@ -950,6 +1064,6 @@
       </section>
     </main>
 
-    <script src="./js/main.js?v=ascalon-20260723-smasher-direct"></script>
+    <script src="./js/main.js?v=ascalon-20260725-nodal-os"></script>
   </body>
 </html>

@@ -64,6 +64,8 @@ const VITO_PHOTO_FILE = [
 ].join("");
 const VITO_PHOTO_SOURCE = "./assets/images/subjects/vito.png";
 const CATEGORY_BACKGROUND_FILE = "./assets/images/archive/accueil.png";
+const NODAL_SECRET_COMMAND = "CONNECT192.168.1.1";
+const NODAL_PASSWORD = "cataleya17";
 
 const fragmentCodes = {
   frag01: "TRACE",
@@ -149,6 +151,25 @@ const subjectPreviewOpen = document.getElementById("subjectPreviewOpen");
 const consoleForm = document.getElementById("consoleForm");
 const consoleInput = document.getElementById("consoleInput");
 const terminalLog = document.getElementById("terminalLog");
+const nodalOs = document.getElementById("nodalOs");
+const nodalBoot = document.getElementById("nodalBoot");
+const nodalBootLog = document.getElementById("nodalBootLog");
+const nodalLogin = document.getElementById("nodalLogin");
+const nodalLoginForm = document.getElementById("nodalLoginForm");
+const nodalPassword = document.getElementById("nodalPassword");
+const nodalLoginFeedback = document.getElementById("nodalLoginFeedback");
+const nodalDesktop = document.getElementById("nodalDesktop");
+const nodalExit = document.getElementById("nodalExit");
+const nodalStartButton = document.getElementById("nodalStartButton");
+const nodalStartMenu = document.getElementById("nodalStartMenu");
+const nodalTaskbarSearchForm = document.getElementById("nodalTaskbarSearchForm");
+const nodalTaskbarSearch = document.getElementById("nodalTaskbarSearch");
+const nodalIcons = document.querySelectorAll("[data-nodal-window]");
+const nodalWindows = document.getElementById("nodalWindows");
+const nodalNotification = document.getElementById("nodalNotification");
+const nodalDesktopConsoleForm = document.getElementById("nodalDesktopConsoleForm");
+const nodalDesktopConsoleInput = document.getElementById("nodalDesktopConsoleInput");
+const nodalDesktopConsoleLog = document.getElementById("nodalDesktopConsoleLog");
 const archiveAccessPanel = document.getElementById("archiveAccessPanel");
 const archiveContent = document.getElementById("archiveContent");
 const archivePinDisplay = document.getElementById("archivePinDisplay");
@@ -166,6 +187,11 @@ let entryInput = "";
 let activeOperationId = null;
 const operationSessionAccess = new Set();
 let selectedSubjectAction = null;
+let nodalWrongAttempts = 0;
+let nodalWindowZ = 210;
+let nodalMemoryNoticeShown = false;
+let nodalBootTimers = [];
+const nodalOpenedWindowIds = new Set();
 
 const archiveGame = document.getElementById("archiveGame");
 const archiveBoot = document.getElementById("archiveBoot");
@@ -2610,6 +2636,652 @@ dossierTriggers.forEach((trigger) => {
 
 window.startMamanArchive = startMamanArchive;
 
+const nodalWindowDefinitions = {
+  explorer: {
+    title: "Explorateur de fichiers",
+    variant: "explorer-window",
+    content: () => renderNodalExplorer(),
+  },
+  dossier: {
+    title: "DOSSIER N.D.R",
+    content: () => `
+      <dl class="nodal-data-list">
+        <div><dt>Nom</dt><dd>Nadir Delgado</dd></div>
+        <div><dt>Alias</dt><dd>N-17</dd></div>
+        <div><dt>Statut</dt><dd>Actif / non récupéré</dd></div>
+        <div><dt>Programme</dt><dd>ASCALON</dd></div>
+        <div><dt>Superviseur</dt><dd>M. Duval</dd></div>
+        <div><dt>Note</dt><dd>Le sujet présente une résistance anormale aux protocoles de conditionnement.</dd></div>
+      </dl>
+    `,
+  },
+  archives: {
+    title: "ASCALON_ARCHIVES",
+    content: () => `
+      <ul class="nodal-lines">
+        <li>Projet : ASCALON</li>
+        <li>But officiel : formation d’opératifs privés</li>
+        <li>But réel : [CENSURÉ]</li>
+        <li>Sujet principal : N-17</li>
+        <li>Incident initial : [FRAGMENT MANQUANT]</li>
+        <li>Statut Duval : inconnu</li>
+      </ul>
+    `,
+  },
+  operations: {
+    title: "OPERATIONS",
+    content: () => `
+      <div class="nodal-lines">
+        <button class="nodal-operation" type="button">OP. NIGHT GLASS — Los Santos — statut : archivé</button>
+        <button class="nodal-operation" type="button">OP. ALTIPLANO — Bolivie — statut : anomalie</button>
+        <button class="nodal-operation" type="button">OP. DEAD SIGNAL — Liberty City — statut : fragmenté</button>
+        <button class="nodal-operation" type="button" data-nodal-action="cataleya-trace">OP. CATALEYA TRACE — [CENSURÉ] — statut : verrouillé</button>
+      </div>
+    `,
+  },
+  photos: {
+    title: "PHOTOS",
+    content: () => renderNodalPhotos(),
+  },
+  transmissions: {
+    title: "TRANSMISSIONS",
+    content: () => `
+      <p><strong>Transmission interceptée.</strong></p>
+      <p>Source : inconnue</p>
+      <p>Destinataire : N-17</p>
+      <p>Message :</p>
+      <p>“Tu pensais avoir disparu. Mais ASCALON ne perd jamais ses sujets.”</p>
+    `,
+  },
+  audio: {
+    title: "AUDIO_LOGS",
+    content: () => `
+      <div class="nodal-lines">
+        <button class="nodal-audio-file" type="button" data-nodal-audio="audio_0213.wav">audio_0213.wav</button>
+        <button class="nodal-audio-file" type="button" data-nodal-audio="duval_note_07.wav">duval_note_07.wav</button>
+        <button class="nodal-audio-file" type="button" data-nodal-audio="n17_breathing_test.wav">n17_breathing_test.wav</button>
+        <button class="nodal-audio-file" type="button" data-nodal-audio="cataleya_trace.wav">cataleya_trace.wav</button>
+      </div>
+    `,
+  },
+  trash: {
+    title: "Corbeille",
+    variant: "explorer-window trash-window",
+    content: () => `
+      <div class="nodal-explorer-ui">
+        <div class="nodal-explorer-ribbon">
+          <button type="button">Restaurer</button>
+          <button type="button">Supprimer</button>
+          <button type="button">Propriétés</button>
+        </div>
+        <div class="nodal-explorer-address">
+          <span>Ce PC</span>
+          <span>›</span>
+          <strong>Corbeille</strong>
+        </div>
+        <div class="nodal-explorer-main">
+          <aside class="nodal-explorer-sidebar">
+            <span>Accès rapide</span>
+            <span>Ce PC</span>
+            <span>Réseau</span>
+          </aside>
+          <div class="nodal-explorer-content">
+            <p class="nodal-recycle-note">1 élément masqué détecté.</p>
+            <button class="nodal-trash-file" type="button" data-nodal-action="trash-secret">duval_contact.tmp</button>
+            <div class="nodal-trash-secret hidden" data-nodal-trash-secret>
+              <p><strong>Fichier :</strong> duval_contact.tmp</p>
+              <p><strong>Contenu :</strong></p>
+              <p>“Il reviendra quand il aura quelque chose à perdre.”</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+  },
+};
+
+function renderNodalExplorer() {
+  const folders = [
+    ["dossier", "DOSSIER_NDR", "Dossier disciplinaire"],
+    ["archives", "ASCALON_ARCHIVES", "Archive interne"],
+    ["operations", "OPERATIONS", "Index opérationnel"],
+    ["photos", "PHOTOS", "Images locales"],
+    ["transmissions", "TRANSMISSIONS", "Messages interceptés"],
+    ["audio", "AUDIO_LOGS", "Fichiers corrompus"],
+  ];
+
+  return `
+    <div class="nodal-explorer-ui">
+      <div class="nodal-explorer-ribbon">
+        <button type="button">Fichier</button>
+        <button type="button">Ordinateur</button>
+        <button type="button">Affichage</button>
+        <button type="button">Propriétés</button>
+        <button type="button">Ouvrir</button>
+        <button type="button">Renommer</button>
+        <button type="button">Paramètres</button>
+      </div>
+      <div class="nodal-explorer-address">
+        <span>⌂</span>
+        <span>Ce PC</span>
+        <span>›</span>
+        <strong>DOSSIER N.D.R</strong>
+        <input type="text" value="Rechercher dans : Ce PC" readonly />
+      </div>
+      <div class="nodal-explorer-main">
+        <aside class="nodal-explorer-sidebar">
+          <span>Accès rapide</span>
+          <span>OneDrive</span>
+          <strong>Ce PC</strong>
+          <span>Bureau</span>
+          <span>Documents</span>
+          <span>Images</span>
+          <span>Musique</span>
+          <span>Objets 3D</span>
+          <span>Téléchargements</span>
+          <span>Vidéos</span>
+          <span>Réseau</span>
+        </aside>
+        <div class="nodal-explorer-content">
+          <h3>Dossiers (6)</h3>
+          <div class="nodal-folder-grid">
+            ${folders
+              .map(
+                ([id, label, detail]) => `
+                  <button class="nodal-folder-tile" type="button" data-nodal-window="${id}">
+                    <span class="nodal-folder-icon" aria-hidden="true"></span>
+                    <span>
+                      <strong>${label}</strong>
+                      <small>${detail}</small>
+                    </span>
+                  </button>
+                `,
+              )
+              .join("")}
+          </div>
+          <h3>Périphériques et lecteurs (4)</h3>
+          <div class="nodal-drive-grid">
+            <div class="nodal-drive-tile">
+              <span class="nodal-drive-icon" aria-hidden="true"></span>
+              <strong>Disque local (C:)</strong>
+              <i><b style="width: 72%"></b></i>
+              <small>37,3 Go libres sur 447 Go</small>
+            </div>
+            <div class="nodal-drive-tile">
+              <span class="nodal-drive-icon" aria-hidden="true"></span>
+              <strong>500Go Clone de C (D:)</strong>
+              <i><b style="width: 46%"></b></i>
+              <small>159 Go libres sur 465 Go</small>
+            </div>
+            <div class="nodal-drive-tile">
+              <span class="nodal-drive-icon" aria-hidden="true"></span>
+              <strong>2To BGarracuda (E:)</strong>
+              <i><b style="width: 61%"></b></i>
+              <small>503 Go libres sur 1,81 To</small>
+            </div>
+            <div class="nodal-drive-tile warning">
+              <span class="nodal-drive-icon" aria-hidden="true"></span>
+              <strong>1 To Interne sauvegarde (F:)</strong>
+              <i><b style="width: 89%"></b></i>
+              <small>101 Go libres sur 931 Go</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="nodal-explorer-status">11 élément(s)</footer>
+    </div>
+  `;
+}
+
+function renderNodalPhotos() {
+  const photos = [
+    "./assets/images/nodal/photo-01.jpg",
+    "./assets/images/nodal/photo-02.jpg",
+    "./assets/images/nodal/photo-03.jpg",
+  ];
+
+  return `
+    <div class="nodal-photo-grid">
+      ${photos
+        .map(
+          (src) => `
+            <figure class="nodal-photo-card">
+              <img src="${src}" alt="" data-nodal-photo />
+              <div class="nodal-photo-fallback">IMAGE MANQUANTE</div>
+              <figcaption>${src}</figcaption>
+            </figure>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function resetNodalOs() {
+  nodalBootTimers.forEach((timer) => window.clearTimeout(timer));
+  nodalBootTimers = [];
+  nodalWrongAttempts = 0;
+  nodalWindowZ = 210;
+  nodalMemoryNoticeShown = false;
+  nodalOpenedWindowIds.clear();
+
+  if (nodalBootLog) {
+    nodalBootLog.innerHTML = "";
+  }
+
+  nodalLogin?.classList.add("hidden");
+  nodalDesktop?.classList.add("hidden");
+  nodalDesktop?.classList.remove("restoring");
+  nodalBoot?.classList.remove("hidden");
+  nodalNotification?.classList.add("hidden");
+  nodalStartMenu?.classList.add("hidden");
+
+  if (nodalPassword) {
+    nodalPassword.value = "";
+  }
+
+  if (nodalTaskbarSearch) {
+    nodalTaskbarSearch.value = "";
+  }
+
+  if (nodalLoginFeedback) {
+    nodalLoginFeedback.textContent = "";
+  }
+
+  nodalLogin?.querySelector(".nodal-login-panel")?.classList.remove("alert");
+
+  if (nodalWindows) {
+    nodalWindows.innerHTML = "";
+  }
+
+  if (nodalDesktopConsoleLog) {
+    nodalDesktopConsoleLog.innerHTML = `
+      <p><span>nodal</span> terminal secondaire actif.</p>
+      <p><span>sys</span> mémoire N-17 fragmentée.</p>
+    `;
+  }
+}
+
+function startNodalSequence() {
+  if (!nodalOs || !nodalBoot || !nodalBootLog || !nodalLogin) {
+    appendConsoleLine("sys", "module NODAL indisponible.");
+    return;
+  }
+
+  resetNodalOs();
+  appendConsoleLine("sys", "SIGNAL ACCROCHÉ");
+  body.classList.add("nodal-os-open");
+  nodalOs.classList.remove("hidden");
+  nodalOs.setAttribute("aria-hidden", "false");
+  nodalBoot.style.animation = "none";
+  void nodalBoot.offsetWidth;
+  nodalBoot.style.animation = "";
+
+  const bootLines = [
+    "Connexion au nœud local...",
+    "Commande : connect 192.168.1.1",
+    "Adresse : 192.168.1.1",
+    "PING 192.168.1.1...",
+    "ROUTE INTERNE TROUVÉE",
+    "NOEUD : NDR-CORE-7",
+    "SESSION FANTÔME DÉTECTÉE",
+    "UTILISATEUR DORMANT DÉTECTÉ : N-17",
+    "CHARGEMENT DE NODAL OS...",
+  ];
+
+  bootLines.forEach((line, index) => {
+    const timer = window.setTimeout(() => {
+      const entry = document.createElement("p");
+      const label = document.createElement("span");
+      label.textContent = index < 2 ? "route" : "sys";
+      entry.append(label, ` ${line}`);
+      nodalBootLog.appendChild(entry);
+    }, 260 + index * 310);
+    nodalBootTimers.push(timer);
+  });
+
+  nodalBootTimers.push(
+    window.setTimeout(() => {
+      nodalBoot.classList.add("hidden");
+      nodalLogin.classList.remove("hidden");
+      nodalPassword?.focus();
+    }, 3300),
+  );
+}
+
+function handleNodalLogin(event) {
+  event.preventDefault();
+
+  if (!nodalPassword || !nodalLoginFeedback) {
+    return;
+  }
+
+  if (nodalPassword.value === NODAL_PASSWORD) {
+    nodalLoginFeedback.textContent = "ACCÈS AUTORISÉ\nBienvenue, N-17.\nRestauration du bureau...";
+    nodalBootTimers.push(
+      window.setTimeout(() => {
+        nodalLogin?.classList.add("hidden");
+        nodalDesktop?.classList.remove("hidden");
+        nodalDesktop?.classList.add("restoring");
+        nodalTaskbarSearch?.focus();
+        window.setTimeout(() => nodalDesktop?.classList.remove("restoring"), 1500);
+      }, 980),
+    );
+    return;
+  }
+
+  nodalWrongAttempts += 1;
+  nodalPassword.value = "";
+  nodalLoginFeedback.textContent = "ACCÈS REFUSÉ\nMot de passe invalide.\nTentative enregistrée.";
+
+  if (nodalWrongAttempts >= 3) {
+    nodalLoginFeedback.textContent += "\nALERTE : ACTIVITÉ NON AUTORISÉE";
+    const panel = nodalLogin.querySelector(".nodal-login-panel");
+    panel?.classList.remove("alert");
+    void panel?.offsetWidth;
+    panel?.classList.add("alert");
+  }
+}
+
+function closeNodalOs() {
+  nodalBootTimers.forEach((timer) => window.clearTimeout(timer));
+  nodalBootTimers = [];
+  nodalOs?.classList.add("hidden");
+  nodalOs?.setAttribute("aria-hidden", "true");
+  body.classList.remove("nodal-os-open");
+}
+
+function createNodalWindow(id, title, content, options = {}) {
+  if (!nodalWindows || !nodalDesktop) {
+    return null;
+  }
+
+  if (!options.allowMultiple) {
+    const existing = nodalWindows.querySelector(`[data-nodal-open="${id}"]`);
+    if (existing) {
+      focusNodalWindow(existing);
+      return existing;
+    }
+  }
+
+  const offset = (nodalWindows.children.length % 6) * 28;
+  const windowElement = document.createElement("article");
+  windowElement.className = `nodal-window${options.small ? " small" : ""}${options.variant ? ` ${options.variant}` : ""}`;
+  windowElement.dataset.nodalOpen = id;
+  windowElement.style.zIndex = `${++nodalWindowZ}`;
+  windowElement.style.left = `${window.innerWidth < 760 ? 18 : 292 + offset}px`;
+  windowElement.style.top = `${window.innerWidth < 760 ? 118 + offset : 82 + offset}px`;
+  windowElement.innerHTML = `
+    <header class="nodal-window-header" data-nodal-drag>
+      <strong>${title}</strong>
+      <button class="nodal-window-close" type="button" data-nodal-close aria-label="Fermer">×</button>
+    </header>
+    <div class="nodal-window-body">${content}</div>
+  `;
+
+  bindNodalWindowContent(windowElement);
+  bindNodalDrag(windowElement);
+  nodalWindows.appendChild(windowElement);
+  focusNodalWindow(windowElement);
+  return windowElement;
+}
+
+function openNodalWindow(id) {
+  const definition = nodalWindowDefinitions[id];
+
+  if (!definition) {
+    return;
+  }
+
+  const windowElement = createNodalWindow(id, definition.title, definition.content(), {
+    variant: definition.variant || "",
+  });
+
+  if (!windowElement) {
+    return;
+  }
+
+  nodalOpenedWindowIds.add(id);
+
+  if (nodalOpenedWindowIds.size >= 3 && !nodalMemoryNoticeShown) {
+    nodalMemoryNoticeShown = true;
+    showNodalNotification();
+  }
+}
+
+function openNodalPopup(title, lines) {
+  createNodalWindow(
+    `popup-${Date.now()}-${Math.round(Math.random() * 1000)}`,
+    title,
+    lines.map((line) => `<p>${line}</p>`).join(""),
+    { allowMultiple: true, small: true },
+  );
+}
+
+function focusNodalWindow(windowElement) {
+  windowElement.style.zIndex = `${++nodalWindowZ}`;
+}
+
+function bindNodalWindowContent(windowElement) {
+  windowElement.querySelectorAll("[data-nodal-photo]").forEach((image) => {
+    image.addEventListener(
+      "error",
+      () => {
+        image.closest(".nodal-photo-card")?.classList.add("missing");
+      },
+      { once: true },
+    );
+  });
+}
+
+function bindNodalDrag(windowElement) {
+  const header = windowElement.querySelector("[data-nodal-drag]");
+
+  if (!header) {
+    return;
+  }
+
+  let dragging = false;
+  let startX = 0;
+  let startY = 0;
+  let startLeft = 0;
+  let startTop = 0;
+
+  header.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0 || event.target.closest("[data-nodal-close]")) {
+      return;
+    }
+
+    dragging = true;
+    const desktopRect = nodalDesktop?.getBoundingClientRect() || { left: 0, top: 0 };
+    const rect = windowElement.getBoundingClientRect();
+    startX = event.clientX;
+    startY = event.clientY;
+    startLeft = rect.left - desktopRect.left;
+    startTop = rect.top - desktopRect.top;
+    header.setPointerCapture?.(event.pointerId);
+    focusNodalWindow(windowElement);
+  });
+
+  header.addEventListener("pointermove", (event) => {
+    if (!dragging || !nodalDesktop) {
+      return;
+    }
+
+    const desktopRect = nodalDesktop.getBoundingClientRect();
+    const maxLeft = Math.max(8, desktopRect.width - windowElement.offsetWidth - 8);
+    const maxTop = Math.max(8, desktopRect.height - windowElement.offsetHeight - 48);
+    const nextLeft = Math.max(8, Math.min(maxLeft, startLeft + event.clientX - startX));
+    const nextTop = Math.max(8, Math.min(maxTop, startTop + event.clientY - startY));
+    windowElement.style.left = `${nextLeft}px`;
+    windowElement.style.top = `${nextTop}px`;
+  });
+
+  const stopDrag = (event) => {
+    dragging = false;
+    header.releasePointerCapture?.(event.pointerId);
+  };
+
+  header.addEventListener("pointerup", stopDrag);
+  header.addEventListener("pointercancel", stopDrag);
+}
+
+function showNodalNotification() {
+  if (!nodalNotification) {
+    return;
+  }
+
+  nodalNotification.classList.add("hidden");
+  void nodalNotification.offsetWidth;
+  nodalNotification.classList.remove("hidden");
+  window.setTimeout(() => nodalNotification.classList.add("hidden"), 4600);
+}
+
+function appendNodalDesktopLine(label, text) {
+  if (!nodalDesktopConsoleLog) {
+    return;
+  }
+
+  const line = document.createElement("p");
+  const labelNode = document.createElement("span");
+  labelNode.textContent = label;
+  line.append(labelNode, ` ${text}`);
+  nodalDesktopConsoleLog.appendChild(line);
+  nodalDesktopConsoleLog.scrollTop = nodalDesktopConsoleLog.scrollHeight;
+}
+
+function handleNodalDesktopCommand(event) {
+  event.preventDefault();
+
+  if (!nodalDesktopConsoleInput) {
+    return;
+  }
+
+  const rawCommand = nodalDesktopConsoleInput.value.trim();
+  const command = normalizeCode(rawCommand);
+
+  if (!command) {
+    return;
+  }
+
+  appendNodalDesktopLine(">", rawCommand);
+  nodalDesktopConsoleInput.value = "";
+
+  if (command === "CATALEYA") {
+    appendNodalDesktopLine("sys", "ANOMALIE ÉMOTIONNELLE DÉTECTÉE");
+    appendNodalDesktopLine("sys", "Le sujet N-17 n’est plus totalement contrôlable.");
+    return;
+  }
+
+  appendNodalDesktopLine("sys", "Commande locale non reconnue.");
+}
+
+nodalLoginForm?.addEventListener("submit", handleNodalLogin);
+nodalExit?.addEventListener("click", closeNodalOs);
+
+function closeNodalStartMenu() {
+  nodalStartMenu?.classList.add("hidden");
+}
+
+nodalStartButton?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  nodalStartMenu?.classList.toggle("hidden");
+});
+
+nodalIcons.forEach((icon) => {
+  icon.addEventListener("click", () => {
+    openNodalWindow(icon.dataset.nodalWindow);
+    closeNodalStartMenu();
+  });
+});
+
+nodalDesktop?.addEventListener("click", (event) => {
+  if (!event.target.closest("#nodalStartMenu") && !event.target.closest("#nodalStartButton")) {
+    closeNodalStartMenu();
+  }
+});
+
+nodalWindows?.addEventListener("pointerdown", (event) => {
+  const windowElement = event.target.closest(".nodal-window");
+
+  if (windowElement) {
+    focusNodalWindow(windowElement);
+  }
+});
+
+nodalWindows?.addEventListener("click", (event) => {
+  const closeButton = event.target.closest("[data-nodal-close]");
+
+  if (closeButton) {
+    closeButton.closest(".nodal-window")?.remove();
+    return;
+  }
+
+  const windowLauncher = event.target.closest("[data-nodal-window]");
+
+  if (windowLauncher) {
+    openNodalWindow(windowLauncher.dataset.nodalWindow);
+    return;
+  }
+
+  const audioButton = event.target.closest("[data-nodal-audio]");
+
+  if (audioButton) {
+    openNodalPopup("Lecture impossible", [
+      "Lecture impossible.",
+      "Fichier corrompu.",
+      "Fragment restauré : 13 %",
+    ]);
+    return;
+  }
+
+  const action = event.target.closest("[data-nodal-action]");
+
+  if (!action) {
+    return;
+  }
+
+  if (action.dataset.nodalAction === "cataleya-trace") {
+    openNodalPopup("ACCÈS REFUSÉ", ["ACCÈS REFUSÉ", "Code émotionnel requis."]);
+  }
+
+  if (action.dataset.nodalAction === "trash-secret") {
+    action.closest(".nodal-window-body")?.querySelector("[data-nodal-trash-secret]")?.classList.remove("hidden");
+  }
+});
+
+nodalDesktopConsoleForm?.addEventListener("submit", handleNodalDesktopCommand);
+
+nodalTaskbarSearchForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  if (!nodalTaskbarSearch) {
+    return;
+  }
+
+  const rawSearch = nodalTaskbarSearch.value.trim();
+  const command = normalizeCode(rawSearch);
+
+  if (!command) {
+    return;
+  }
+
+  if (command === "CATALEYA") {
+    appendNodalDesktopLine(">", rawSearch);
+    appendNodalDesktopLine("sys", "ANOMALIE ÉMOTIONNELLE DÉTECTÉE");
+    appendNodalDesktopLine("sys", "Le sujet N-17 n’est plus totalement contrôlable.");
+    openNodalPopup("ANOMALIE ÉMOTIONNELLE", [
+      "ANOMALIE ÉMOTIONNELLE DÉTECTÉE",
+      "Le sujet N-17 n’est plus totalement contrôlable.",
+    ]);
+    nodalTaskbarSearch.value = "";
+    return;
+  }
+
+  openNodalPopup("Recherche NODAL", ["Aucun résultat indexé.", "Mémoire locale fragmentée."]);
+  nodalTaskbarSearch.value = "";
+});
+
 consoleForm.addEventListener("submit", (event) => {
   event.preventDefault();
   handleConsoleCommand();
@@ -2634,8 +3306,8 @@ function handleConsoleCommand() {
   consoleInput.value = "";
 
   const responses = {
-    AIDE: "commandes : ETAT, N17, TRACE, SCELLE, DEX, MAMAN, EFFACER.",
-    HELP: "commandes : ETAT, N17, TRACE, SCELLE, DEX, MAMAN, EFFACER.",
+    AIDE: "commandes : ETAT, N17, TRACE, SCELLE, DEX, MAMAN, CONNECT 192.168.1.1, EFFACER.",
+    HELP: "commandes : ETAT, N17, TRACE, SCELLE, DEX, MAMAN, CONNECT 192.168.1.1, EFFACER.",
     ETAT: "archive ouverte. niveau incomplet.",
     STATUS: "archive ouverte. niveau incomplet.",
     N17: "sujet actif. douleur consignée. motif absent.",
@@ -2648,6 +3320,11 @@ function handleConsoleCommand() {
     EFFACER: "",
     CLEAR: "",
   };
+
+  if (command === NODAL_SECRET_COMMAND) {
+    startNodalSequence();
+    return;
+  }
 
   if (command === "MAMAN") {
     if (window.startMamanArchive) {
@@ -2681,7 +3358,13 @@ function handleConsoleCommand() {
     return;
   }
 
-  appendConsoleLine("sys", responses[command] || "aucune réponse.");
+  if (responses[command] !== undefined) {
+    appendConsoleLine("sys", responses[command]);
+    return;
+  }
+
+  appendConsoleLine("sys", "Commande inconnue.");
+  appendConsoleLine("sys", "Aucun nœud détecté.");
 }
 
 function appendConsoleLine(label, text) {

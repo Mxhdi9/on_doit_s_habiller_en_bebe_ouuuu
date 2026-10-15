@@ -6862,3 +6862,1733 @@ body.cartography-view {
 .page {
   background: transparent;
 }
+
+/* NODAL OS : faux système isolé déclenché par la console ASCALON. */
+body.nodal-os-open {
+  overflow: hidden;
+}
+
+body.nodal-os-open .ambient-control {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nodal-os {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  overflow: hidden;
+  color: #d8e0df;
+  background:
+    radial-gradient(circle at 64% 18%, rgba(112, 19, 28, 0.22), transparent 32%),
+    radial-gradient(circle at 15% 78%, rgba(22, 55, 71, 0.26), transparent 36%),
+    linear-gradient(135deg, #030608, #07090d 48%, #020304);
+  font-family: "Courier New", Courier, monospace;
+  letter-spacing: 0;
+}
+
+.nodal-os::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  opacity: 0.26;
+  background:
+    linear-gradient(90deg, transparent 0 49.7%, rgba(141, 164, 174, 0.07) 50%, transparent 50.3%),
+    linear-gradient(180deg, transparent 0 49.7%, rgba(141, 164, 174, 0.05) 50%, transparent 50.3%);
+  background-size: 120px 120px;
+  transform: rotate(-3deg);
+  pointer-events: none;
+}
+
+.nodal-noise,
+.nodal-scanlines,
+.nodal-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.nodal-noise {
+  z-index: 2;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(0deg, transparent 0 96%, rgba(255, 255, 255, 0.24) 100%),
+    linear-gradient(90deg, transparent 0 96%, rgba(160, 188, 196, 0.14) 100%);
+  background-size: 13px 13px, 19px 19px;
+  mix-blend-mode: screen;
+}
+
+.nodal-scanlines {
+  z-index: 3;
+  opacity: 0.16;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.02) 0,
+    rgba(255, 255, 255, 0.02) 1px,
+    transparent 2px,
+    transparent 6px
+  );
+}
+
+.nodal-particles {
+  z-index: 1;
+  opacity: 0.28;
+  background-image:
+    radial-gradient(circle, rgba(189, 211, 214, 0.26) 0 1px, transparent 2px),
+    radial-gradient(circle, rgba(152, 29, 38, 0.22) 0 1px, transparent 2px);
+  background-position: 0 0, 31px 47px;
+  background-size: 97px 131px, 149px 163px;
+  animation: nodalDrift 18s linear infinite;
+}
+
+.nodal-boot,
+.nodal-login,
+.nodal-desktop {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+}
+
+.nodal-boot {
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.78)),
+    rgba(2, 4, 6, 0.9);
+  animation: nodalBootGlitch 3.1s steps(2, end) both;
+}
+
+.nodal-signal {
+  position: fixed;
+  top: 7vh;
+  left: 50%;
+  z-index: 2;
+  margin: 0;
+  transform: translateX(-50%);
+  color: rgba(245, 231, 171, 0.86);
+  text-transform: uppercase;
+  font-size: clamp(0.78rem, 1.7vw, 1rem);
+  text-shadow:
+    2px 0 rgba(155, 20, 31, 0.7),
+    -2px 0 rgba(59, 109, 126, 0.72),
+    0 0 24px rgba(245, 231, 171, 0.18);
+  animation: nodalSignalFlash 560ms steps(2, end) infinite;
+}
+
+.nodal-boot-card {
+  width: min(760px, 92vw);
+  min-height: 300px;
+  padding: clamp(22px, 4vw, 38px);
+  border: 1px solid rgba(130, 152, 157, 0.38);
+  border-radius: 4px;
+  background:
+    linear-gradient(135deg, rgba(103, 20, 27, 0.28), transparent 34%),
+    linear-gradient(180deg, rgba(15, 22, 26, 0.92), rgba(2, 4, 6, 0.9));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    0 34px 110px rgba(0, 0, 0, 0.68);
+}
+
+.nodal-boot-card h2 {
+  margin: 0 0 26px;
+  color: #f2efe7;
+  text-transform: uppercase;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+}
+
+.nodal-boot-log {
+  display: grid;
+  gap: 11px;
+  color: rgba(204, 222, 220, 0.84);
+  font-size: clamp(0.82rem, 1.8vw, 1rem);
+  text-transform: uppercase;
+}
+
+.nodal-boot-log p {
+  margin: 0;
+}
+
+.nodal-boot-log span {
+  color: rgba(240, 213, 139, 0.82);
+}
+
+.nodal-login {
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background:
+    radial-gradient(circle at center, rgba(37, 55, 62, 0.18), transparent 38%),
+    linear-gradient(180deg, rgba(3, 7, 10, 0.76), rgba(0, 0, 0, 0.92));
+}
+
+.nodal-login-panel {
+  width: min(460px, 94vw);
+  padding: clamp(24px, 4vw, 36px);
+  border: 1px solid rgba(129, 149, 153, 0.34);
+  border-radius: 6px;
+  background:
+    linear-gradient(160deg, rgba(97, 18, 28, 0.18), transparent 30%),
+    linear-gradient(180deg, rgba(17, 23, 27, 0.94), rgba(5, 8, 11, 0.94));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    0 28px 100px rgba(0, 0, 0, 0.72);
+}
+
+.nodal-login-panel.alert {
+  animation: nodalPanelFault 320ms steps(2, end) 2;
+}
+
+.nodal-mark {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(240, 231, 198, 0.24);
+  border-radius: 4px;
+  color: rgba(240, 231, 198, 0.86);
+  background: rgba(0, 0, 0, 0.38);
+  font-size: 1.8rem;
+  font-weight: 700;
+  box-shadow: 0 0 34px rgba(112, 21, 32, 0.22);
+}
+
+.nodal-login-panel h2 {
+  margin: 0;
+  color: #f4efe5;
+  text-transform: uppercase;
+  font-size: clamp(2rem, 8vw, 3.4rem);
+  line-height: 0.95;
+}
+
+.nodal-login-route {
+  margin: 10px 0 28px;
+  color: rgba(159, 176, 178, 0.74);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+}
+
+.nodal-login-form {
+  display: grid;
+  gap: 10px;
+}
+
+.nodal-login-form label {
+  color: rgba(240, 213, 139, 0.82);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.nodal-login-form output {
+  display: block;
+  padding: 12px 13px;
+  border: 1px solid rgba(129, 149, 153, 0.2);
+  border-radius: 4px;
+  color: #f4efe5;
+  background: rgba(2, 4, 6, 0.82);
+}
+
+.nodal-login-form input {
+  color: #f4efe5;
+  border-color: rgba(129, 149, 153, 0.24);
+  background: rgba(0, 0, 0, 0.54);
+}
+
+.nodal-login-feedback {
+  min-height: 44px;
+  margin: 4px 0 0;
+  color: rgba(240, 213, 139, 0.88);
+  white-space: pre-line;
+  text-transform: uppercase;
+}
+
+.nodal-login-footer {
+  display: grid;
+  gap: 6px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(129, 149, 153, 0.18);
+  color: rgba(159, 176, 178, 0.62);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.nodal-desktop {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(34, 58, 69, 0.22), transparent 44%),
+    radial-gradient(circle at 86% 18%, rgba(102, 18, 28, 0.18), transparent 35%),
+    linear-gradient(180deg, #060a0e, #020304 74%);
+}
+
+.nodal-desktop-field {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(142, 161, 166, 0.035) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(142, 161, 166, 0.03) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black, transparent 82%);
+}
+
+.nodal-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  gap: 10px;
+  width: min(760px, 74vw);
+  transform: translate(-50%, -50%);
+  color: rgba(179, 195, 198, 0.055);
+  text-align: center;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.nodal-watermark strong {
+  font-size: clamp(4rem, 16vw, 10rem);
+  line-height: 0.8;
+}
+
+.nodal-watermark span {
+  font-size: clamp(0.8rem, 2vw, 1.2rem);
+  color: rgba(222, 227, 220, 0.07);
+}
+
+.nodal-session-exit {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 14;
+  padding: 8px 12px;
+  border: 1px solid rgba(140, 158, 162, 0.24);
+  border-radius: 4px;
+  color: rgba(224, 232, 230, 0.72);
+  background: rgba(3, 6, 9, 0.58);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.nodal-session-exit:hover {
+  color: #f4efe5;
+  border-color: rgba(240, 213, 139, 0.38);
+  background: rgba(86, 16, 26, 0.42);
+}
+
+.nodal-icons {
+  position: absolute;
+  top: 28px;
+  left: 24px;
+  z-index: 12;
+  display: grid;
+  grid-template-columns: repeat(2, 112px);
+  gap: 14px 12px;
+  max-width: 248px;
+}
+
+.nodal-icon {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  min-height: 88px;
+  padding: 9px 7px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: rgba(224, 232, 230, 0.82);
+  background: rgba(5, 9, 12, 0.28);
+  text-align: center;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.nodal-icon:hover,
+.nodal-icon:focus-visible {
+  border-color: rgba(240, 213, 139, 0.32);
+  background: rgba(22, 35, 42, 0.62);
+  outline: none;
+}
+
+.nodal-icon-symbol {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 34px;
+  border: 1px solid rgba(140, 158, 162, 0.3);
+  border-radius: 4px;
+  color: rgba(240, 213, 139, 0.82);
+  background:
+    linear-gradient(145deg, rgba(34, 55, 65, 0.66), rgba(7, 10, 13, 0.92));
+  font-size: 1.16rem;
+}
+
+.nodal-desktop-console {
+  position: absolute;
+  right: 24px;
+  bottom: 58px;
+  z-index: 13;
+  width: min(420px, calc(100vw - 48px));
+  border: 1px solid rgba(129, 149, 153, 0.2);
+  border-radius: 4px;
+  background: rgba(3, 7, 10, 0.76);
+  box-shadow: 0 18px 70px rgba(0, 0, 0, 0.48);
+  backdrop-filter: blur(10px);
+}
+
+.nodal-desktop-console-log {
+  max-height: 126px;
+  overflow: auto;
+  padding: 12px 14px 6px;
+  color: rgba(205, 221, 219, 0.78);
+  font-size: 0.72rem;
+}
+
+.nodal-desktop-console-log p {
+  margin: 0 0 6px;
+}
+
+.nodal-desktop-console-log span {
+  color: rgba(240, 213, 139, 0.78);
+}
+
+.nodal-desktop-console-form {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 12px;
+  border-top: 1px solid rgba(129, 149, 153, 0.14);
+}
+
+.nodal-desktop-console-form span {
+  color: rgba(240, 213, 139, 0.72);
+}
+
+.nodal-desktop-console-form input {
+  height: 34px;
+  padding: 6px 8px;
+  border-color: rgba(129, 149, 153, 0.18);
+  color: #e6ecea;
+  background: rgba(0, 0, 0, 0.42);
+  font-size: 0.78rem;
+}
+
+.nodal-windows {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.nodal-window {
+  position: absolute;
+  width: min(560px, calc(100vw - 38px));
+  max-height: min(620px, calc(100vh - 92px));
+  overflow: hidden;
+  border: 1px solid rgba(137, 157, 160, 0.38);
+  border-radius: 4px;
+  color: rgba(226, 235, 233, 0.9);
+  background:
+    linear-gradient(135deg, rgba(101, 17, 28, 0.16), transparent 36%),
+    linear-gradient(180deg, rgba(17, 25, 30, 0.97), rgba(5, 8, 11, 0.97));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    0 28px 100px rgba(0, 0, 0, 0.62);
+  pointer-events: auto;
+}
+
+.nodal-window.small {
+  width: min(380px, calc(100vw - 38px));
+}
+
+.nodal-window-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(137, 157, 160, 0.22);
+  color: rgba(244, 239, 229, 0.96);
+  background: linear-gradient(90deg, rgba(19, 33, 40, 0.96), rgba(43, 15, 21, 0.92));
+  text-transform: uppercase;
+  cursor: grab;
+  user-select: none;
+}
+
+.nodal-window-header:active {
+  cursor: grabbing;
+}
+
+.nodal-window-header strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nodal-window-close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 26px;
+  border: 1px solid rgba(240, 213, 139, 0.24);
+  border-radius: 4px;
+  color: rgba(244, 239, 229, 0.78);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.nodal-window-close:hover {
+  border-color: rgba(240, 213, 139, 0.5);
+  background: rgba(107, 18, 29, 0.42);
+}
+
+.nodal-window-body {
+  max-height: calc(min(620px, calc(100vh - 92px)) - 48px);
+  overflow: auto;
+  padding: 18px;
+}
+
+.nodal-window-body p {
+  margin: 0 0 10px;
+  color: rgba(207, 222, 220, 0.84);
+}
+
+.nodal-window-body strong {
+  color: rgba(240, 213, 139, 0.88);
+}
+
+.nodal-data-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.nodal-data-list div {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(137, 157, 160, 0.12);
+}
+
+.nodal-data-list dt {
+  color: rgba(240, 213, 139, 0.78);
+  text-transform: uppercase;
+}
+
+.nodal-data-list dd {
+  margin: 0;
+}
+
+.nodal-lines {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nodal-lines li {
+  padding: 9px 10px;
+  border: 1px solid rgba(137, 157, 160, 0.14);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.nodal-operation {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid rgba(137, 157, 160, 0.14);
+  border-radius: 4px;
+  color: rgba(226, 235, 233, 0.9);
+  background: rgba(0, 0, 0, 0.22);
+  text-align: left;
+}
+
+.nodal-operation:hover {
+  border-color: rgba(240, 213, 139, 0.34);
+  background: rgba(28, 38, 44, 0.55);
+}
+
+.nodal-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.nodal-photo-card {
+  min-height: 158px;
+  border: 1px solid rgba(137, 157, 160, 0.18);
+  border-radius: 4px;
+  background:
+    linear-gradient(135deg, rgba(98, 18, 28, 0.1), transparent 48%),
+    rgba(0, 0, 0, 0.28);
+}
+
+.nodal-photo-card img {
+  display: block;
+  width: 100%;
+  height: 116px;
+  object-fit: cover;
+  border-bottom: 1px solid rgba(137, 157, 160, 0.16);
+}
+
+.nodal-photo-card.missing img {
+  display: none;
+}
+
+.nodal-photo-fallback {
+  display: none;
+  min-height: 116px;
+  place-items: center;
+  color: rgba(240, 213, 139, 0.72);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.nodal-photo-card.missing .nodal-photo-fallback {
+  display: grid;
+}
+
+.nodal-photo-card figcaption {
+  padding: 9px 10px;
+  color: rgba(159, 176, 178, 0.72);
+  font-size: 0.66rem;
+}
+
+.nodal-audio-file,
+.nodal-trash-file {
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid rgba(137, 157, 160, 0.14);
+  border-radius: 4px;
+  color: rgba(226, 235, 233, 0.88);
+  background: rgba(0, 0, 0, 0.24);
+  text-align: left;
+}
+
+.nodal-audio-file:hover,
+.nodal-trash-file:hover {
+  border-color: rgba(240, 213, 139, 0.34);
+  background: rgba(31, 39, 44, 0.54);
+}
+
+.nodal-trash-secret {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid rgba(240, 213, 139, 0.22);
+  border-radius: 4px;
+  background: rgba(73, 18, 25, 0.22);
+}
+
+.nodal-notification {
+  position: absolute;
+  right: 24px;
+  bottom: 228px;
+  z-index: 50;
+  max-width: min(360px, calc(100vw - 48px));
+  padding: 12px 14px;
+  border: 1px solid rgba(240, 213, 139, 0.36);
+  border-radius: 4px;
+  color: rgba(244, 239, 229, 0.92);
+  background: rgba(6, 10, 13, 0.86);
+  box-shadow: 0 18px 70px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  animation: nodalNotify 4.6s ease both;
+}
+
+.nodal-taskbar {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 42px;
+  padding: 6px 12px;
+  border-top: 1px solid rgba(137, 157, 160, 0.22);
+  background: rgba(2, 5, 8, 0.92);
+  box-shadow: 0 -12px 60px rgba(0, 0, 0, 0.45);
+}
+
+.nodal-taskbar button {
+  min-height: 30px;
+  padding: 0 14px;
+  border: 1px solid rgba(240, 213, 139, 0.26);
+  border-radius: 4px;
+  color: rgba(244, 239, 229, 0.86);
+  background: linear-gradient(90deg, rgba(81, 19, 28, 0.52), rgba(24, 42, 49, 0.56));
+  text-transform: uppercase;
+}
+
+.nodal-taskbar span,
+.nodal-taskbar time {
+  color: rgba(159, 176, 178, 0.68);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.nodal-taskbar time {
+  color: rgba(240, 213, 139, 0.82);
+}
+
+@keyframes nodalDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-97px, -131px, 0);
+  }
+}
+
+@keyframes nodalBootGlitch {
+  0%,
+  8% {
+    filter: contrast(1.2) brightness(1.1);
+    transform: translate(0, 0);
+  }
+
+  11% {
+    filter: contrast(1.9) brightness(1.3) hue-rotate(-8deg);
+    transform: translate(-8px, 2px);
+  }
+
+  14% {
+    transform: translate(6px, -2px);
+  }
+
+  27% {
+    filter: contrast(1.2) brightness(0.9);
+    transform: translate(0, 0);
+  }
+
+  62% {
+    filter: contrast(1.55) brightness(1.15);
+  }
+
+  100% {
+    filter: contrast(1) brightness(1);
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes nodalSignalFlash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.42;
+  }
+}
+
+@keyframes nodalPanelFault {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  33% {
+    transform: translate(7px, -1px);
+  }
+
+  66% {
+    transform: translate(-5px, 2px);
+  }
+}
+
+@keyframes nodalNotify {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  12%,
+  86% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (max-width: 860px) {
+  .nodal-icons {
+    top: 76px;
+    grid-template-columns: repeat(2, 100px);
+    gap: 10px;
+  }
+
+  .nodal-icon {
+    min-height: 78px;
+    font-size: 0.62rem;
+  }
+
+  .nodal-desktop-console {
+    right: 14px;
+    bottom: 54px;
+    left: 14px;
+    width: auto;
+  }
+
+  .nodal-photo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nodal-data-list div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 560px) {
+  .nodal-icons {
+    left: 12px;
+    max-width: calc(100vw - 24px);
+  }
+
+  .nodal-session-exit {
+    right: 12px;
+  }
+
+  .nodal-window {
+    left: 12px !important;
+    width: calc(100vw - 24px);
+  }
+
+  .nodal-taskbar {
+    grid-template-columns: auto 1fr auto;
+  }
+}
+
+/* NODAL OS v2 : VM sombre avec ergonomie inspirée Windows 10/11. */
+.nodal-login {
+  place-items: center;
+  background:
+    radial-gradient(circle at 28% 42%, rgba(92, 170, 255, 0.4), transparent 28%),
+    radial-gradient(circle at 78% 28%, rgba(48, 119, 255, 0.42), transparent 30%),
+    linear-gradient(135deg, #071b86 0%, #1255d7 44%, #0a2b9e 100%);
+  animation: nodalLoginWake 420ms ease both;
+}
+
+.nodal-login::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.34;
+  background:
+    linear-gradient(115deg, transparent 0 34%, rgba(255, 255, 255, 0.12) 48%, transparent 62%),
+    radial-gradient(circle at 58% 50%, rgba(255, 255, 255, 0.18), transparent 34%);
+  filter: blur(12px);
+}
+
+.nodal-login-panel {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  width: min(430px, calc(100vw - 32px));
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+  animation: nodalLoginPanelIn 560ms ease 40ms both;
+}
+
+.nodal-login-system {
+  margin: 0 0 22px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.32);
+}
+
+.nodal-login-avatar {
+  display: grid;
+  place-items: center;
+  width: 154px;
+  height: 154px;
+  border-radius: 50%;
+  background: rgba(224, 232, 249, 0.78);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 18px 70px rgba(0, 0, 0, 0.2);
+}
+
+.nodal-login-avatar span {
+  position: relative;
+  width: 78px;
+  height: 92px;
+}
+
+.nodal-login-avatar span::before,
+.nodal-login-avatar span::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid rgba(53, 55, 62, 0.82);
+}
+
+.nodal-login-avatar span::before {
+  top: 2px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+}
+
+.nodal-login-avatar span::after {
+  bottom: 4px;
+  width: 70px;
+  height: 42px;
+  border-bottom: 0;
+  border-radius: 48px 48px 0 0;
+}
+
+.nodal-login-panel h2 {
+  margin: 16px 0 18px;
+  color: #fff;
+  font-family: "Segoe UI", "Courier New", monospace;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.1;
+  text-transform: none;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.42);
+}
+
+.nodal-login-route {
+  margin: 0 0 12px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.7rem;
+}
+
+.nodal-login-form {
+  width: min(300px, 82vw);
+  gap: 9px;
+}
+
+.nodal-password-row {
+  display: grid;
+  grid-template-columns: 1fr 38px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(28, 38, 68, 0.82);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+}
+
+.nodal-password-row input {
+  height: 26px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+  background: transparent;
+  font-family: "Segoe UI", "Courier New", monospace;
+  font-size: 0.8rem;
+}
+
+.nodal-password-row input::placeholder {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.nodal-password-row button {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(20, 34, 77, 0.92);
+  font-size: 1rem;
+}
+
+.nodal-password-row button:hover {
+  background: rgba(40, 92, 180, 0.95);
+}
+
+.nodal-login-feedback {
+  min-height: 54px;
+  margin: 8px 0 0;
+  color: rgba(255, 225, 225, 0.95);
+  font-family: "Segoe UI", "Courier New", monospace;
+  font-size: 0.74rem;
+  text-align: center;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+}
+
+.nodal-login-footer {
+  position: absolute;
+  right: 22px;
+  bottom: 18px;
+  left: 22px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.68rem;
+}
+
+.nodal-desktop {
+  font-family: "Segoe UI", "Courier New", monospace;
+  background:
+    radial-gradient(circle at 82% 42%, rgba(83, 197, 255, 0.7), transparent 19%),
+    radial-gradient(circle at 70% 45%, rgba(18, 125, 220, 0.56), transparent 28%),
+    linear-gradient(180deg, #092849, #021326 72%);
+  animation: nodalDesktopFade 920ms ease both;
+}
+
+.nodal-desktop-field {
+  opacity: 1;
+  background:
+    linear-gradient(90deg, rgba(37, 147, 238, 0.12), transparent 40%),
+    radial-gradient(circle at 73% 45%, rgba(120, 219, 255, 0.52), transparent 10%),
+    radial-gradient(circle at 73% 45%, rgba(53, 147, 230, 0.42), transparent 28%),
+    linear-gradient(180deg, rgba(7, 34, 67, 0.22), rgba(0, 6, 17, 0.46));
+  mask-image: none;
+}
+
+.nodal-desktop-field::before,
+.nodal-desktop-field::after {
+  content: "";
+  position: absolute;
+  top: 29%;
+  left: 63%;
+  width: 220px;
+  height: 168px;
+  border: 3px solid rgba(112, 222, 255, 0.94);
+  box-shadow:
+    0 0 18px rgba(68, 196, 255, 0.9),
+    0 0 58px rgba(12, 141, 240, 0.76),
+    -520px 14px 120px rgba(28, 115, 198, 0.28);
+  transform: perspective(520px) rotateY(-16deg) skewY(-1deg);
+}
+
+.nodal-desktop-field::after {
+  top: calc(29% + 81px);
+  height: 0;
+  border-top: 3px solid rgba(112, 222, 255, 0.82);
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+}
+
+.nodal-watermark {
+  top: 82%;
+  color: rgba(255, 255, 255, 0.04);
+}
+
+.nodal-watermark strong {
+  font-size: 5rem;
+}
+
+.nodal-icons {
+  top: 18px;
+  left: 10px;
+  grid-template-columns: 86px;
+  gap: 12px;
+  max-width: 86px;
+}
+
+.nodal-icon {
+  min-height: 76px;
+  padding: 7px 5px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: #fff;
+  background: transparent;
+  font-size: 0.68rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.86);
+  text-transform: none;
+}
+
+.nodal-icon:hover,
+.nodal-icon:focus-visible {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(98, 174, 255, 0.24);
+}
+
+.nodal-icon-symbol {
+  position: relative;
+  width: 34px;
+  height: 32px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.nodal-explorer-symbol::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  width: 30px;
+  height: 20px;
+  border: 1px solid rgba(127, 91, 14, 0.5);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #ffd66f, #e9a928);
+  box-shadow: inset 0 7px 0 rgba(255, 236, 142, 0.62);
+}
+
+.nodal-explorer-symbol::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 14px;
+  height: 7px;
+  border-radius: 2px 2px 0 0;
+  background: #f4c24b;
+}
+
+.nodal-trash-symbol::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  width: 18px;
+  height: 22px;
+  border: 1px solid rgba(25, 52, 80, 0.46);
+  border-radius: 2px 2px 4px 4px;
+  background:
+    linear-gradient(90deg, transparent 0 31%, rgba(0, 0, 0, 0.12) 32% 35%, transparent 36% 64%, rgba(0, 0, 0, 0.12) 65% 68%, transparent 69%),
+    linear-gradient(180deg, #e8f2ff, #a8c2dc);
+}
+
+.nodal-trash-symbol::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 5px;
+  width: 22px;
+  height: 4px;
+  border-radius: 2px;
+  background: #f4f8ff;
+  box-shadow: 0 -2px 0 #7ea0bf;
+}
+
+.nodal-start-menu {
+  position: absolute;
+  bottom: 46px;
+  left: 0;
+  z-index: 260;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  width: 352px;
+  min-height: 410px;
+  padding: 14px 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(42, 48, 58, 0.99), rgba(22, 27, 34, 0.99)),
+    #202730;
+  box-shadow: 0 -18px 70px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(18px);
+  animation: nodalStartIn 160ms ease both;
+}
+
+.nodal-start-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 14px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  color: #fff;
+}
+
+.nodal-start-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(218, 226, 241, 0.88);
+}
+
+.nodal-start-user strong,
+.nodal-start-user small {
+  display: block;
+}
+
+.nodal-start-user small {
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 0.66rem;
+}
+
+.nodal-start-menu button {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 0;
+  color: rgba(255, 255, 255, 0.9);
+  background: transparent;
+  text-align: left;
+}
+
+.nodal-start-menu button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.nodal-start-menu .nodal-power {
+  margin-top: 174px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.nodal-power-glyph {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  border-top-color: transparent;
+  border-radius: 50%;
+}
+
+.nodal-power-glyph::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  width: 2px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.nodal-taskbar {
+  grid-template-columns: 48px minmax(210px, 340px) 48px 48px 1fr auto;
+  gap: 0;
+  min-height: 46px;
+  padding: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(5, 7, 11, 0.94);
+  box-shadow: none;
+}
+
+.nodal-taskbar button {
+  min-height: 46px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+  background: transparent;
+}
+
+.nodal-taskbar button:hover,
+.nodal-taskbar button:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+
+.nodal-start-logo {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: auto;
+}
+
+.nodal-start-logo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #fff 0 44%, transparent 45% 55%, #fff 56%),
+    linear-gradient(180deg, #fff 0 44%, transparent 45% 55%, #fff 56%);
+}
+
+.nodal-taskbar-search {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.nodal-taskbar-search input {
+  height: 46px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 0;
+  color: rgba(255, 255, 255, 0.88);
+  background: transparent;
+  font-family: "Segoe UI", "Courier New", monospace;
+  font-size: 0.78rem;
+}
+
+.nodal-taskbar-search input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.nodal-task-app {
+  display: grid;
+  place-items: center;
+}
+
+.nodal-task-app .nodal-icon-symbol {
+  transform: scale(0.86);
+}
+
+.nodal-task-spacer {
+  min-width: 1px;
+}
+
+.nodal-tray {
+  display: grid;
+  align-content: center;
+  justify-items: end;
+  min-width: 138px;
+  height: 46px;
+  padding: 0 12px;
+  color: #fff;
+  font-size: 0.66rem;
+  line-height: 1.3;
+}
+
+.nodal-tray span {
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.62rem;
+}
+
+.nodal-tray time {
+  color: #fff;
+  font-size: 0.72rem;
+}
+
+.nodal-window {
+  animation: nodalWindowIn 170ms ease both;
+}
+
+.nodal-window.explorer-window {
+  width: min(1010px, calc(100vw - 72px));
+  max-height: min(690px, calc(100vh - 72px));
+  border: 1px solid rgba(0, 0, 0, 0.38);
+  color: #1d1f22;
+  background: #fff;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.34);
+}
+
+.nodal-window.explorer-window .nodal-window-header {
+  min-height: 31px;
+  padding: 0 8px 0 10px;
+  border-bottom: 1px solid #d2d2d2;
+  color: #161a1e;
+  background: #f7f7f7;
+  font-family: "Segoe UI", "Courier New", monospace;
+  text-transform: none;
+}
+
+.nodal-window.explorer-window .nodal-window-header strong {
+  font-size: 0.76rem;
+  font-weight: 400;
+}
+
+.nodal-window.explorer-window .nodal-window-close {
+  width: 38px;
+  height: 31px;
+  border: 0;
+  border-radius: 0;
+  color: #1d1f22;
+  background: transparent;
+}
+
+.nodal-window.explorer-window .nodal-window-close:hover {
+  color: #fff;
+  background: #c42b1c;
+}
+
+.nodal-window.explorer-window .nodal-window-body {
+  max-height: calc(min(690px, calc(100vh - 72px)) - 31px);
+  padding: 0;
+  background: #fff;
+}
+
+.nodal-explorer-ui {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  min-height: 560px;
+  font-family: "Segoe UI", "Courier New", monospace;
+  font-size: 0.78rem;
+  background: #fff;
+}
+
+.nodal-explorer-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  min-height: 76px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #d8d8d8;
+  background: #f5f6f8;
+}
+
+.nodal-explorer-ribbon button {
+  min-height: 52px;
+  min-width: 74px;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  color: #1d1f22;
+  background: transparent;
+  font-size: 0.7rem;
+}
+
+.nodal-explorer-ribbon button:hover {
+  border-color: #c8d7eb;
+  background: #eaf3ff;
+}
+
+.nodal-explorer-address {
+  display: grid;
+  grid-template-columns: auto auto auto auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 5px 8px;
+  border-bottom: 1px solid #e3e3e3;
+  color: #24272b;
+  background: #fff;
+}
+
+.nodal-explorer-address input {
+  justify-self: end;
+  width: min(230px, 100%);
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid #d0d0d0;
+  border-radius: 0;
+  color: #60646a;
+  background: #fff;
+  font-size: 0.72rem;
+}
+
+.nodal-explorer-main {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  min-height: 410px;
+}
+
+.nodal-explorer-sidebar {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding: 12px 0;
+  border-right: 1px solid #eee;
+  background: #fbfbfb;
+}
+
+.nodal-explorer-sidebar span,
+.nodal-explorer-sidebar strong {
+  padding: 5px 18px;
+  color: #2e3339;
+  font-weight: 400;
+}
+
+.nodal-explorer-sidebar strong {
+  background: #d9d9d9;
+}
+
+.nodal-explorer-content {
+  overflow: auto;
+  padding: 18px 22px 24px;
+}
+
+.nodal-explorer-content h3 {
+  margin: 0 0 12px;
+  color: #2e3339;
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.nodal-folder-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+  gap: 16px 22px;
+  margin-bottom: 28px;
+}
+
+.nodal-folder-tile {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 6px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  color: #1d1f22;
+  background: transparent;
+  text-align: left;
+}
+
+.nodal-folder-tile:hover {
+  border-color: #bdd7f4;
+  background: #eaf4ff;
+}
+
+.nodal-folder-tile strong,
+.nodal-folder-tile small {
+  display: block;
+}
+
+.nodal-folder-tile small {
+  margin-top: 3px;
+  color: #68717a;
+  font-size: 0.66rem;
+}
+
+.nodal-folder-icon {
+  position: relative;
+  width: 40px;
+  height: 32px;
+}
+
+.nodal-folder-icon::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 15px;
+  height: 7px;
+  border-radius: 2px 2px 0 0;
+  background: #efc44e;
+}
+
+.nodal-folder-icon::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 10px;
+  width: 34px;
+  height: 22px;
+  border: 1px solid rgba(156, 108, 20, 0.36);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #ffdf78, #f2b63e);
+}
+
+.nodal-drive-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 14px 20px;
+}
+
+.nodal-drive-tile {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 4px 10px;
+  align-items: center;
+  padding: 7px;
+  border: 1px solid transparent;
+}
+
+.nodal-drive-tile:hover {
+  border-color: #bdd7f4;
+  background: #f2f8ff;
+}
+
+.nodal-drive-icon {
+  grid-row: span 3;
+  width: 36px;
+  height: 22px;
+  border: 1px solid #9da8b3;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #f8f8f8, #bfc5cc);
+}
+
+.nodal-drive-tile strong {
+  color: #24272b;
+  font-size: 0.74rem;
+  font-weight: 400;
+}
+
+.nodal-drive-tile i {
+  display: block;
+  width: 100%;
+  height: 10px;
+  border: 1px solid #c8c8c8;
+  background: #e9e9e9;
+}
+
+.nodal-drive-tile i b {
+  display: block;
+  height: 100%;
+  background: #26a0da;
+}
+
+.nodal-drive-tile.warning i b {
+  background: #d04b44;
+}
+
+.nodal-drive-tile small {
+  color: #68717a;
+  font-size: 0.66rem;
+}
+
+.nodal-explorer-status {
+  min-height: 24px;
+  padding: 4px 10px;
+  border-top: 1px solid #e5e5e5;
+  color: #60646a;
+  background: #f8f8f8;
+  font-size: 0.7rem;
+}
+
+.nodal-recycle-note {
+  color: #2e3339;
+}
+
+.nodal-trash-file {
+  max-width: 360px;
+  border: 1px solid transparent;
+  color: #1d1f22;
+  background: transparent;
+}
+
+.nodal-trash-file:hover {
+  border-color: #bdd7f4;
+  background: #eaf4ff;
+}
+
+.nodal-trash-secret {
+  max-width: 520px;
+  border-color: #d5d5d5;
+  color: #1d1f22;
+  background: #fff7df;
+}
+
+@keyframes nodalLoginWake {
+  from {
+    filter: brightness(0.82) blur(3px);
+  }
+
+  to {
+    filter: brightness(1) blur(0);
+  }
+}
+
+@keyframes nodalLoginPanelIn {
+  from {
+    opacity: 0.42;
+    transform: translateY(24px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes nodalDesktopFade {
+  from {
+    opacity: 0;
+    filter: brightness(0.38) blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    filter: brightness(1) blur(0);
+  }
+}
+
+@keyframes nodalStartIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nodalWindowIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (max-width: 820px) {
+  .nodal-login-footer {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+  }
+
+  .nodal-taskbar {
+    grid-template-columns: 46px minmax(120px, 1fr) 44px 44px auto;
+  }
+
+  .nodal-task-spacer {
+    display: none;
+  }
+
+  .nodal-tray span {
+    display: none;
+  }
+
+  .nodal-tray {
+    min-width: 62px;
+  }
+
+  .nodal-window.explorer-window {
+    left: 10px !important;
+    width: calc(100vw - 20px);
+  }
+
+  .nodal-explorer-main {
+    grid-template-columns: 1fr;
+  }
+
+  .nodal-explorer-sidebar {
+    display: none;
+  }
+
+  .nodal-folder-grid,
+  .nodal-drive-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .nodal-start-menu {
+    width: min(352px, 100vw);
+  }
+
+  .nodal-taskbar-search input {
+    font-size: 0.7rem;
+  }
+
+  .nodal-icons {
+    top: 12px;
+    left: 8px;
+  }
+
+  .nodal-login-avatar {
+    width: 128px;
+    height: 128px;
+  }
+}
