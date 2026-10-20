@@ -1,7 +1,8 @@
 Dépose ici les vidéos publiables du site.
 
-Exemple :
+Vidéo utilisée par MAMAN :
 
-- cam06-couloir.mp4
+- cam06-couloir.webm : VP8, 1280 x 720, sans audio, compatible CEF/FiveM.
+- Le MP4 original reste dans assets/images/archive/camchambre1.mp4 comme solution de repli pour les navigateurs compatibles.
 
 Les références doivent être ajoutées dans `js/main.js`.

@@ -301,7 +301,8 @@ const GAME_MEDIA = {
   cam03: "./assets/images/archive/cam3.png",
   cam04: "./assets/images/archive/cam4.png",
   cam05: "./assets/images/archive/cam5.png",
-  cam06: "./assets/images/archive/camchambre1.mp4",
+  cam06: "./assets/videos/archive/cam06-couloir.webm",
+  cam06Mp4: "./assets/images/archive/camchambre1.mp4",
   cam06Image: "./assets/images/archive/cam6.png",
 };
 
@@ -389,44 +390,122 @@ const GAME_MEDIA_FALLBACKS = {
   cam06Image: fallbackImageDataUri("CAM 06", "ARCHIVE CORROMPUE"),
 };
 
+// Keep the archive's bytes for this page session. FiveM must not have to make
+// another protected HTTP request each time a camera or the video is opened.
+const archiveMediaCache = new Map();
+const archiveMediaRequests = new Map();
+const archiveImageKeys = ["cover", "cam01", "cam02", "cam03", "cam04", "cam05", "cam06Image"];
+
+function archiveVideoKeys() {
+  const video = document.createElement("video");
+  return [
+    ["cam06", 'video/webm; codecs="vp8"'],
+    ["cam06Mp4", 'video/mp4; codecs="avc1.4D402A"'],
+  ].filter(([, type]) => video.canPlayType(type)).map(([key]) => key);
+}
+
+function getArchiveMediaUrl(key) {
+  if (archiveMediaCache.has(key)) return Promise.resolve(archiveMediaCache.get(key));
+  if (archiveMediaRequests.has(key)) return archiveMediaRequests.get(key);
+
+  const source = GAME_MEDIA[key];
+  if (!source) return Promise.reject(new Error("Source d’archive inconnue."));
+  const expectedType = archiveImageKeys.includes(key) ? "image/" : "video/";
+  const request = (async () => {
+    // Try the plain URL first, as the working DEX/subject-image fallbacks do.
+    for (const [index, candidate] of [source, mediaUrl(source, key)].entries()) {
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 15000);
+      try {
+        const response = await fetch(candidate, {
+          credentials: "same-origin",
+          cache: index === 0 ? "force-cache" : "reload",
+          signal: controller.signal,
+        });
+        const type = response.headers.get("content-type") || "";
+        // A Vercel checkpoint is HTML, never an image or a video.
+        if (!response.ok || !type.startsWith(expectedType)) continue;
+        const blob = await response.blob();
+        if (!blob.size) continue;
+        const url = URL.createObjectURL(blob);
+        archiveMediaCache.set(key, url);
+        return url;
+      } catch {
+        // The second URL is a bounded retry, not a repeated camera reload.
+      } finally {
+        window.clearTimeout(timeout);
+      }
+    }
+    throw new Error("Média d’archive indisponible ou bloqué par l’hébergement.");
+  })().finally(() => archiveMediaRequests.delete(key));
+  archiveMediaRequests.set(key, request);
+  return request;
+}
+
+function preloadArchiveMedia() {
+  const video = (async () => {
+    const keys = archiveVideoKeys();
+    const cached = keys.find((key) => archiveMediaCache.has(key));
+    if (cached) return archiveMediaCache.get(cached);
+    for (const key of keys) {
+      try { return await getArchiveMediaUrl(key); } catch { /* Try the next supported format. */ }
+    }
+  })();
+  return Promise.allSettled([...archiveImageKeys.map(getArchiveMediaUrl), video]);
+}
+
+function setArchiveCameraSignal(media, text) {
+  if (cameraFrame.contains(media)) cameraSignal.textContent = text;
+}
+
+function loadArchiveImage(media, key) {
+  const showFallback = () => {
+    if (media.dataset.archiveState === "fallback") return;
+    media.dataset.archiveState = "fallback";
+    media.src = GAME_MEDIA_FALLBACKS[key] || GAME_MEDIA_FALLBACKS.cover;
+    setArchiveCameraSignal(media, "SOURCE INDISPONIBLE");
+  };
+  if (media.dataset.fallbackWired !== "true") {
+    media.dataset.fallbackWired = "true";
+    media.addEventListener("error", showFallback);
+    media.addEventListener("load", () => {
+      if (media.dataset.archiveState === "fallback") return;
+      media.dataset.archiveState = "ready";
+      setArchiveCameraSignal(media, cameraData[key]?.signal || "SIGNAL OK");
+    });
+  }
+  media.dataset.archiveState = "loading";
+  setArchiveCameraSignal(media, "CHARGEMENT…");
+  getArchiveMediaUrl(key).then((url) => {
+    if (media.isConnected) media.src = url;
+  }).catch(showFallback);
+}
+
 function wireArchiveMediaFallbacks(container = document) {
   container.querySelectorAll("[data-archive-media]").forEach((media) => {
     const key = media.dataset.archiveMedia;
-    if (!key) {
-      return;
-    }
-
-    const source = media.dataset.archiveSrc || GAME_MEDIA[key];
-    if (source && media.getAttribute("src") !== mediaUrl(source, key)) {
-      media.src = mediaUrl(source, key);
-    }
-
-    if (media.dataset.fallbackWired !== "true") {
-      media.dataset.fallbackWired = "true";
-      media.addEventListener("error", () => {
-        if (media.tagName === "IMG") {
-          media.src = GAME_MEDIA_FALLBACKS[key] || GAME_MEDIA_FALLBACKS.cover;
-        }
-      });
-    }
+    if (key) loadArchiveImage(media, key);
   });
 
   container.querySelectorAll("[data-archive-video]").forEach((media) => {
-    const key = media.dataset.archiveVideo;
-    const source = media.dataset.archiveSrc || GAME_MEDIA[key];
-    if (source && media.getAttribute("src") !== mediaUrl(source, key)) {
-      media.src = mediaUrl(source, key);
-    }
-
-    if (media.dataset.fallbackWired !== "true") {
-      media.dataset.fallbackWired = "true";
-      media.addEventListener("loadeddata", () => {
-        media.classList.remove("hidden");
-      });
-      media.addEventListener("error", () => {
-        media.classList.add("hidden");
-      });
-    }
+    if (media.dataset.fallbackWired === "true") return;
+    media.dataset.fallbackWired = "true";
+    const keys = archiveVideoKeys().sort((a, b) => Number(archiveMediaCache.has(b)) - Number(archiveMediaCache.has(a)));
+    let attempt = 0;
+    const loadNextSource = () => {
+      media.classList.add("hidden");
+      const key = keys[attempt++];
+      if (!key || !media.isConnected) return; // The camera image stays visible.
+      getArchiveMediaUrl(key).then((url) => {
+        if (!media.isConnected) return;
+        media.src = url;
+        media.load();
+        media.play().catch(() => {});
+      }).catch(loadNextSource);
+    };
+    media.addEventListener("loadeddata", () => media.classList.remove("hidden"));
+    media.addEventListener("error", loadNextSource);
+    loadNextSource();
   });
 }
 
@@ -468,10 +547,7 @@ vitoProfileImage?.addEventListener("error", () => {
   vitoProfileImage.src = fallbackImageDataUri("V-10", "PORTRAIT INDISPONIBLE");
 });
 
-archiveCoverImage.src = mediaUrl(GAME_MEDIA.cover, "cover");
-archiveCoverImage.addEventListener("error", () => {
-  archiveCoverImage.src = GAME_MEDIA_FALLBACKS.cover;
-});
+loadArchiveImage(archiveCoverImage, "cover");
 
 function syncAmbientAudioControl() {
   if (!ambientAudio || !ambientVolume || !ambientVolumeLabel) {
@@ -1022,7 +1098,7 @@ const cameraData = {
 function mediaScene(cameraId, notes) {
   return `
     <div class="camera-scene media-scene">
-      <img class="camera-media" src="${mediaUrl(GAME_MEDIA[cameraId], cameraId)}" data-archive-media="${cameraId}" data-archive-src="${GAME_MEDIA[cameraId]}" alt="" />
+      <img class="camera-media" data-archive-media="${cameraId}" alt="" />
       <div class="camera-media-vignette"></div>
       <div class="cctv-glitch-layer" aria-hidden="true"></div>
       ${notes}
@@ -1076,6 +1152,7 @@ window.addEventListener("load", () => {
   entryGate.classList.remove("hidden");
   entryKeys[0]?.focus();
   restoreState();
+  preloadArchiveMedia();
 });
 
 navButtons.forEach((button) => {
@@ -2519,7 +2596,8 @@ function startMamanArchive() {
 
 function resetArchive() {
   clearArchiveTimers();
-  archiveCoverImage.src = mediaUrl(GAME_MEDIA.cover, "cover");
+  loadArchiveImage(archiveCoverImage, "cover");
+  preloadArchiveMedia();
   archiveState.activeCamera = "cam01";
   archiveState.unlocked = new Set(["cam01", "cam02"]);
   archiveState.viewed = new Set();
@@ -2581,9 +2659,9 @@ function selectCamera(cameraId, instant = false) {
 function renderCamera(cameraId) {
   const camera = cameraData[cameraId];
   cameraFrame.innerHTML = cameraScenes[cameraId]();
-  wireArchiveMediaFallbacks(cameraFrame);
   cameraLabel.textContent = camera.label;
   cameraSignal.textContent = camera.signal;
+  wireArchiveMediaFallbacks(cameraFrame);
   if (camera.log) {
     addArchiveLog("cam", camera.log);
   }
@@ -2686,14 +2764,15 @@ function showDamagedStep(step) {
     `,
     corridor: `
       <div class="damaged-screen damaged-corridor damaged-media-screen">
-        <video class="archive-sequence-media" src="${mediaUrl(GAME_MEDIA.cam06, "cam06")}" data-archive-video="cam06" data-archive-src="${GAME_MEDIA.cam06}" autoplay muted playsinline></video>
+        <img class="archive-sequence-media" data-archive-media="cam06Image" alt="" />
+        <video class="archive-sequence-media hidden" data-archive-video="cam06" preload="auto" autoplay muted playsinline></video>
         <div class="camera-media-vignette"></div>
         <div class="cctv-glitch-layer" aria-hidden="true"></div>
       </div>
     `,
     bedroom: `
       <div class="damaged-screen damaged-bedroom damaged-media-screen">
-        <img class="archive-sequence-media" src="${mediaUrl(GAME_MEDIA.cam06Image, "cam06Image")}" data-archive-media="cam06Image" data-archive-src="${GAME_MEDIA.cam06Image}" alt="" />
+        <img class="archive-sequence-media" data-archive-media="cam06Image" alt="" />
         <div class="camera-media-vignette"></div>
         <div class="cctv-glitch-layer" aria-hidden="true"></div>
         <div class="blink-shutter" aria-hidden="true"></div>

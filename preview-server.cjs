@@ -23,6 +23,7 @@ const types = {
   ".webp": "image/webp",
   ".mp3": "audio/mpeg",
   ".mp4": "video/mp4",
+  ".webm": "video/webm",
   ".ico": "image/x-icon",
 };
 
@@ -30,7 +31,7 @@ function sendFile(req, res, target) {
   const extension = path.extname(target).toLowerCase();
   const contentType = types[extension] || "application/octet-stream";
 
-  if ([".mp3", ".mp4"].includes(extension) && req.headers.range) {
+  if ([".mp3", ".mp4", ".webm"].includes(extension) && req.headers.range) {
     fs.stat(target, (error, stats) => {
       if (error) {
         res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
