@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <title>ASCALON</title>
-    <link rel="stylesheet" href="./css/style.css?v=ascalon-20260725-nodal-os" />
+    <link rel="stylesheet" href="./css/style.css?v=20261020-startup" />
     <!-- NODAL OS : styles inclus pour un remplacement en deux fichiers. -->
     <style id="nodalOsStyles">
 /* NODAL OS: responsive workspace, archive navigation and protected records. */
@@ -417,6 +417,349 @@
   }
 }
 
+/* Startup and sign-in follow the quiet, full-screen rhythm of a desktop OS. */
+.nodal-os:has(#nodalDesktop.hidden)::before,
+.nodal-os:has(#nodalDesktop.hidden) > :is(.nodal-noise, .nodal-scanlines, .nodal-particles) { display: none; }
+.nodal-os .nodal-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.nodal-os #nodalBoot {
+  display: block;
+  padding: 0;
+  color: #f5f7fa;
+  background: #000;
+  animation: none;
+  opacity: 1;
+  transition: opacity 500ms ease;
+}
+.nodal-os #nodalBoot.is-finishing { opacity: 0; }
+.nodal-os .nodal-boot-brand {
+  position: absolute;
+  top: 39%;
+  left: 50%;
+  display: grid;
+  justify-items: center;
+  gap: 21px;
+  transform: translate(-50%, -50%);
+  animation: nodalStartupBrand 800ms ease-out both;
+}
+.nodal-os .nodal-boot-logo { display: block; width: 88px; height: 88px; color: #e9eef3; }
+.nodal-os .nodal-boot-brand span {
+  padding-left: .26em;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: .26em;
+  white-space: nowrap;
+}
+.nodal-os .nodal-boot-spinner {
+  position: absolute;
+  top: 68%;
+  left: calc(50% - 17px);
+  width: 34px;
+  height: 34px;
+  animation: nodalStartupFade 550ms ease 350ms both;
+}
+.nodal-os .nodal-loading-dots { display: inline-block; position: relative; width: 34px; height: 34px; }
+.nodal-os .nodal-loading-dots i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  animation: nodalStartupOrbit 2s cubic-bezier(.3, .05, .3, 1) infinite;
+  animation-delay: calc(var(--dot) * 110ms);
+  opacity: 0;
+}
+.nodal-os .nodal-loading-dots i::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.nodal-os #nodalLogin {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  color: #fff;
+  background: #252c34 url("./assets/images/nodal-login-wallpaper.svg?v=20261020-startup") center / cover no-repeat;
+  animation: nodalStartupFade 700ms ease-out both;
+}
+.nodal-os #nodalLogin::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  background: linear-gradient(180deg, #090b1414 0%, #080d1914 45%, #060b1a52 100%);
+  filter: none;
+  pointer-events: none;
+}
+.nodal-os #nodalLogin .nodal-login-panel {
+  position: absolute;
+  top: clamp(80px, 18vh, 220px);
+  left: 50%;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  width: min(440px, calc(100% - 40px));
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+  background: none;
+  box-shadow: none;
+  transform: translateX(-50%);
+  animation: nodalSignInPanel 600ms cubic-bezier(.2, .7, .2, 1) 120ms both;
+}
+.nodal-os #nodalLogin .nodal-login-panel.is-switching { animation: nodalSwitchUser 240ms ease both; }
+.nodal-os #nodalLogin .nodal-login-panel.alert { animation: nodalLoginError 300ms ease both; }
+.nodal-os #nodalLogin .nodal-login-avatar {
+  display: grid;
+  place-items: center;
+  width: 192px;
+  height: 192px;
+  border: 0;
+  border-radius: 50%;
+  background: #c7d1d56b;
+  box-shadow: none;
+}
+.nodal-os .nodal-user-glyph { display: block; width: 62%; height: 62%; color: #fff; }
+.nodal-os #nodalLoginTitle {
+  margin: 22px 0 29px;
+  color: #fff;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 44px;
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-transform: none;
+  text-shadow: 0 1px 8px #0002;
+}
+.nodal-os #nodalLoginTitle:focus { outline: none; }
+.nodal-os #nodalLoginForm {
+  display: grid;
+  gap: 0;
+  width: min(332px, 100%);
+  margin: 0;
+  transition: opacity 160ms ease;
+}
+.nodal-os #nodalLogin .nodal-password-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  width: 100%;
+  height: 42px;
+  border: 2px solid #ffffffb3;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 0 1px 4px #0002;
+}
+.nodal-os #nodalLogin .nodal-password-row:focus-within { border-color: #fff; }
+.nodal-os #nodalPassword {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  color: #202020;
+  background: #fff;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 15px;
+  line-height: normal;
+  box-shadow: none;
+}
+.nodal-os #nodalPassword::placeholder { color: #6b6b6b; opacity: 1; }
+.nodal-os #nodalLogin .nodal-password-row button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 38px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-left: 2px solid #fff;
+  border-radius: 0;
+  color: #fff;
+  background: #747b80;
+  cursor: pointer;
+}
+.nodal-os #nodalLogin .nodal-password-row button:hover { background: #5d656b; }
+.nodal-os #nodalLogin .nodal-password-row button:focus-visible { outline-color: #202020; outline-offset: -4px; }
+.nodal-os #nodalLogin .nodal-password-row button svg { width: 25px; height: 25px; }
+.nodal-os #nodalLoginFeedback {
+  min-height: 35px;
+  margin: 10px 0 0;
+  color: #fff;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  text-transform: none;
+  text-shadow: 0 1px 4px #0009;
+}
+.nodal-os .nodal-login-users {
+  position: absolute;
+  bottom: max(32px, env(safe-area-inset-bottom));
+  left: max(28px, env(safe-area-inset-left));
+  z-index: 2;
+  display: grid;
+  gap: 2px;
+  width: 210px;
+  transition: opacity 180ms ease;
+}
+.nodal-os .nodal-login-users button {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  min-height: 64px;
+  padding: 8px 13px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  color: #fff;
+  background: transparent;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+.nodal-os .nodal-login-users button:hover { background: #ffffff1f; }
+.nodal-os .nodal-login-users button[aria-pressed="true"] { background: #147cb9d9; }
+.nodal-os .nodal-login-user-avatar {
+  display: grid;
+  flex: 0 0 44px;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #c7d1d56b;
+}
+.nodal-os .nodal-login-power {
+  position: absolute;
+  right: max(28px, env(safe-area-inset-right));
+  bottom: max(30px, env(safe-area-inset-bottom));
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+  background: transparent;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+.nodal-os .nodal-login-power:hover { background: #ffffff1f; }
+.nodal-os .nodal-login-power svg { width: 27px; height: 27px; }
+.nodal-os .nodal-welcome {
+  position: absolute;
+  top: calc(100% - 45px);
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  margin: 0;
+  color: #fff;
+  font-size: 23px;
+  font-weight: 300;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 220ms ease;
+}
+.nodal-os .nodal-welcome .nodal-loading-dots { width: 28px; height: 28px; }
+.nodal-os .nodal-welcome .nodal-loading-dots i::before { left: 12px; width: 3px; height: 3px; }
+.nodal-os #nodalLogin.is-signing-in #nodalLoginForm,
+.nodal-os #nodalLogin.is-signing-in .nodal-login-users,
+.nodal-os #nodalLogin.is-signing-in .nodal-login-power { opacity: 0; pointer-events: none; visibility: hidden; }
+.nodal-os #nodalLogin.is-signing-in .nodal-welcome { opacity: 1; visibility: visible; }
+@keyframes nodalStartupBrand { from { opacity: 0; } to { opacity: 1; } }
+@keyframes nodalStartupFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes nodalStartupOrbit {
+  0% { transform: rotate(0deg); opacity: 0; }
+  6% { opacity: 1; }
+  78% { opacity: 1; }
+  85%, 100% { transform: rotate(540deg); opacity: 0; }
+}
+@keyframes nodalSignInPanel {
+  from { opacity: 0; transform: translate(-50%, 13px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes nodalSwitchUser {
+  0% { opacity: .35; transform: translate(-50%, 5px); }
+  100% { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes nodalLoginError {
+  0%, 100% { transform: translateX(-50%); }
+  30% { transform: translateX(calc(-50% - 5px)); }
+  65% { transform: translateX(calc(-50% + 4px)); }
+}
+@media (max-width: 640px) {
+  .nodal-os #nodalLogin .nodal-login-panel { top: clamp(65px, 16vh, 150px); }
+  .nodal-os #nodalLogin .nodal-login-avatar { width: 144px; height: 144px; }
+  .nodal-os #nodalLoginTitle { margin: 18px 0 25px; font-size: 36px; }
+  .nodal-os .nodal-login-users { bottom: max(22px, env(safe-area-inset-bottom)); left: 15px; width: 176px; }
+  .nodal-os .nodal-login-users button { min-height: 56px; padding: 6px 10px; gap: 11px; font-size: 15px; }
+  .nodal-os .nodal-login-user-avatar { flex-basis: 40px; width: 40px; height: 40px; }
+  .nodal-os .nodal-login-power { right: 15px; bottom: max(22px, env(safe-area-inset-bottom)); }
+  .nodal-os .nodal-boot-logo { width: 72px; height: 72px; }
+  .nodal-os .nodal-boot-brand span { font-size: 14px; }
+}
+@media (max-height: 560px) {
+  .nodal-os #nodalLogin .nodal-login-panel { top: 32px; }
+  .nodal-os #nodalLogin .nodal-login-avatar { width: 94px; height: 94px; }
+  .nodal-os #nodalLoginTitle { margin: 12px 0 18px; font-size: 32px; }
+  .nodal-os #nodalLoginFeedback { min-height: 24px; margin-top: 8px; font-size: 13px; }
+  .nodal-os .nodal-login-users { bottom: 15px; left: 18px; width: 164px; }
+  .nodal-os .nodal-login-users button { min-height: 50px; padding: 5px 9px; gap: 10px; font-size: 14px; }
+  .nodal-os .nodal-login-user-avatar { flex-basis: 36px; width: 36px; height: 36px; }
+  .nodal-os .nodal-login-power { bottom: 15px; right: 18px; }
+  .nodal-os .nodal-boot-brand { gap: 15px; }
+  .nodal-os .nodal-boot-logo { width: 64px; height: 64px; }
+  .nodal-os .nodal-boot-brand span { font-size: 13px; }
+}
+@media (max-height: 400px) and (min-width: 600px) {
+  .nodal-os #nodalLogin .nodal-login-panel { top: 20px; }
+  .nodal-os #nodalLogin .nodal-login-avatar { width: 76px; height: 76px; }
+  .nodal-os #nodalLoginTitle { margin: 10px 0 15px; font-size: 28px; }
+}
+@media (max-height: 400px) and (max-width: 599px) {
+  .nodal-os #nodalLogin .nodal-login-panel { top: 14px; }
+  .nodal-os #nodalLogin .nodal-login-avatar { width: 64px; height: 64px; }
+  .nodal-os #nodalLoginTitle { margin: 8px 0 14px; font-size: 26px; }
+  .nodal-os .nodal-login-users {
+    right: 64px;
+    bottom: 12px;
+    left: 12px;
+    width: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+  }
+  .nodal-os .nodal-login-users button { min-height: 48px; padding: 6px 8px; gap: 8px; font-size: 13px; }
+  .nodal-os .nodal-login-user-avatar { flex-basis: 32px; width: 32px; height: 32px; }
+  .nodal-os .nodal-login-power { right: 12px; bottom: 12px; width: 40px; height: 48px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nodal-os #nodalBoot, .nodal-os #nodalLogin, .nodal-os #nodalLogin .nodal-login-panel,
+  .nodal-os .nodal-boot-brand, .nodal-os .nodal-boot-spinner, .nodal-os .nodal-login-users,
+  .nodal-os .nodal-welcome, .nodal-os .nodal-loading-dots i {
+    animation: none !important;
+    transition: none !important;
+  }
+  .nodal-os .nodal-loading-dots i { opacity: .75; transform: rotate(calc(var(--dot) * 72deg)); }
+}
+
     </style>
   </head>
   <body class="locked">
@@ -502,38 +845,56 @@
       <div class="nodal-scanlines" aria-hidden="true"></div>
       <div class="nodal-particles" aria-hidden="true"></div>
 
-      <section class="nodal-boot" id="nodalBoot" aria-live="polite">
-        <p class="nodal-signal">SIGNAL ACCROCHÉ</p>
-        <div class="nodal-boot-card">
-          <p class="kicker">ASCALON / NODAL OS / DOSSIER N.D.R</p>
-          <h2>Redirection interne</h2>
-          <div class="nodal-boot-log" id="nodalBootLog"></div>
+      <section class="nodal-boot" id="nodalBoot" aria-label="Démarrage de NODAL OS">
+        <div class="nodal-boot-brand" aria-hidden="true">
+          <svg class="nodal-boot-logo" viewBox="0 0 88 88" fill="none">
+            <path d="M13 74V14h13l36 43V14h13v60H62L26 31v43H13Z" fill="currentColor" />
+          </svg>
+          <span>NODAL OS</span>
         </div>
+        <div class="nodal-boot-spinner" aria-hidden="true">
+          <span class="nodal-loading-dots"><i style="--dot:0"></i><i style="--dot:1"></i><i style="--dot:2"></i><i style="--dot:3"></i><i style="--dot:4"></i></span>
+        </div>
+        <p class="nodal-sr-only" id="nodalBootStatus" role="status">Démarrage de NODAL OS…</p>
       </section>
 
-      <section class="nodal-login hidden" id="nodalLogin" aria-labelledby="nodalLoginTitle">
-        <button class="nodal-login-back" type="button" data-nodal-exit>← Retour à la console</button>
+      <section class="nodal-login hidden" id="nodalLogin" data-nodal-user="n17" aria-labelledby="nodalLoginTitle">
         <div class="nodal-login-panel">
-          <p class="nodal-login-system">ASCALON INTERNAL ACCESS</p>
           <div class="nodal-login-avatar" aria-hidden="true">
-            <span></span>
+            <svg class="nodal-user-glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3.7">
+              <circle cx="50" cy="31" r="19" />
+              <path d="M17 91v-7a33 33 0 0 1 66 0v7" />
+            </svg>
           </div>
-          <h2 id="nodalLoginTitle">N-17</h2>
-          <p class="nodal-login-route">NODAL OS // DOSSIER N.D.R</p>
-          <form class="nodal-login-form" id="nodalLoginForm">
-            <label class="hidden" for="nodalPassword">Mot de passe</label>
+          <h2 id="nodalLoginTitle" tabindex="-1">N17</h2>
+          <form class="nodal-login-form" id="nodalLoginForm" aria-busy="false">
+            <label class="nodal-sr-only" for="nodalPassword">Mot de passe</label>
             <div class="nodal-password-row">
-              <input id="nodalPassword" type="password" autocomplete="off" placeholder="Mot de passe" />
-              <button type="submit" aria-label="Accéder">→</button>
+              <input id="nodalPassword" type="password" autocomplete="off" placeholder="Mot de passe" required />
+              <button type="submit" aria-label="Se connecter">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" /></svg>
+              </button>
             </div>
             <p class="nodal-login-feedback" id="nodalLoginFeedback" aria-live="polite"></p>
           </form>
+          <p class="nodal-welcome" role="status" aria-live="polite">
+            <span class="nodal-loading-dots" aria-hidden="true"><i style="--dot:0"></i><i style="--dot:1"></i><i style="--dot:2"></i><i style="--dot:3"></i><i style="--dot:4"></i></span>
+            <span>Bienvenue</span>
+          </p>
         </div>
-        <div class="nodal-login-footer">
-          <span>Système isolé // accès local uniquement</span>
-          <span>Dernière session : inconnue</span>
-          <span>État mémoire : fragmenté</span>
+        <div class="nodal-login-users" role="group" aria-label="Choisir une session">
+          <button type="button" data-nodal-user="n17" aria-pressed="true">
+            <span class="nodal-login-user-avatar" aria-hidden="true"><svg class="nodal-user-glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4.5"><circle cx="50" cy="31" r="19" /><path d="M17 91v-7a33 33 0 0 1 66 0v7" /></svg></span>
+            <span>N17</span>
+          </button>
+          <button type="button" data-nodal-user="admin" aria-pressed="false">
+            <span class="nodal-login-user-avatar" aria-hidden="true"><svg class="nodal-user-glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4.5"><circle cx="50" cy="31" r="19" /><path d="M17 91v-7a33 33 0 0 1 66 0v7" /></svg></span>
+            <span>Admin</span>
+          </button>
         </div>
+        <button class="nodal-login-power" type="button" data-nodal-exit aria-label="Éteindre" title="Éteindre">
+          <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 2v12M7.2 6.7a10 10 0 1 0 13.6 0" /></svg>
+        </button>
       </section>
 
       <section class="nodal-desktop hidden" id="nodalDesktop" aria-label="Bureau NODAL OS">
@@ -584,7 +945,7 @@
           <div class="nodal-start-user">
             <span class="nodal-start-avatar" aria-hidden="true"></span>
             <div>
-              <strong>N-17</strong>
+              <strong id="nodalStartUserName">N17</strong>
               <small>ASCALON / NODAL OS</small>
             </div>
           </div>
@@ -598,6 +959,9 @@
           </button>
           <button type="button" class="nodal-lock-button" data-nodal-lock>
             <span aria-hidden="true">◈</span> Reverrouiller les archives
+          </button>
+          <button type="button" data-nodal-signout>
+            <span aria-hidden="true">↪</span> Se déconnecter
           </button>
           <button class="nodal-power" type="button" id="nodalExit">
             <span class="nodal-power-glyph" aria-hidden="true"></span>
@@ -1492,6 +1856,6 @@
       </section>
     </main>
 
-    <script src="./js/main.js?v=20261020-connect-fix"></script>
+    <script src="./js/main.js?v=20261020-startup"></script>
   </body>
 </html>

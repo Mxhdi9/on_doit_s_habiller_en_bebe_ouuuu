@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" fill="none">
+  <defs>
+    <linearGradient id="sky" x1="1010" y1="80" x2="980" y2="740" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#153b64"/>
+      <stop offset=".5" stop-color="#287d9e"/>
+      <stop offset="1" stop-color="#aac1b3"/>
+    </linearGradient>
+    <linearGradient id="ocean" x1="730" y1="400" x2="890" y2="870" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4aa1b5"/>
+      <stop offset=".42" stop-color="#65a9b6"/>
+      <stop offset="1" stop-color="#98b7aa"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="1550" y1="500" x2="1140" y2="1060" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#aa794e"/>
+      <stop offset=".45" stop-color="#bb9469"/>
+      <stop offset="1" stop-color="#725e4a"/>
+    </linearGradient>
+    <linearGradient id="rock" x1="150" y1="60" x2="1390" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#302c31"/>
+      <stop offset=".45" stop-color="#242126"/>
+      <stop offset="1" stop-color="#171b24"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="0" cy="0" r="1" gradientTransform="translate(1010 510) rotate(90) scale(820 1370)" gradientUnits="userSpaceOnUse">
+      <stop offset=".28" stop-color="#10141c" stop-opacity="0"/>
+      <stop offset="1" stop-color="#11141e" stop-opacity=".6"/>
+    </radialGradient>
+    <filter id="defocus" x="-10%" y="-16%" width="120%" height="132%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="30"/>
+    </filter>
+  </defs>
+  <path fill="#24242c" d="M0 0h1920v1080H0z"/>
+  <g filter="url(#defocus)">
+    <path fill="url(#sky)" d="M250 80h1450v790H250z"/>
+    <path fill="url(#ocean)" d="M220 430c330-65 590-28 804-5 280 29 483-42 696 54l170 601H100L220 430Z"/>
+    <path fill="#a1bdb3" fill-opacity=".65" d="M480 654c232-26 448 30 638 1 183-29 318-71 482-36l-18 43c-175-22-305 36-473 49-245 19-414-21-620-4l-9-53Z"/>
+    <path fill="url(#sand)" d="M1580 300c-38 177-46 334-271 426-167 68-300 108-476 132l-294 222h1451V236l-410 64Z"/>
+    <path fill="#c7a780" fill-opacity=".42" d="M1750 601c-150 111-269 143-473 205-142 43-324 65-440 126l-147 148h300c134-90 336-119 481-176 184-72 314-136 489-225l-210-78Z"/>
+    <path fill="url(#rock)" d="M-100-100h2120v341c-177-21-261 5-388 34-108 25-166-13-215-91-65-104-183-111-274-80-163 55-169 186-312 230-156 48-265 4-393 60-104 46-93 156-79 234L-100 830V-100Z"/>
+    <path fill="#25252f" d="M-100 412c203-13 327 56 405 191 41 71 86 188 133 244 56 67 147 111 219 233H-100V412Z"/>
+    <path fill="#1c202a" d="M1873 92c-147 156-185 229-226 321-56 124-82 176-46 251 47 98 177 134 419 144V92h-147Z"/>
+    <path fill="#75563f" fill-opacity=".48" d="M1826 325c-69 89-119 193-127 266-6 59 54 89 156 122l125-33V272l-154 53Z"/>
+    <path fill="#202532" d="M-100 1003c323-81 519-27 731 51 226 83 362 100 587 92l802-110v144H-100v-177Z"/>
+  </g>
+  <path fill="url(#vignette)" d="M0 0h1920v1080H0z"/>
+</svg>
