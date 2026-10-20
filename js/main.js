@@ -2775,7 +2775,7 @@ function handleConsoleCommand() {
     CLEAR: "",
   };
 
-  if (command === NODAL_SECRET_COMMAND) {
+  if (command === normalizeCode(NODAL_SECRET_COMMAND)) {
     startNodalSequence();
     return;
   }
