@@ -1,0 +1,279 @@
+/* A single palette for the complete NODAL desktop and its protected readers. */
+#nodalOs {
+  color-scheme: dark;
+  --nodal-ink: #e1e9f2;
+  --nodal-muted: #a2b1c3;
+  --nodal-line: #2c3b4d;
+  --nodal-focus: #6ac5e9;
+  --nodal-base: #0b121c;
+  --nodal-surface: #111b28;
+  --nodal-raised: #192635;
+  --nodal-field: #0c1622;
+  --nodal-hover: #22364b;
+  --nodal-selected: #1c4057;
+  --nodal-accent: #8cd5ed;
+  --nodal-error: #f2b8b5;
+  color: var(--nodal-ink);
+  background: var(--nodal-base);
+}
+#nodalOs ::selection { color: #f4f9ff; background: #365c78; }
+#nodalOs * { scrollbar-width: thin; scrollbar-color: #547089 #101b29; }
+#nodalOs *::-webkit-scrollbar { width: 9px; height: 9px; }
+#nodalOs *::-webkit-scrollbar-track { background: #101b29; }
+#nodalOs *::-webkit-scrollbar-thumb { border: 2px solid #101b29; border-radius: 8px; background: #547089; }
+#nodalOs *::-webkit-scrollbar-thumb:hover { background: #7090ac; }
+#nodalOs *::-webkit-scrollbar-corner { background: #101b29; }
+#nodalOs :is(.nodal-noise, .nodal-scanlines, .nodal-particles) { display: none; }
+#nodalOs :is(button, input, textarea, select) { color-scheme: dark; }
+#nodalOs :is(input, textarea, select) { border-color: #40566d; color: var(--nodal-ink); background: var(--nodal-field); }
+#nodalOs :is(input, textarea)::placeholder { color: #97a8bb; opacity: 1; }
+#nodalOs :is(button, input, [tabindex]):focus-visible { outline-color: var(--nodal-focus); }
+#nodalOs input[aria-invalid="true"] { border-color: #dc9290; }
+
+/* Keep the black startup screen and use dark native-looking sign-in controls. */
+#nodalOs #nodalBoot { color: #edf3fa; background: #000; }
+#nodalOs #nodalLogin { background-color: #121a25; }
+#nodalOs #nodalLogin::before { background: linear-gradient(180deg, #050c175e, #07101c42 44%, #050b17a6); }
+#nodalOs #nodalLogin .nodal-login-avatar { background: #adb9c34a; }
+#nodalOs #nodalLogin .nodal-password-row { border-color: #90a6b9; background: #111c2aef; box-shadow: 0 1px 5px #0004; }
+#nodalOs #nodalLogin .nodal-password-row:focus-within { border-color: var(--nodal-focus); }
+#nodalOs #nodalPassword { color: #eff5fc; background: #111c2a; }
+#nodalOs #nodalPassword::placeholder { color: #b9c5d2; }
+#nodalOs #nodalLogin .nodal-password-row button { border-left-color: #637b92; color: #edf5ff; background: #344b62; }
+#nodalOs #nodalLogin .nodal-password-row button:hover { background: #42657f; }
+#nodalOs #nodalLogin .nodal-password-row button:focus-visible { outline-color: #e1f4ff; }
+#nodalOs #nodalLoginFeedback { color: var(--nodal-error); }
+#nodalOs .nodal-login-users button[aria-pressed="true"] { background: #174d70e6; }
+#nodalOs .nodal-login-users button:hover { background: #7094b12e; }
+#nodalOs .nodal-login-user-avatar { background: #adb9c34d; }
+
+/* Desktop chrome remains understated, with small cyan highlights. */
+#nodalOs .nodal-desktop { color: var(--nodal-ink); background: radial-gradient(ellipse at 76% 38%, #183750 0%, #101e2e 29%, #080f19 73%); }
+#nodalOs .nodal-desktop-field { opacity: .58; background: radial-gradient(ellipse at 72% 45%, #29587535, transparent 50%); }
+#nodalOs .nodal-desktop-field::before,
+#nodalOs .nodal-desktop-field::after { border-color: #76adca80; box-shadow: 0 0 42px #387d9c26; }
+#nodalOs .nodal-desktop-field::after { border-top-color: #76adca80; }
+#nodalOs .nodal-watermark { color: #b7d6ed08; }
+#nodalOs .nodal-watermark span { color: #bbd4e80d; }
+#nodalOs .nodal-icon { color: #edf3fb; }
+#nodalOs .nodal-icon:hover,
+#nodalOs .nodal-icon:focus-visible { border-color: #7899b45e; background: #50759238; }
+#nodalOs .nodal-report-symbol { color: #a7d4e9; background: transparent; }
+#nodalOs .nodal-report-symbol svg { display: block; width: 32px; height: 36px; }
+#nodalOs .nodal-session-status { color: var(--nodal-muted); }
+#nodalOs .nodal-session-status::before { background: #8cc5b8; box-shadow: 0 0 0 3px #8cc5b81a; }
+#nodalOs .nodal-taskbar { border-top-color: #2a3a4a; background: #080f19fa; }
+#nodalOs .nodal-taskbar button { color: #e8f0f9; }
+#nodalOs .nodal-taskbar button:hover,
+#nodalOs .nodal-taskbar button:focus-visible { background: #7d9bb32b; }
+#nodalOs .nodal-taskbar-search { background: #172331; }
+#nodalOs .nodal-taskbar-search input { border: 0; color: #e2ebf6; background: transparent; }
+#nodalOs .nodal-taskbar-search input::placeholder { color: #aab9cb; }
+#nodalOs .nodal-taskbar .nodal-running-app { color: #b7c8da; background: #172331; }
+#nodalOs .nodal-taskbar .nodal-running-app[aria-pressed="true"] { color: #f3f8fd; background: #263b4d; }
+#nodalOs .nodal-running-app::after { background: #738ba2; }
+#nodalOs .nodal-running-app[aria-pressed="true"]::after { background: #80c6e2; }
+#nodalOs .nodal-tray { color: #edf4fc; }
+#nodalOs .nodal-tray span { color: #a8bbcf; }
+#nodalOs .nodal-start-menu { border-color: #3b4d60; color: #e5eef8; background: #142131; box-shadow: 0 -12px 45px #0006; }
+#nodalOs .nodal-start-user { border-bottom-color: var(--nodal-line); }
+#nodalOs .nodal-start-avatar { background: #64798e; }
+#nodalOs .nodal-start-user strong { color: #edf4fd; }
+#nodalOs .nodal-start-user small { color: var(--nodal-muted); }
+#nodalOs .nodal-start-menu button { color: #e0eaf6; background: transparent; }
+#nodalOs .nodal-start-menu button:hover { background: var(--nodal-hover); }
+#nodalOs .nodal-start-menu .nodal-lock-button { color: #d5c493; }
+#nodalOs .nodal-start-menu .nodal-power { border-top-color: var(--nodal-line); }
+#nodalOs .nodal-notification { border-color: #42617b; color: #e1edf8; background: #15283bf5; }
+#nodalOs .nodal-desktop-console { border-color: var(--nodal-line); background: #0c1725ed; }
+#nodalOs .nodal-desktop-console-log { color: #c0d0e2; }
+#nodalOs .nodal-desktop-console-log span,
+#nodalOs .nodal-desktop-console-form span { color: var(--nodal-accent); }
+#nodalOs .nodal-desktop-console-form { border-top-color: var(--nodal-line); }
+
+/* Shared windows, notices, public folders, photos, audio and transmissions. */
+#nodalOs .nodal-window { border-color: #3a4d60; color: var(--nodal-ink); background: var(--nodal-surface); box-shadow: 0 16px 48px #0007, 0 2px 8px #0005; }
+#nodalOs .nodal-window.is-active { border-color: #608ba6; box-shadow: 0 18px 55px #0008, 0 0 0 1px #608ba629; }
+#nodalOs .nodal-window-header,
+#nodalOs .nodal-window.explorer-window .nodal-window-header { border-bottom-color: var(--nodal-line); color: #e8f0f9; background: #1a2837; text-transform: none; }
+#nodalOs .nodal-window-header strong { color: #e8f0f9; }
+#nodalOs .nodal-window-controls button { border: 0; color: #cbd9e8; background: transparent; }
+#nodalOs .nodal-window-controls button:hover { background: #ffffff14; }
+#nodalOs .nodal-window-controls button[data-nodal-close]:hover { color: #fff; background: #a9373c; }
+#nodalOs .nodal-window-body { color: var(--nodal-ink); background: var(--nodal-surface); }
+#nodalOs .nodal-window-body :is(p, li, dd) { color: #c9d6e5; }
+#nodalOs .nodal-window-body :is(h1, h2, h3, h4, strong) { color: #edf3fb; }
+#nodalOs .nodal-data-list div { border-bottom-color: var(--nodal-line); }
+#nodalOs .nodal-data-list dt { color: #a8c3d8; }
+#nodalOs .nodal-lines li,
+#nodalOs :is(.nodal-operation, .nodal-audio-file, .nodal-trash-file) { border-color: var(--nodal-line); color: var(--nodal-ink); background: #172432; }
+#nodalOs :is(.nodal-operation, .nodal-audio-file, .nodal-trash-file):hover { border-color: #56768f; background: var(--nodal-hover); }
+#nodalOs .nodal-photo-card { border-color: var(--nodal-line); background: #0b1521; }
+#nodalOs .nodal-photo-card img { border-bottom-color: var(--nodal-line); }
+#nodalOs .nodal-photo-card figcaption { color: #a9bfd3; }
+#nodalOs .nodal-photo-fallback { color: #b9cadb; }
+#nodalOs .nodal-trash-secret { border-color: #5b5462; color: #d5dce7; background: #242331; }
+#nodalOs :is(audio, video) { color-scheme: dark; background: #0b1420; }
+
+/* Explorer surfaces explicitly override every earlier light palette layer. */
+#nodalOs .nodal-window.explorer-window { color: var(--nodal-ink); background: var(--nodal-surface); }
+#nodalOs .nodal-explorer-ui,
+#nodalOs .nodal-explorer-main,
+#nodalOs .nodal-explorer-content { color: var(--nodal-ink); background: var(--nodal-surface); }
+#nodalOs .nodal-window.explorer-window .nodal-window-body { color: var(--nodal-ink); background: var(--nodal-surface); }
+#nodalOs .nodal-window.explorer-window .nodal-window-body p { color: var(--nodal-muted); }
+#nodalOs .nodal-window.explorer-window .nodal-window-body strong { color: var(--nodal-ink); }
+#nodalOs .nodal-explorer-ribbon,
+#nodalOs .nodal-explorer-address,
+#nodalOs .nodal-explorer-sidebar,
+#nodalOs .nodal-explorer-status { border-color: var(--nodal-line); color: #b5c5d7; background: #172331; }
+#nodalOs .nodal-explorer-ribbon button,
+#nodalOs .nodal-explorer-address > button,
+#nodalOs .nodal-explorer-sidebar button { border-color: transparent; color: #c9d7e7; background: transparent; }
+#nodalOs .nodal-explorer-ribbon button:hover,
+#nodalOs .nodal-explorer-address > button:not(:disabled):hover,
+#nodalOs .nodal-explorer-sidebar button:hover { border-color: #3c566f; color: #f0f6fc; background: var(--nodal-hover); }
+#nodalOs .nodal-explorer-sidebar button[aria-current="page"] { border-color: #3e607b; color: #d6efff; background: var(--nodal-selected); }
+#nodalOs .nodal-explorer-sidebar > :is(span, strong) { color: #8fa6bc; }
+#nodalOs .nodal-breadcrumbs,
+#nodalOs .nodal-explorer-address input { border-color: #354b61; color: #dce7f4; background: var(--nodal-field); }
+#nodalOs .nodal-breadcrumbs button { color: #cbddeb; background: transparent; }
+#nodalOs .nodal-breadcrumbs button:hover { background: var(--nodal-hover); }
+#nodalOs .nodal-breadcrumbs > span { color: #a6bbce; }
+#nodalOs .nodal-explorer-address input::placeholder { color: #94a9bd; }
+#nodalOs .nodal-explorer-heading { border-bottom-color: var(--nodal-line); }
+#nodalOs .nodal-explorer-content .nodal-explorer-heading h3 { color: #e5edf8; }
+#nodalOs .nodal-explorer-heading > :is(span, small),
+#nodalOs .nodal-explorer-heading p,
+#nodalOs .nodal-window-body .nodal-search-summary { color: #a3b5c8; }
+#nodalOs .nodal-explorer-content .nodal-section-heading { color: #9bb5cb; }
+#nodalOs .nodal-folder-tile,
+#nodalOs .nodal-file-row { border-color: #2b3e51; color: #dbe6f4; background: #172432; }
+#nodalOs .nodal-folder-tile:hover,
+#nodalOs .nodal-file-row:hover { border-color: #52738f; background: var(--nodal-hover); }
+#nodalOs .nodal-window-body .nodal-folder-tile strong,
+#nodalOs .nodal-window-body .nodal-file-row strong { color: #e3edf8; }
+#nodalOs .nodal-folder-tile small,
+#nodalOs .nodal-file-row small,
+#nodalOs .nodal-file-meta { color: #a3b5c8; }
+#nodalOs .nodal-file-row > span:first-child { border-color: #416079; color: #a4c9e2; background: #1b3246; }
+#nodalOs .nodal-lock-badge { border-color: #62573d; color: #dac895; background: #332d20; }
+#nodalOs .nodal-folder-icon::before { background: #a58b53; }
+#nodalOs .nodal-folder-icon::after { border-color: #9e8251; background: linear-gradient(180deg, #c5ad6e, #9b7b41); }
+#nodalOs .nodal-drive-tile { border-color: #2b3e51; color: var(--nodal-ink); background: #172432; }
+#nodalOs .nodal-drive-tile:hover { border-color: #52738f; background: var(--nodal-hover); }
+#nodalOs .nodal-drive-icon { border-color: #6b849b; background: linear-gradient(180deg, #6a8196, #344b5f); }
+#nodalOs .nodal-drive-tile strong { color: #dce8f6; }
+#nodalOs .nodal-drive-tile small { color: #a3b5c8; }
+#nodalOs .nodal-drive-tile i { border-color: #41576c; background: #0c1622; }
+#nodalOs .nodal-drive-tile i b { background: #539bb7; }
+#nodalOs .nodal-drive-tile.warning i b { background: #c87976; }
+#nodalOs .nodal-empty-state { border-color: #3b5269; color: #b3c6da; background: #101e2c; }
+#nodalOs .nodal-window-body .nodal-empty-state p { color: #a0b4c9; }
+#nodalOs .nodal-window-body .nodal-empty-state strong { color: #d7e6f6; }
+#nodalOs .nodal-window-body .nodal-recycle-note { color: #b2c5d8; }
+
+/* Existing encrypted dossiers retain their page structure in dark mode. */
+#nodalOs .nodal-window.document-window,
+#nodalOs .document-window .nodal-window-body { color: var(--nodal-ink); background: #0b1521; }
+#nodalOs .nodal-document { border-color: #33485e; color: #d8e4f1; background: #142231; box-shadow: 0 2px 12px #0002; }
+#nodalOs .nodal-document-header { border-bottom-color: #6b9db8; }
+#nodalOs .nodal-document-header :is(h2, h3) { color: #e9f2fc; }
+#nodalOs .nodal-window-body .nodal-document-header p { color: #9fb5ca; }
+#nodalOs .nodal-document-classification,
+#nodalOs .nodal-window-body .nodal-document .nodal-document-classification { border-color: #67513f; color: #dfc4a2; background: #342a23; }
+#nodalOs .nodal-document-meta { border-color: #344b61; background: #101d2b; }
+#nodalOs .nodal-document-meta dt { color: #93acc3; }
+#nodalOs .nodal-document-meta dd { color: #cfdeed; }
+#nodalOs .nodal-document-section :is(h3, h4) { color: #c4e1f5; }
+#nodalOs .nodal-window-body .nodal-document :is(p, li) { color: #c4d2e2; }
+#nodalOs .nodal-window-body .nodal-document strong { color: #eff5fc; }
+#nodalOs .nodal-document-footer { border-top-color: #344b61; color: #91a9bf; }
+#nodalOs .nodal-document-actions button,
+#nodalOs .nodal-explorer-heading button { border-color: #42607c; color: #cce2f3; background: #1c3348; }
+#nodalOs .nodal-document-actions button:hover,
+#nodalOs .nodal-explorer-heading button:hover { background: #294b65; }
+
+/* Shared password prompt and its error states. */
+#nodalOs .nodal-vault-dialog { border-color: #526d87; color: #deebf8; background: #132132; box-shadow: 0 25px 100px #000a; }
+#nodalOs .nodal-vault-dialog::backdrop { background: #020812bc; }
+#nodalOs .nodal-vault-mark { border-color: #466b83; color: #acd4e9; background: #20394d; }
+#nodalOs .nodal-vault-form h2 { color: #f0f5fc; }
+#nodalOs .nodal-vault-form > p { color: #adbed1; }
+#nodalOs .nodal-vault-form .nodal-document-classification { border-color: #426078; color: #a9cee3; background: #1a3247; }
+#nodalOs .nodal-vault-label { color: #c9d9e9; }
+#nodalOs .nodal-vault-form input[type="password"] { border-color: #58748d; color: #eef5fc; background: #0b1623; }
+#nodalOs .nodal-vault-form input[aria-invalid="true"] { border-color: #dd9490; }
+#nodalOs .nodal-vault-form .nodal-vault-feedback { color: var(--nodal-error); }
+#nodalOs .nodal-vault-actions button { border-color: #4a657d; color: #d4e3f1; background: #1a2d41; }
+#nodalOs .nodal-vault-actions button[type="submit"] { border-color: #5e9fbe; color: #f0f8ff; background: #285975; }
+#nodalOs .nodal-vault-actions button:hover { filter: none; background: #2a465f; }
+#nodalOs .nodal-vault-actions button[type="submit"]:hover { background: #356f8f; }
+
+/* The police report is a quiet, continuous reading surface. */
+#nodalOs .nodal-window.police-report-window { width: min(920px, calc(100vw - 144px)); height: min(810px, calc(100dvh - var(--nodal-taskbar-height) - 48px)); background: #091a2d; }
+#nodalOs .police-report-window .nodal-window-body { display: flex; min-height: 0; padding: 0; overflow: hidden; background: #091a2d; }
+#nodalOs .nodal-police-viewer { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; min-height: 0; height: 100%; color: #e4edf7; background: #091a2d; }
+#nodalOs .nodal-police-toolbar { display: flex; flex: 0 0 auto; align-items: center; gap: 12px; min-height: 49px; padding: 9px 17px; border-bottom: 1px solid #29445b; color: #b9cbdc; background: #101f30; font-size: 12px; line-height: 1.4; }
+#nodalOs .nodal-police-toolbar > :first-child { margin-right: auto; }
+#nodalOs .nodal-police-file { display: grid; gap: 2px; min-width: 0; }
+#nodalOs .nodal-police-file strong { color: #d8e7f3; font-size: 13px; font-weight: 600; }
+#nodalOs .nodal-police-file span { color: #92adc3; font-size: 10px; }
+#nodalOs .nodal-police-tools { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+#nodalOs .nodal-police-tools button { min-height: 31px; padding: 5px 10px; border: 1px solid #365770; border-radius: 4px; color: #c0dced; background: #172d40; font-size: 12px; line-height: 1.4; white-space: nowrap; }
+#nodalOs .nodal-police-tools button:hover { border-color: #6393af; background: #23465e; }
+#nodalOs .nodal-police-toolbar :is(strong, span) { color: #c3d5e6; font-weight: 400; }
+#nodalOs [data-nodal-report-progress] { color: #9db9ce; font-variant-numeric: tabular-nums; white-space: nowrap; }
+#nodalOs [data-nodal-report-autoscroll] { min-height: 31px; padding: 5px 10px; border: 1px solid #365770; border-radius: 4px; color: #c0dced; background: #172d40; font-size: 12px; line-height: 1.4; white-space: nowrap; }
+#nodalOs [data-nodal-report-autoscroll]:hover { border-color: #6393af; background: #23465e; }
+#nodalOs [data-nodal-report-autoscroll][aria-pressed="true"] { border-color: #78bbd4; color: #e0f5ff; background: #27556c; }
+#nodalOs .nodal-police-scroll { flex: 1 1 0; min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; scrollbar-color: #7ab4cf #0d2033; background: #091a2d; }
+#nodalOs .nodal-police-scroll::-webkit-scrollbar { width: 8px; }
+#nodalOs .nodal-police-scroll::-webkit-scrollbar-track { background: #0d2033; }
+#nodalOs .nodal-police-scroll::-webkit-scrollbar-thumb { border-color: #0d2033; background: #7ab4cf; }
+#nodalOs .nodal-police-scroll:focus-visible { outline: 1px solid #6ac5e96b; outline-offset: -1px; }
+#nodalOs .nodal-police-document { width: 100%; max-width: 800px; margin: 0 auto; padding: 28px 48px 48px; color: #e0e9f3; font-family: "Segoe UI", Arial, sans-serif; font-size: 16px; line-height: 1.85; overflow-wrap: anywhere; }
+#nodalOs .nodal-police-seal { display: block; width: 110px; height: 110px; margin: 0 auto 18px; color: #d9e9f8; }
+#nodalOs .nodal-police-seal svg { display: block; width: 100%; height: 100%; }
+#nodalOs .nodal-police-heading { margin-bottom: 26px; text-align: center; }
+#nodalOs .nodal-police-document .nodal-police-heading > p { margin: 7px 0; color: #b6c9dc; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+#nodalOs .nodal-police-heading h1 { margin: 18px 0 15px; color: #f4f8fe; font-size: clamp(25px, 3vw, 33px); font-weight: 600; letter-spacing: .025em; line-height: 1.35; text-decoration: underline; text-decoration-color: #a3bed2; text-decoration-thickness: 1px; text-underline-offset: 8px; }
+#nodalOs .nodal-police-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 24px; margin: 0 0 28px; padding: 15px 0; border-top: 1px solid #345069; border-bottom: 1px solid #345069; font-size: 13px; line-height: 1.7; }
+#nodalOs .nodal-police-meta > div { min-width: 0; }
+#nodalOs .nodal-police-document .nodal-police-meta > p { margin: 0; color: #c8d9e8; font-size: 13px; line-height: 1.7; }
+#nodalOs .nodal-police-meta dt { margin-bottom: 3px; color: #92afc5; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+#nodalOs .nodal-police-meta dd { margin: 0; color: #d4e3ef; }
+#nodalOs .nodal-police-section { margin: 38px 0 0; }
+#nodalOs .nodal-police-section h2 { margin: 0 0 24px; color: #f1f6fd; font-size: 18px; font-weight: 600; line-height: 1.55; text-align: center; text-decoration: underline; text-decoration-color: #aac5da; text-decoration-thickness: 1px; text-underline-offset: 6px; }
+#nodalOs .nodal-police-document :is(p, li) { margin: 0 0 19px; color: #dce7f2; font-size: inherit; line-height: inherit; }
+#nodalOs .nodal-police-document strong { color: #f0f5fc; font-weight: 600; }
+#nodalOs .nodal-police-transcript { margin: 25px 0; padding: 16px 21px; border: 0; border-left: 2px solid #6cabc7; color: #d3e3ef; background: #10263b; font-style: normal; }
+#nodalOs .nodal-police-transcript p:last-child { margin-bottom: 0; }
+#nodalOs .nodal-police-redaction { padding: 1px 5px; border-radius: 2px; color: #9fb5ca; background: #020a13; font-size: .9em; }
+#nodalOs .nodal-police-status { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 14px; min-height: 29px; padding: 7px 17px; border-top: 1px solid #29445b; color: #90abc0; background: #101f30; font-size: 11px; line-height: 1.45; }
+
+@media (max-width: 960px) {
+  #nodalOs .nodal-window.police-report-window { width: calc(100vw - 124px); }
+  #nodalOs .nodal-police-document { padding-right: 34px; padding-left: 34px; }
+}
+@media (max-width: 640px) {
+  #nodalOs .nodal-window.police-report-window,
+  #nodalOs .nodal-window.police-report-window.is-maximized { top: 8px !important; left: 8px !important; width: calc(100% - 16px) !important; height: calc(100% - 16px) !important; max-height: none; }
+  #nodalOs .nodal-police-toolbar { flex-wrap: wrap; gap: 7px 12px; padding: 9px 12px; }
+  #nodalOs .nodal-police-toolbar > :first-child { flex-basis: 100%; }
+  #nodalOs .nodal-police-tools { justify-content: flex-start; gap: 4px; }
+  #nodalOs .nodal-police-tools button { padding-inline: 6px; font-size: 11px; }
+  #nodalOs .nodal-police-document { padding: 24px 21px 36px; font-size: 15px; line-height: 1.8; }
+  #nodalOs .nodal-police-seal { width: 88px; height: 88px; margin-bottom: 17px; }
+  #nodalOs .nodal-police-heading h1 { font-size: 25px; }
+  #nodalOs .nodal-police-meta { grid-template-columns: 1fr; gap: 12px; margin-bottom: 30px; padding-block: 16px; }
+  #nodalOs .nodal-police-section { margin-top: 30px; }
+  #nodalOs .nodal-police-section h2 { margin-bottom: 20px; font-size: 17px; }
+  #nodalOs .nodal-police-transcript { padding: 13px 15px; }
+  #nodalOs .nodal-police-status { padding: 6px 12px; font-size: 10px; }
+}
+@media (max-height: 440px) {
+  #nodalOs .nodal-police-toolbar { min-height: 39px; padding-block: 5px; }
+  #nodalOs .nodal-police-status { min-height: 24px; padding-block: 4px; }
+  #nodalOs .nodal-police-document { padding-top: 25px; }
+}
