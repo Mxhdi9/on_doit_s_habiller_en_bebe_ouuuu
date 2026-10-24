@@ -277,3 +277,90 @@
   #nodalOs .nodal-police-status { min-height: 24px; padding-block: 4px; }
   #nodalOs .nodal-police-document { padding-top: 25px; }
 }
+
+/* A clean desktop uses the supplied wallpaper without additional artwork. */
+#nodalOs .nodal-desktop { background: #050506 url("../assets/images/nodal-desktop-wallpaper.png") center / cover no-repeat; }
+#nodalOs .nodal-desktop:focus { outline: none; }
+#nodalOs .nodal-desktop-field,
+#nodalOs .nodal-watermark { display: none; }
+
+/* Windows-style Ce PC, with a single local volume. */
+#nodalOs .nodal-window.explorer-window { width: min(1120px, calc(100vw - 144px)); height: min(750px, calc(100dvh - var(--nodal-taskbar-height) - 48px)); border-color: #555; border-radius: 2px; color: #e5e5e5; background: #202020; }
+#nodalOs .nodal-window.explorer-window .nodal-window-header { min-height: 32px; color: #eee; background: #303030; border-color: #444; }
+#nodalOs .nodal-window.explorer-window .nodal-window-controls button { height: 31px; width: 44px; }
+#nodalOs .nodal-window.explorer-window .nodal-window-header strong { font-size: 12px; font-weight: 400; }
+#nodalOs .explorer-window .nodal-window-body { background: #202020; }
+#nodalOs .nodal-explorer-ui { grid-template-rows: auto auto auto minmax(0, 1fr) auto; font-size: 13px; color: #ddd; background: #202020; }
+#nodalOs .nodal-explorer-tabs { display: flex; align-items: stretch; min-height: 29px; padding: 0; border-bottom: 1px solid #4a4a4a; background: #202020; }
+#nodalOs .nodal-explorer-tabs > span { display: grid; place-items: center; min-width: 73px; padding: 5px 14px; color: #ddd; font-size: 12px; line-height: 1.4; }
+#nodalOs .nodal-explorer-tabs > span:first-child { color: #fff; background: #17669b; }
+#nodalOs .nodal-explorer-tabs .is-current { border-right: 1px solid #494949; border-left: 1px solid #494949; color: #fff; background: #303030; }
+#nodalOs .nodal-explorer-ribbon { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; min-height: 47px; padding: 6px 10px; border-color: #464646; background: #303030; }
+#nodalOs .nodal-explorer-ribbon button { min-height: 30px; padding: 5px 12px; border: 1px solid transparent; border-radius: 0; color: #ddd; background: transparent; font-size: 12px; }
+#nodalOs .nodal-explorer-ribbon button:not(:disabled):hover { border-color: #686868; color: #fff; background: #454545; }
+#nodalOs .nodal-explorer-address { display: grid; grid-template-columns: repeat(3, 29px) minmax(0, 1fr) minmax(170px, 245px); gap: 7px; min-height: 46px; padding: 8px 11px; border-color: #363636; color: #d5d5d5; background: #202020; }
+#nodalOs .nodal-explorer-address > button { height: 28px; color: #c9c9c9; border-radius: 0; background: transparent; }
+#nodalOs .nodal-explorer-address > button:not(:disabled):hover { background: #414141; }
+#nodalOs .nodal-breadcrumbs { height: 28px; padding: 1px 6px; gap: 5px; border-color: #606060; border-radius: 0; color: #ddd; background: #202020; }
+#nodalOs .nodal-breadcrumbs button { color: #eee; background: transparent; border-radius: 0; font-size: 12px; }
+#nodalOs .nodal-breadcrumbs button:hover { background: #414141; }
+#nodalOs .nodal-breadcrumbs > span { color: #ddd; font-size: 12px; white-space: nowrap; }
+#nodalOs .nodal-explorer-address input { height: 28px; border-color: #606060; border-radius: 0; color: #eee; background: #202020; font-size: 12px; }
+#nodalOs .nodal-explorer-address input::placeholder { color: #c2c2c2; }
+#nodalOs .nodal-explorer-main { grid-template-columns: 205px minmax(0, 1fr); color: #e5e5e5; background: #202020; }
+#nodalOs .nodal-explorer-sidebar { gap: 0; padding: 11px 0; border-color: #444; color: #ddd; background: #202020; }
+#nodalOs .nodal-explorer-sidebar > span { padding: 7px 15px; color: #bcbcbc; font-size: 11px; font-weight: 400; text-transform: none; }
+#nodalOs .nodal-explorer-sidebar button { display: flex; align-items: center; gap: 9px; min-height: 30px; padding: 5px 13px 5px 20px; border: 0; border-radius: 0; color: #dedede; font-size: 11px; background: transparent; }
+#nodalOs .nodal-explorer-sidebar button:hover { color: #fff; background: #3a3a3a; }
+#nodalOs .nodal-explorer-sidebar button[aria-current="page"] { color: #fff; background: #484848; font-weight: 400; }
+#nodalOs .nodal-explorer-sidebar .nodal-sidebar-nested { padding-left: 32px; }
+#nodalOs .nodal-explorer-sidebar .nodal-sidebar-icon { display: inline-grid; place-items: center; flex: 0 0 16px; width: 16px; height: 16px; padding: 0; color: #d3b16e; font-size: 15px; }
+#nodalOs .nodal-explorer-content { padding: 12px 20px 26px; background: #202020; }
+#nodalOs .nodal-explorer-content .nodal-section-heading { display: flex; align-items: center; gap: 10px; margin: 11px 0 14px; color: #ddd; font-size: 15px; font-weight: 400; letter-spacing: 0; text-transform: none; }
+#nodalOs .nodal-explorer-content .nodal-section-heading::after { content: ""; flex: 1 1 auto; height: 1px; background: #454545; }
+#nodalOs .nodal-folder-grid { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 9px 12px; margin-bottom: 18px; }
+#nodalOs .nodal-folder-tile { grid-template-columns: 46px minmax(0, 1fr); min-height: 70px; gap: 10px; padding: 7px 9px; border-color: transparent; border-radius: 0; color: #eee; background: transparent; }
+#nodalOs .nodal-folder-tile:hover { border-color: #646464; background: #393939; }
+#nodalOs .nodal-window-body .nodal-folder-tile strong { color: #eee; font-size: 12px; font-weight: 400; }
+#nodalOs .nodal-folder-tile small { margin-top: 3px; color: #bababa; font-size: 10px; }
+#nodalOs .nodal-folder-tile .nodal-lock-badge { border: 0; padding: 0; color: #bfb39b; background: transparent; font-size: 10px; }
+#nodalOs .nodal-file-row { border-color: transparent; border-radius: 0; color: #ddd; background: transparent; }
+#nodalOs .nodal-file-row:hover { border-color: #626262; background: #393939; }
+#nodalOs .nodal-window-body .nodal-file-row strong { color: #eee; font-size: 12px; font-weight: 400; }
+#nodalOs .nodal-file-row :is(small, .nodal-file-meta) { color: #bcbcbc; }
+#nodalOs .nodal-drive-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 315px)); gap: 12px; margin-bottom: 14px; }
+#nodalOs .nodal-drive-tile { grid-template-columns: 48px minmax(0, 1fr); gap: 5px 10px; min-height: 76px; padding: 9px; border-color: transparent; border-radius: 0; color: #eee; background: transparent; text-align: left; }
+#nodalOs .nodal-drive-tile:hover { border-color: #626262; background: #393939; }
+#nodalOs .nodal-drive-icon { position: relative; width: 43px; height: 27px; border: 1px solid #83929b; border-radius: 3px; background: linear-gradient(#bdc4c9, #66737d); box-shadow: inset 0 -6px #26313b; }
+#nodalOs .nodal-drive-icon::before { content: ""; position: absolute; top: 4px; left: 7px; width: 15px; height: 10px; border: 1px solid #76838f; background: #a7b6c1; transform: skewY(-7deg); }
+#nodalOs .nodal-drive-icon::after { content: ""; position: absolute; right: 5px; bottom: 2px; width: 3px; height: 3px; background: #80c59b; }
+#nodalOs .nodal-drive-tile strong { color: #eee; font-size: 13px; font-weight: 400; }
+#nodalOs .nodal-drive-tile i { height: 14px; border-color: #777; background: #484848; }
+#nodalOs .nodal-drive-tile i b { background: #338bc5; }
+#nodalOs .nodal-drive-tile small { color: #c2c2c2; font-size: 11px; }
+#nodalOs .nodal-explorer-status { min-height: 24px; padding: 5px 14px; border-color: #3a3a3a; color: #bbb; background: #252525; font-size: 11px; }
+#nodalOs .nodal-empty-trash { display: grid; place-content: start center; min-height: 160px; padding: 34px 12px; color: #bbb; text-align: center; }
+#nodalOs .nodal-empty-trash strong { color: #c8c8c8; font-size: 13px; font-weight: 400; }
+#nodalOs .nodal-empty-trash p { margin-top: 9px; color: #a5a5a5; font-size: 12px; }
+#nodalOs .trash-window .nodal-explorer-address { grid-template-columns: 29px minmax(0, 1fr); }
+
+@media (max-width: 820px) {
+  #nodalOs .nodal-window.explorer-window { top: 8px !important; left: 8px !important; width: calc(100% - 16px); height: calc(100% - 16px); max-height: none; }
+  #nodalOs .nodal-explorer-main { grid-template-columns: 165px minmax(0, 1fr); }
+  #nodalOs .nodal-explorer-address { grid-template-columns: repeat(3, 29px) minmax(0, 1fr); }
+  #nodalOs .nodal-explorer-address input { grid-column: 1 / -1; }
+  #nodalOs .nodal-folder-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+}
+@media (max-width: 640px) {
+  #nodalOs .nodal-explorer-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  #nodalOs .nodal-explorer-sidebar { flex-direction: row; gap: 2px; max-height: 47px; padding: 5px 8px; border-right: 0; border-bottom: 1px solid #444; overflow: auto hidden; }
+  #nodalOs .nodal-explorer-sidebar > span { display: none; }
+  #nodalOs .nodal-explorer-sidebar button { flex: 0 0 auto; padding: 5px 8px; white-space: nowrap; }
+  #nodalOs .nodal-explorer-sidebar .nodal-sidebar-nested { padding-left: 8px; }
+  #nodalOs .nodal-explorer-content { padding: 10px 13px 22px; }
+  #nodalOs .nodal-explorer-ribbon { padding: 4px 6px; }
+  #nodalOs .nodal-explorer-ribbon button { padding: 5px 7px; font-size: 11px; }
+  #nodalOs .nodal-folder-grid { grid-template-columns: 1fr; }
+  #nodalOs .nodal-drive-grid { grid-template-columns: minmax(0, 1fr); }
+  #nodalOs .nodal-drive-tile { min-width: 0; }
+}
