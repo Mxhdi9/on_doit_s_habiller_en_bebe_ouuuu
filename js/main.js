@@ -3036,16 +3036,7 @@ const nodalWindowDefinitions = {
   trash: {
     title: "Corbeille",
     variant: "explorer-window trash-window",
-    content: () => `
-      <div class="nodal-explorer-ui">
-        <div class="nodal-explorer-tabs"><span>Fichier</span><span class="is-current">Outils de Corbeille</span></div>
-        <div class="nodal-explorer-ribbon"><button type="button" disabled>Vider la corbeille</button><button type="button" data-nodal-folder="root">Ouvrir Ce PC</button></div>
-        <div class="nodal-explorer-address"><button type="button" data-nodal-folder="root" aria-label="Revenir à Ce PC">↑</button><nav class="nodal-breadcrumbs" aria-label="Chemin du dossier"><button type="button" data-nodal-folder="root">Ce PC</button><span>›</span><span aria-current="page">Corbeille</span></nav></div>
-        <div class="nodal-explorer-main"><aside class="nodal-explorer-sidebar" aria-label="Dossiers"><button type="button" data-nodal-folder="root">▣ Ce PC</button><button type="button" data-nodal-folder="drive-c">▱ Disque local (C:)</button></aside>
-          <div class="nodal-explorer-content"><div class="nodal-empty-trash"><strong>La Corbeille est vide.</strong><p>Aucun élément à afficher.</p></div></div>
-        </div><footer class="nodal-explorer-status">0 élément</footer>
-      </div>
-    `,
+    content: () => renderNodalTrash(),
   },
 };
 
@@ -3058,10 +3049,19 @@ const nodalPublicFolders = [
   {id:'audio',title:'AUDIO_LOGS',description:'Enregistrements endommagés'},
 ];
 const nodalVaultFolders = window.NODAL_VAULT_DATA?.folders || [];
-const nodalStandaloneDocuments = window.NODAL_POLICE_REPORT ? [{...window.NODAL_POLICE_REPORT,standalone:true}] : [];
+const nodalStandaloneDocuments = window.NODAL_POLICE_REPORT ? [{...window.NODAL_POLICE_REPORT,standalone:true,hidden:true,location:'trash'}] : [];
 const nodalFolderCache = new Map();
 const nodalDocumentCache = new Map();
-const nodalExplorerState = {folder:'root',query:'',history:['root'],index:0};
+const nodalSystemFolders = [
+  {id:'library-desktop',title:'Bureau',icon:'desktop'},
+  {id:'library-documents',title:'Documents',icon:'documents'},
+  {id:'library-pictures',title:'Images',icon:'pictures'},
+  {id:'library-music',title:'Musique',icon:'music'},
+  {id:'library-objects',title:'Objets 3D',icon:'objects'},
+  {id:'library-downloads',title:'Téléchargements',icon:'downloads'},
+  {id:'library-videos',title:'Vidéos',icon:'videos'},
+];
+const nodalExplorerState = {folder:'quick-access',query:'',history:['quick-access'],index:0,quickExpanded:true,computerExpanded:true};
 let nodalSession = 0, nodalUnlockRequest = 0, nodalUnlockTarget = null;
 let nodalNotificationTimer = 0, nodalSearchTimer = 0, nodalClockTimer = 0, nodalIdleTimer = 0;
 let nodalLoginPending = false, nodalReturnFocus = null, nodalDialogReturnFocus = null;
@@ -3090,9 +3090,11 @@ function nodalSearchText(value) {
   return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr').trim();
 }
 function nodalFolder(id) {
-  if (id === 'root') return {id:'root',title:'Ce PC'};
-  if (id === 'drive-c') return {id:'drive-c',title:'Disque local (C:)'};
-  return [...nodalPublicFolders,...nodalVaultFolders].find(folder => folder.id === id);
+  if (id === 'quick-access') return {id,title:'Accès rapide',icon:'quick'};
+  if (id === 'root') return {id,title:'Ce PC',icon:'computer'};
+  if (id === 'drive-c') return {id,title:'Disque local (C:)',icon:'drive'};
+  if (id === 'network') return {id,title:'Réseau',icon:'network'};
+  return [...nodalSystemFolders,...nodalPublicFolders,...nodalVaultFolders].find(folder => folder.id === id);
 }
 function nodalDocument(id) {
   const standalone = nodalStandaloneDocuments.find(file => file.id === id);
@@ -3113,41 +3115,93 @@ function nodalFileRow(file) {
 function nodalDriveTile() {
   return `<button class="nodal-drive-tile" type="button" data-nodal-folder="drive-c" aria-label="Ouvrir Disque local C, 128 Go libres sur 256 Go"><span class="nodal-drive-icon" aria-hidden="true"></span><strong>Disque local (C:)</strong><i aria-hidden="true"><b style="width:50%"></b></i><small>128 Go libres sur 256 Go</small></button>`;
 }
+function nodalExplorerIcon(name) {
+  return window.NodalExplorerIcons.render(name);
+}
+function nodalLibraryTile(folder, frequent = false) {
+  const path = folder.id.startsWith('library-') ? 'Ce PC' : 'Disque local (C:)';
+  return `<button class="${frequent ? 'nodal-frequent-tile' : 'nodal-system-tile'}" type="button" data-nodal-folder="${nodalEscape(folder.id)}"><span class="nodal-library-symbol" aria-hidden="true">${nodalExplorerIcon(folder.icon || 'folder')}</span><span><strong>${nodalEscape(folder.title)}</strong><small>${path}</small></span></button>`;
+}
+function renderNodalSidebar(active = nodalExplorerState.folder) {
+  const link = (folder, root = false) => `<button class="${root ? 'nodal-sidebar-root' : 'nodal-sidebar-library'}" type="button" data-nodal-folder="${folder.id}" ${active === folder.id ? 'aria-current="page"' : ''}><span class="nodal-sidebar-icon" aria-hidden="true">${nodalExplorerIcon(folder.icon)}</span><span class="nodal-sidebar-label">${nodalEscape(folder.title)}</span></button>`;
+  const group = (key, id, children, expanded) => `<section class="nodal-sidebar-section"><div class="nodal-tree-heading"><button class="nodal-tree-toggle" type="button" data-nodal-toggle-tree="${key}" aria-label="${expanded ? 'Replier' : 'Déplier'} ${nodalFolder(id).title}" aria-expanded="${expanded}"><span class="nodal-sidebar-chevron" aria-hidden="true">›</span></button>${link(nodalFolder(id),true)}</div><div class="nodal-tree-children" ${expanded ? '' : 'hidden'}>${children.map(folder => link(folder)).join('')}</div></section>`;
+  const quick = ['library-desktop','library-downloads','library-documents','library-pictures'].map(id => nodalFolder(id));
+  return `<aside class="nodal-explorer-sidebar" aria-label="Navigation des fichiers">${group('quick','quick-access',quick,nodalExplorerState.quickExpanded)}${group('computer','root',[...nodalSystemFolders,nodalFolder('drive-c')],nodalExplorerState.computerExpanded)}<div class="nodal-sidebar-network">${link(nodalFolder('network'),true)}</div></aside>`;
+}
+function nodalVisibleStandaloneDocuments() {
+  return nodalStandaloneDocuments.filter(file => !file.hidden);
+}
 function nodalExplorerResults() {
   const {folder,query} = nodalExplorerState;
-  const computer = folder === 'root' || folder === 'drive-c';
+  const visibleDocuments = nodalVisibleStandaloneDocuments();
+  const scope = ['root','drive-c','quick-access'].includes(folder) || nodalSystemFolders.some(item => item.id === folder);
   const matches = item => nodalSearchText(`${item.title} ${item.description || ''} ${item.reference || ''} ${item.kind || ''}`).includes(nodalSearchText(query));
+  const allFolders = [...nodalPublicFolders,...nodalVaultFolders];
   let count = 0, html = '';
   if (query) {
-    const folders = [...nodalPublicFolders,...nodalVaultFolders].filter(matches);
-    const files = (computer ? [...nodalStandaloneDocuments,...[...nodalFolderCache.values()].flatMap(item => item.documents)] : nodalFolderCache.get(folder)?.documents || []).filter(matches);
+    const folders = [...nodalSystemFolders,...allFolders].filter(matches);
+    const files = (scope ? [...visibleDocuments,...[...nodalFolderCache.values()].flatMap(item => item.documents)] : nodalFolderCache.get(folder)?.documents || []).filter(matches);
     count = folders.length + files.length;
     html = `<h3 class="nodal-section-heading">Résultats pour « ${nodalEscape(query)} »</h3><div class="nodal-folder-grid">${folders.map(nodalFolderTile).join('')}</div><div class="nodal-file-list">${files.map(nodalFileRow).join('')}</div>`;
-  } else if (computer) {
-    const folders = [...nodalPublicFolders,...nodalVaultFolders];
-    count = folders.length + nodalStandaloneDocuments.length + (folder === 'root' ? 1 : 0);
-    html = `<h3 class="nodal-section-heading">Dossiers (${folders.length})</h3><div class="nodal-folder-grid">${folders.map(nodalFolderTile).join('')}</div><h3 class="nodal-section-heading">Documents (${nodalStandaloneDocuments.length})</h3><div class="nodal-file-list">${nodalStandaloneDocuments.map(nodalFileRow).join('')}</div>${folder === 'root' ? `<h3 class="nodal-section-heading">Périphériques et lecteurs (1)</h3><div class="nodal-drive-grid">${nodalDriveTile()}</div>` : ''}`;
+  } else if (folder === 'quick-access') {
+    const frequent = ['library-desktop','library-downloads','library-documents','library-pictures','archives','operations','medical','experiments','contracts'].map(nodalFolder).filter(Boolean);
+    count = frequent.length;
+    html = `<h3 class="nodal-section-heading">Dossiers fréquents (${count})</h3><div class="nodal-frequent-grid">${frequent.map(item => nodalLibraryTile(item,true)).join('')}</div>`;
+  } else if (folder === 'root') {
+    count = nodalSystemFolders.length + 1;
+    html = `<h3 class="nodal-section-heading">Dossiers (${nodalSystemFolders.length})</h3><div class="nodal-system-grid">${nodalSystemFolders.map(item => nodalLibraryTile(item)).join('')}</div><h3 class="nodal-section-heading">Périphériques et lecteurs (1)</h3><div class="nodal-drive-grid">${nodalDriveTile()}</div>`;
+  } else if (folder === 'drive-c') {
+    count = allFolders.length + visibleDocuments.length;
+    html = `<h3 class="nodal-section-heading">Dossiers (${allFolders.length})</h3><div class="nodal-folder-grid">${allFolders.map(nodalFolderTile).join('')}</div>${visibleDocuments.length ? `<div class="nodal-file-list">${visibleDocuments.map(nodalFileRow).join('')}</div>` : ''}`;
   } else if (nodalFolderCache.has(folder)) {
     const files = nodalFolderCache.get(folder).documents; count = files.length;
     html = `<h3 class="nodal-section-heading">${nodalEscape(nodalFolder(folder)?.title)}</h3><div class="nodal-file-list">${files.map(nodalFileRow).join('')}</div>`;
+  } else if (folder === 'library-desktop') {
+    count = 2;
+    html = `<h3 class="nodal-section-heading">Bureau</h3><div class="nodal-system-grid"><button class="nodal-system-tile" type="button" data-nodal-window="trash"><span class="nodal-library-symbol" aria-hidden="true">${nodalExplorerIcon('folder')}</span><span><strong>Corbeille</strong><small>Raccourci</small></span></button>${nodalLibraryTile({...nodalFolder('quick-access'),title:'Explorateur de fichiers'})}</div>`;
+  } else {
+    const contents = {
+      'library-documents': allFolders.filter(item => ['dossier','archives','medical','experiments','contracts'].includes(item.id)),
+      'library-pictures': allFolders.filter(item => item.id === 'photos'),
+      'library-music': allFolders.filter(item => item.id === 'audio'),
+      'library-downloads': allFolders.filter(item => item.id === 'transmissions'),
+    }[folder] || [];
+    count = contents.length;
+    html = `<div class="nodal-folder-grid">${contents.map(nodalFolderTile).join('')}</div>`;
   }
-  if (!count) html += '<div class="nodal-empty-state"><strong>Aucun élément trouvé</strong><p>Essayez un autre nom ou ouvrez un dossier.</p></div>';
+  if (!count) html += `<div class="nodal-empty-state"><strong>${query ? 'Aucun élément trouvé' : 'Ce dossier est vide.'}</strong>${query ? '<p>Essayez un autre nom.</p>' : ''}</div>`;
   return {html,status:`${count} élément${count > 1 ? 's' : ''}`};
 }
 function renderNodalExplorer() {
   const {folder,index,history} = nodalExplorerState, result = nodalExplorerResults();
-  const parent = folder === 'root' || folder === 'drive-c' ? 'root' : 'drive-c';
-  const breadcrumbs = folder === 'root' ? '<span aria-current="page">Ce PC</span>' : `<button type="button" data-nodal-folder="root">Ce PC</button><span>›</span>${folder === 'drive-c' ? '<span aria-current="page">Disque local (C:)</span>' : `<button type="button" data-nodal-folder="drive-c">Disque local (C:)</button><span>›</span><span aria-current="page">${nodalEscape(nodalFolder(folder)?.title)}</span>`}`;
-  return `<div class="nodal-explorer-ui"><div class="nodal-explorer-tabs"><span>Fichier</span><span class="is-current">Ordinateur</span><span>Affichage</span></div><div class="nodal-explorer-ribbon">
-    <button type="button" data-nodal-folder="root">▣ Ce PC</button><button type="button" data-nodal-action="refresh">↻ Actualiser</button><button type="button" data-nodal-lock>◈ Verrouiller les archives</button><button type="button" data-nodal-action="help">? Aide</button></div>
-    <div class="nodal-explorer-address"><button type="button" data-nodal-history="-1" aria-label="Précédent" ${index === 0 ? 'disabled' : ''}>←</button><button type="button" data-nodal-history="1" aria-label="Suivant" ${index === history.length - 1 ? 'disabled' : ''}>→</button><button type="button" data-nodal-folder="${parent}" aria-label="Dossier parent" ${folder === 'root' ? 'disabled' : ''}>↑</button>
-    <nav class="nodal-breadcrumbs" aria-label="Chemin du dossier">${breadcrumbs}</nav>
-    <input type="search" data-nodal-search aria-label="Rechercher dans ${nodalEscape(nodalFolder(folder)?.title)}" placeholder="Rechercher dans ${nodalEscape(nodalFolder(folder)?.title)}" value="${nodalEscape(nodalExplorerState.query)}" autocomplete="off" /></div>
-    <div class="nodal-explorer-main"><aside class="nodal-explorer-sidebar" aria-label="Dossiers"><span>Accès rapide</span>
-    ${nodalPublicFolders.map(item => `<button type="button" data-nodal-folder="${item.id}"><span class="nodal-sidebar-icon" aria-hidden="true">▰</span>${nodalEscape(item.title)}</button>`).join('')}
-    <span>Ce PC</span><button type="button" data-nodal-folder="root" ${folder === 'root' ? 'aria-current="page"' : ''}><span class="nodal-sidebar-icon" aria-hidden="true">▣</span>Ce PC</button><button type="button" data-nodal-folder="drive-c" ${folder === 'drive-c' ? 'aria-current="page"' : ''}><span class="nodal-sidebar-icon" aria-hidden="true">▱</span>Disque local (C:)</button>
-    ${nodalVaultFolders.map(item => `<button class="nodal-sidebar-nested" type="button" data-nodal-folder="${nodalEscape(item.id)}" ${folder === item.id ? 'aria-current="page"' : ''}><span class="nodal-sidebar-icon" aria-hidden="true">${nodalFolderCache.has(item.id) ? '◇' : '◈'}</span>${nodalEscape(item.title)}</button>`).join('')}
-    ${nodalStandaloneDocuments.map(file => `<button type="button" data-nodal-document="${nodalEscape(file.id)}"><span class="nodal-sidebar-icon" aria-hidden="true">▤</span>${nodalEscape(file.title)}</button>`).join('')}<button type="button" data-nodal-window="trash"><span class="nodal-sidebar-icon" aria-hidden="true">♜</span>Corbeille</button></aside><div class="nodal-explorer-content" tabindex="-1">${result.html}</div></div><footer class="nodal-explorer-status" role="status">${result.status}</footer></div>`;
+  const location = nodalFolder(folder);
+  const system = nodalSystemFolders.some(item => item.id === folder);
+  const parent = folder === 'root' || folder === 'quick-access' || folder === 'drive-c' || folder === 'network' || system ? 'root' : 'drive-c';
+  const topLevel = ['root','quick-access','network'].includes(folder);
+  const breadcrumbs = topLevel ? `<span aria-current="page">${nodalEscape(location?.title)}</span>` : `<button type="button" data-nodal-folder="root">Ce PC</button><span>›</span>${folder === 'drive-c' || system ? `<span aria-current="page">${nodalEscape(location?.title)}</span>` : `<button type="button" data-nodal-folder="drive-c">Disque local (C:)</button><span>›</span><span aria-current="page">${nodalEscape(location?.title)}</span>`}`;
+  return `<div class="nodal-explorer-ui"><div class="nodal-explorer-tabs"><span>Fichier</span><span class="is-current">${folder === 'quick-access' ? 'Accueil' : 'Ordinateur'}</span><span>Affichage</span></div><div class="nodal-explorer-ribbon"><button type="button" data-nodal-folder="quick-access">★ Accès rapide</button><button type="button" data-nodal-folder="root">▣ Ce PC</button><button type="button" data-nodal-action="refresh">↻ Actualiser</button><button type="button" data-nodal-lock>◈ Verrouiller les archives</button></div>
+    <div class="nodal-explorer-address"><button type="button" data-nodal-history="-1" aria-label="Précédent" ${index === 0 ? 'disabled' : ''}>←</button><button type="button" data-nodal-history="1" aria-label="Suivant" ${index === history.length - 1 ? 'disabled' : ''}>→</button><button type="button" data-nodal-folder="${parent}" aria-label="Dossier parent" ${topLevel ? 'disabled' : ''}>↑</button><nav class="nodal-breadcrumbs" aria-label="Chemin du dossier">${breadcrumbs}</nav><input type="search" data-nodal-search aria-label="Rechercher dans ${nodalEscape(location?.title)}" placeholder="Rechercher dans ${nodalEscape(location?.title)}" value="${nodalEscape(nodalExplorerState.query)}" autocomplete="off" /></div>
+    <div class="nodal-explorer-main">${renderNodalSidebar()}<div class="nodal-explorer-content" tabindex="-1">${result.html}</div></div><footer class="nodal-explorer-status" role="status">${result.status}</footer></div>`;
+}
+function nodalTrashRevealed() {
+  return Boolean(nodalWindows?.querySelector('[data-nodal-open="trash"][data-nodal-show-hidden="true"]:not(.hidden)'));
+}
+function renderNodalTrash(showHidden = false) {
+  const files = showHidden ? nodalStandaloneDocuments.filter(file => file.location === 'trash') : [];
+  return `<div class="nodal-explorer-ui"><div class="nodal-explorer-tabs"><span>Fichier</span><span class="is-current">Outils de Corbeille</span></div><div class="nodal-explorer-ribbon"><button type="button" disabled>Vider la corbeille</button><button type="button" data-nodal-folder="root">Ouvrir Ce PC</button><button type="button" data-nodal-action="toggle-hidden-files" aria-pressed="${showHidden}">Afficher les fichiers cachés</button></div><div class="nodal-explorer-address"><button type="button" data-nodal-folder="root" aria-label="Revenir à Ce PC">↑</button><nav class="nodal-breadcrumbs" aria-label="Chemin du dossier"><button type="button" data-nodal-folder="root">Ce PC</button><span>›</span><span aria-current="page">Corbeille</span></nav></div><div class="nodal-explorer-main">${renderNodalSidebar('trash')}<div class="nodal-explorer-content">${files.length ? `<div class="nodal-file-list">${files.map(file => nodalFileRow(file).replace('class="nodal-file-row"','class="nodal-file-row is-hidden"')).join('')}</div>` : '<div class="nodal-empty-trash"><strong>La Corbeille est vide.</strong><p>Aucun élément à afficher.</p></div>'}</div></div><footer class="nodal-explorer-status">${files.length} élément${files.length > 1 ? 's' : ''}</footer></div>`;
+}
+function resetNodalTrash(refresh = true) {
+  const trash = nodalWindows?.querySelector('[data-nodal-open="trash"]');
+  if (trash) trash.dataset.nodalShowHidden = 'false';
+  const hidden = nodalStandaloneDocuments.filter(file => file.location === 'trash');
+  if (hidden.some(file => nodalUnlockTarget?.documentId === file.id)) cancelNodalUnlock();
+  hidden.forEach(file => {
+    nodalDocumentCache.delete(file.id);
+    const element = [...(nodalWindows?.children || [])].find(item => item.dataset.nodalOpen === `document-${file.id}`);
+    if (element) {window.NodalPoliceReportViewer?.dispose(element); element.remove();}
+  });
+  if (trash && refresh) trash.querySelector('.nodal-window-body').innerHTML = renderNodalTrash(false);
+  updateNodalTaskbar();
 }
 function refreshNodalExplorer(resultsOnly = false) {
   const explorer = nodalWindows?.querySelector('[data-nodal-open="explorer"]'); if (!explorer) return;
@@ -3157,7 +3211,7 @@ function refreshNodalExplorer(resultsOnly = false) {
   explorer.dataset.nodalTitle = title; explorer.querySelector('.nodal-window-header strong').textContent = title; explorer.setAttribute('aria-label',title); updateNodalTaskbar();
 }
 function navigateNodalFolder(id,historyIndex = null) {
-  if (id === 'root' || id === 'drive-c' || nodalVaultFolders.some(folder => folder.id === id)) {
+  if (['root','quick-access','drive-c','network'].includes(id) || nodalSystemFolders.some(folder => folder.id === id) || nodalVaultFolders.some(folder => folder.id === id)) {
     const folder = nodalFolder(id);
     if (folder?.sealed && !nodalFolderCache.has(id)) {
       requestNodalUnlock({title:folder.title,sealed:folder.sealed,onUnlock:data => {nodalFolderCache.set(id,data); navigateNodalFolder(id,historyIndex);}}); return;
@@ -3227,7 +3281,7 @@ function renderNodalDocument(data) {
   return `<article class="nodal-document"><header class="nodal-document-header"><p class="nodal-document-classification">${nodalEscape(data.classification)}</p><h2>${nodalEscape(data.title)}</h2><dl class="nodal-document-meta"><div><dt>Référence</dt><dd>${nodalEscape(data.reference)}</dd></div><div><dt>Sujet</dt><dd>${nodalEscape(data.subject)}</dd></div><div><dt>Date</dt><dd>${nodalEscape(data.date)}</dd></div></dl></header>${data.sections.map(section => `<section class="nodal-document-section"><h3>${nodalEscape(section.heading)}</h3>${String(section.body).split('\n').filter(Boolean).map(paragraph => `<p>${nodalEscape(paragraph)}</p>`).join('')}</section>`).join('')}<footer class="nodal-document-footer">${nodalEscape(data.footer)}</footer><div class="nodal-document-actions"><button type="button" data-nodal-lock>◈ Reverrouiller les archives</button></div></article>`;
 }
 function openNodalDocument(id) {
-  const file = nodalDocument(id); if (!file || (!file.standalone && !nodalFolderCache.has(file.folderId))) return;
+  const file = nodalDocument(id); if (!file || (!file.standalone && !nodalFolderCache.has(file.folderId)) || (file.hidden && !nodalTrashRevealed())) return;
   const open = data => {
     const report = data.format === 'police-report';
     const element = createNodalWindow(`document-${id}`,data.title,renderNodalDocument(data),{variant:report ? 'document-window police-report-window' : 'document-window'});
@@ -3238,12 +3292,13 @@ function openNodalDocument(id) {
     refreshNodalExplorer(true); updateNodalDesktopLocks();
   };
   if (nodalDocumentCache.has(id)) open(nodalDocumentCache.get(id));
-  else requestNodalUnlock({title:file.title,sealed:file.sealed,documentId:id,onUnlock:data => {nodalDocumentCache.set(id,data); open(data);}});
+  else requestNodalUnlock({title:file.title,sealed:file.sealed,documentId:id,onUnlock:data => {if (file.hidden && !nodalTrashRevealed()) return; nodalDocumentCache.set(id,data); open(data);}});
 }
 function lockNodalArchives(notify = true) {
   nodalSession++; cancelNodalUnlock(); window.clearTimeout(nodalSearchTimer); window.clearTimeout(nodalIdleTimer); nodalFolderCache.clear(); nodalDocumentCache.clear();
   nodalWindows?.querySelectorAll('[data-nodal-protected]').forEach(element => {window.NodalPoliceReportViewer?.dispose(element); element.remove();});
-  Object.assign(nodalExplorerState,{folder:'root',query:'',history:['root'],index:0}); if (nodalTaskbarSearch) nodalTaskbarSearch.value = '';
+  resetNodalTrash();
+  Object.assign(nodalExplorerState,{folder:'quick-access',query:'',history:['quick-access'],index:0,quickExpanded:true,computerExpanded:true}); if (nodalTaskbarSearch) nodalTaskbarSearch.value = '';
   refreshNodalExplorer(); updateNodalDesktopLocks(); updateNodalTaskbar();
   if (notify) {showNodalNotification('Archives reverrouillées. Autorisations de session effacées.'); const explorer = nodalWindows.querySelector('[data-nodal-open="explorer"]:not(.hidden)'); if (explorer) focusNodalWindow(explorer,true);}
 }
@@ -3375,8 +3430,10 @@ function createNodalWindow(id,title,content,options = {}) {
   fitNodalWindow(element); focusNodalWindow(element,true); return element;
 }
 function openNodalWindow(id) {
+  if (id === 'trash') resetNodalTrash();
   const definition = nodalWindowDefinitions[id]; if (!definition) return;
-  createNodalWindow(id,definition.title,definition.content(),{variant:definition.variant || ''}); nodalOpenedWindowIds.add(id);
+  const title = id === 'explorer' ? nodalFolder(nodalExplorerState.folder)?.title || 'Accès rapide' : definition.title;
+  createNodalWindow(id,title,definition.content(),{variant:definition.variant || ''}); nodalOpenedWindowIds.add(id);
   if (nodalOpenedWindowIds.size >= 3 && !nodalMemoryNoticeShown) {nodalMemoryNoticeShown = true; showNodalNotification('Mémoire partiellement restaurée.');}
 }
 function openNodalPopup(title,lines) {
@@ -3400,11 +3457,12 @@ function updateNodalTaskbar() {
   });
 }
 function closeNodalWindow(element) {
-  if (!element) return; window.NodalPoliceReportViewer?.dispose(element); element.remove();
+  if (!element) return; if (element.dataset.nodalOpen === 'trash') resetNodalTrash(false); window.NodalPoliceReportViewer?.dispose(element); element.remove();
   const next = [...nodalWindows.children].filter(item => !item.classList.contains('hidden')).sort((a,b) => Number(b.style.zIndex) - Number(a.style.zIndex))[0];
   if (next) focusNodalWindow(next,true); else nodalStartButton.focus(); updateNodalTaskbar();
 }
 function minimizeNodalWindow(element) {
+  if (element.dataset.nodalOpen === 'trash') resetNodalTrash();
   window.NodalPoliceReportViewer?.pause(element);
   element.classList.add('hidden'); element.classList.remove('is-active'); updateNodalTaskbar();
   [...nodalRunningApps.children].find(button => button.dataset.nodalTask === element.dataset.nodalOpen)?.focus();
@@ -3454,6 +3512,19 @@ nodalDesktop?.addEventListener('click',event => {
   if (target.hasAttribute('data-nodal-minimize')) return minimizeNodalWindow(element);
   if (target.hasAttribute('data-nodal-maximize')) return maximizeNodalWindow(element);
   if (target.hasAttribute('data-nodal-signout')) return signOutNodalUser();
+  if (target.dataset.nodalToggleTree) {
+    const property = target.dataset.nodalToggleTree === 'quick' ? 'quickExpanded' : 'computerExpanded';
+    nodalExplorerState[property] = !nodalExplorerState[property];
+    nodalWindows.querySelectorAll('.nodal-explorer-sidebar').forEach(sidebar => {const container = document.createElement('div'); container.innerHTML = renderNodalSidebar(sidebar.closest('.trash-window') ? 'trash' : nodalExplorerState.folder); sidebar.replaceWith(container.firstElementChild);});
+    element?.querySelector(`[data-nodal-toggle-tree="${target.dataset.nodalToggleTree}"]`)?.focus({preventScroll:true}); return;
+  }
+  if (target.dataset.nodalAction === 'toggle-hidden-files' && element?.dataset.nodalOpen === 'trash') {
+    const show = element.dataset.nodalShowHidden !== 'true';
+    if (!show) resetNodalTrash(false);
+    element.dataset.nodalShowHidden = String(show);
+    element.querySelector('.nodal-window-body').innerHTML = renderNodalTrash(show);
+    element.querySelector('[data-nodal-action="toggle-hidden-files"]').focus({preventScroll:true}); return;
+  }
   if (target.hasAttribute('data-nodal-lock')) {closeNodalStartMenu(); lockNodalArchives(); return;}
   if (target.dataset.nodalFolder) {closeNodalStartMenu(); navigateNodalFolder(target.dataset.nodalFolder); return;}
   if (target.dataset.nodalWindow) {closeNodalStartMenu(); openNodalWindow(target.dataset.nodalWindow); return;}

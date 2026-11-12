@@ -352,15 +352,113 @@
   #nodalOs .nodal-folder-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
 }
 @media (max-width: 640px) {
-  #nodalOs .nodal-explorer-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
-  #nodalOs .nodal-explorer-sidebar { flex-direction: row; gap: 2px; max-height: 47px; padding: 5px 8px; border-right: 0; border-bottom: 1px solid #444; overflow: auto hidden; }
-  #nodalOs .nodal-explorer-sidebar > span { display: none; }
-  #nodalOs .nodal-explorer-sidebar button { flex: 0 0 auto; padding: 5px 8px; white-space: nowrap; }
-  #nodalOs .nodal-explorer-sidebar .nodal-sidebar-nested { padding-left: 8px; }
+
   #nodalOs .nodal-explorer-content { padding: 10px 13px 22px; }
   #nodalOs .nodal-explorer-ribbon { padding: 4px 6px; }
   #nodalOs .nodal-explorer-ribbon button { padding: 5px 7px; font-size: 11px; }
   #nodalOs .nodal-folder-grid { grid-template-columns: 1fr; }
   #nodalOs .nodal-drive-grid { grid-template-columns: minmax(0, 1fr); }
   #nodalOs .nodal-drive-tile { min-width: 0; }
+}
+
+/* A familiar navigation tree keeps system locations separate from archive files. */
+#nodalOs .nodal-explorer-main { grid-template-columns: 205px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+#nodalOs .nodal-explorer-sidebar { display: flex; flex-direction: column; min-width: 0; min-height: 0; max-height: none; gap: 0; padding: 8px 0; overflow-x: hidden; overflow-y: auto; border-right: 1px solid #444; border-bottom: 0; }
+#nodalOs .nodal-sidebar-section { display: flex; flex: 0 0 auto; flex-direction: column; min-width: 0; gap: 1px; padding: 2px 0 8px; }
+#nodalOs .nodal-explorer-sidebar button { display: flex; align-items: center; flex: 0 0 auto; gap: 7px; width: 100%; min-width: 0; min-height: 31px; padding: 6px 9px; overflow: hidden; color: #dedede; background: transparent; font-size: 12px; line-height: 1.35; text-align: left; white-space: nowrap; }
+#nodalOs .nodal-explorer-sidebar .nodal-sidebar-root { position: sticky; top: 0; z-index: 2; min-height: 32px; padding-left: 7px; color: #e4e4e4; background: #202020; }
+#nodalOs .nodal-explorer-sidebar .nodal-sidebar-library { min-height: 30px; padding-left: 35px; padding-right: 8px; }
+#nodalOs .nodal-explorer-sidebar button:hover { color: #fff; background: #383838; }
+#nodalOs .nodal-explorer-sidebar button[aria-current="page"] { color: #fff; background: #484848; }
+#nodalOs .nodal-explorer-sidebar .nodal-sidebar-root:hover { background: #383838; }
+#nodalOs .nodal-explorer-sidebar .nodal-sidebar-root[aria-current="page"] { background: #484848; }
+#nodalOs .nodal-explorer-sidebar .nodal-sidebar-label { display: block; min-width: 0; padding: 0; overflow: hidden; color: inherit; text-overflow: ellipsis; white-space: nowrap; }
+#nodalOs .nodal-explorer-sidebar .nodal-sidebar-chevron { display: inline-grid; place-items: center; flex: 0 0 10px; width: 10px; height: 16px; padding: 0; color: #b9b9b9; font-size: 10px; line-height: 1; }
+#nodalOs .nodal-explorer-sidebar .nodal-sidebar-icon { display: inline-grid; place-items: center; flex: 0 0 16px; width: 16px; height: 16px; padding: 0; color: #b9cedd; }
+#nodalOs .nodal-sidebar-icon svg { display: block; width: 16px; height: 16px; }
+#nodalOs .nodal-library-symbol { display: inline-grid; place-items: center; flex: 0 0 48px; width: 48px; height: 48px; padding: 0; color: #c4d5e2; }
+#nodalOs .nodal-library-symbol svg { display: block; width: 100%; height: 100%; }
+#nodalOs .nodal-frequent-grid,
+#nodalOs .nodal-system-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px 14px; min-width: 0; margin-bottom: 22px; }
+#nodalOs .nodal-frequent-tile,
+#nodalOs .nodal-system-tile { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 3px 11px; width: 100%; min-width: 0; min-height: 78px; padding: 8px 9px; border: 1px solid transparent; border-radius: 0; color: #e7e7e7; background: transparent; text-align: left; }
+#nodalOs .nodal-frequent-tile:hover,
+#nodalOs .nodal-system-tile:hover { border-color: #646464; background: #393939; }
+#nodalOs :is(.nodal-frequent-tile, .nodal-system-tile) > .nodal-library-symbol { grid-row: 1 / span 2; }
+#nodalOs :is(.nodal-frequent-tile, .nodal-system-tile) > span:last-child { min-width: 0; }
+#nodalOs .nodal-window-body :is(.nodal-frequent-tile, .nodal-system-tile) strong { display: block; color: #eee; font-size: 12px; font-weight: 400; line-height: 1.4; overflow-wrap: anywhere; }
+#nodalOs :is(.nodal-frequent-tile, .nodal-system-tile) small { display: block; min-width: 0; margin-top: 4px; overflow: hidden; color: #b4b4b4; font-size: 11px; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+#nodalOs .nodal-file-row.is-hidden { border-style: dashed; border-color: #505050; }
+#nodalOs .nodal-file-row.is-hidden > span:first-child { opacity: .55; }
+#nodalOs .nodal-window-body .nodal-file-row.is-hidden strong { color: #c5c5c5; }
+#nodalOs .nodal-file-row.is-hidden:hover { border-color: #858585; }
+#nodalOs .nodal-explorer-ribbon [data-nodal-action="toggle-hidden-files"] { display: inline-flex; align-items: center; justify-content: flex-start; gap: 7px; }
+#nodalOs [data-nodal-action="toggle-hidden-files"]::before { content: ""; display: inline-grid; place-items: center; flex: 0 0 12px; width: 12px; height: 12px; border: 1px solid #a0a0a0; color: #fff; background: #202020; font-size: 10px; line-height: 1; }
+#nodalOs .nodal-explorer-ribbon [data-nodal-action="toggle-hidden-files"][aria-pressed="true"] { border-color: #7b8d99; color: #fff; background: #404b54; }
+#nodalOs [data-nodal-action="toggle-hidden-files"][aria-pressed="true"]::before { content: "✓"; border-color: #8bc9ee; background: #0877bd; }
+
+@media (max-width: 820px) {
+  #nodalOs .nodal-explorer-main { grid-template-columns: 165px minmax(0, 1fr); }
+  #nodalOs .nodal-frequent-grid,
+  #nodalOs .nodal-system-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  #nodalOs .nodal-explorer-main { grid-template-columns: 150px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  #nodalOs .nodal-explorer-sidebar { flex-direction: column; min-height: 0; max-height: none; padding: 5px 0; overflow: hidden; border-right: 1px solid #444; border-bottom: 0; }
+  #nodalOs .nodal-sidebar-section { flex: 1 1 auto; min-height: 32px; padding: 0 0 4px; overflow-x: hidden; overflow-y: auto; }
+  #nodalOs .nodal-explorer-sidebar .nodal-sidebar-root { top: 0; }
+  #nodalOs .nodal-explorer-sidebar button { gap: 6px; padding-right: 6px; font-size: 11px; }
+  #nodalOs .nodal-explorer-sidebar .nodal-sidebar-library { padding-left: 28px; }
+  #nodalOs .nodal-explorer-content { min-width: 0; padding: 9px 8px 18px; }
+  #nodalOs .nodal-explorer-content .nodal-section-heading { gap: 7px; margin: 10px 0 12px; font-size: 13px; }
+  #nodalOs .nodal-frequent-grid,
+  #nodalOs .nodal-system-grid { grid-template-columns: minmax(0, 1fr); gap: 4px; margin-bottom: 16px; }
+  #nodalOs .nodal-frequent-tile,
+  #nodalOs .nodal-system-tile { grid-template-columns: 40px minmax(0, 1fr); gap: 3px 7px; min-height: 69px; padding: 7px 4px; }
+  #nodalOs .nodal-library-symbol { flex-basis: 40px; width: 40px; height: 40px; }
+  #nodalOs .nodal-window-body :is(.nodal-frequent-tile, .nodal-system-tile) strong { font-size: 11px; }
+  #nodalOs :is(.nodal-frequent-tile, .nodal-system-tile) small { font-size: 10px; }
+  #nodalOs .nodal-explorer-content .nodal-folder-tile { grid-template-columns: 32px minmax(0, 1fr); gap: 7px; padding: 6px 4px; }
+  #nodalOs .nodal-explorer-content .nodal-folder-icon { transform: scale(.8); transform-origin: left center; }
+  #nodalOs .nodal-window-body .nodal-folder-tile strong { font-size: 11px; }
+  #nodalOs .nodal-file-row { grid-template-columns: 24px minmax(0, 1fr); gap: 7px; padding: 7px 4px; }
+  #nodalOs .nodal-file-row > span:first-child { width: 24px; }
+  #nodalOs .nodal-file-row .nodal-file-meta { grid-column: 2; font-size: 10px; white-space: normal; }
+  #nodalOs .nodal-window-body .nodal-file-row strong { font-size: 11px; }
+  #nodalOs .nodal-drive-tile { grid-template-columns: 32px minmax(0, 1fr); gap: 4px 7px; padding: 7px 4px; }
+  #nodalOs .nodal-drive-icon { transform: scale(.75); transform-origin: left center; }
+  #nodalOs .nodal-drive-tile strong { font-size: 11px; }
+  #nodalOs .nodal-drive-tile small { font-size: 10px; }
+}
+@media (max-width: 360px) {
+  #nodalOs .nodal-explorer-main { grid-template-columns: 140px minmax(0, 1fr); }
+  #nodalOs .nodal-explorer-sidebar .nodal-sidebar-library { padding-left: 26px; }
+  #nodalOs .nodal-explorer-content { padding-right: 6px; padding-left: 6px; }
+  #nodalOs .nodal-explorer-content .nodal-section-heading { font-size: 12px; }
+}
+
+/* Disclosure buttons and location buttons remain separate keyboard targets. */
+#nodalOs .nodal-tree-heading { position: sticky; top: 0; z-index: 3; display: flex; flex: 0 0 auto; align-items: center; min-width: 0; min-height: 32px; background: #202020; }
+#nodalOs .nodal-explorer-sidebar .nodal-tree-toggle { display: grid; place-items: center; flex: 0 0 22px; width: 22px; min-height: 32px; padding: 0; color: #c4c4c4; background: transparent; }
+#nodalOs .nodal-tree-toggle .nodal-sidebar-chevron { transition: transform 120ms ease; }
+#nodalOs .nodal-tree-toggle[aria-expanded="true"] .nodal-sidebar-chevron { transform: rotate(90deg); }
+#nodalOs .nodal-tree-heading > .nodal-sidebar-root { position: static; flex: 1 1 auto; width: auto; min-width: 0; padding-left: 3px; }
+#nodalOs .nodal-tree-children { display: flex; flex-direction: column; flex: 0 0 auto; min-width: 0; gap: 1px; }
+@media (max-width: 640px) {
+  #nodalOs .nodal-sidebar-section { min-height: 32px; padding-bottom: 3px; overflow: hidden; }
+  #nodalOs .nodal-tree-heading { flex: 0 0 32px; }
+  #nodalOs .nodal-tree-children { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #nodalOs .nodal-tree-toggle .nodal-sidebar-chevron { transition: none; }
+}
+
+/* Short landscape screens keep both navigation roots in view. */
+@media (max-height: 440px) {
+  #nodalOs .nodal-window.explorer-window { top: 8px !important; height: calc(100% - 16px); max-height: none; }
+  #nodalOs .nodal-explorer-sidebar { min-height: 0; max-height: none; overflow: hidden; }
+  #nodalOs .nodal-sidebar-section { flex: 1 1 auto; min-height: 32px; padding-bottom: 3px; overflow: hidden; }
+  #nodalOs .nodal-tree-heading { flex: 0 0 32px; }
+  #nodalOs .nodal-tree-children { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; }
+  #nodalOs .nodal-sidebar-network { flex: 0 0 auto; }
 }
