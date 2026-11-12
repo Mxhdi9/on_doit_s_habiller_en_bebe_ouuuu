@@ -2848,8 +2848,6 @@ function handleConsoleCommand() {
   consoleInput.value = "";
 
   const responses = {
-    AIDE: "commandes : ETAT, N17, TRACE, SCELLE, DEX, MAMAN, CONNECT 192.168.1.1, EFFACER.",
-    HELP: "commandes : ETAT, N17, TRACE, SCELLE, DEX, MAMAN, CONNECT 192.168.1.1, EFFACER.",
     ETAT: "archive ouverte. niveau incomplet.",
     STATUS: "archive ouverte. niveau incomplet.",
     N17: "sujet actif. douleur consignée. motif absent.",
