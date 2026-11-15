@@ -3157,8 +3157,8 @@ function nodalExplorerResults() {
     const files = nodalFolderCache.get(folder).documents; count = files.length;
     html = `<h3 class="nodal-section-heading">${nodalEscape(nodalFolder(folder)?.title)}</h3><div class="nodal-file-list">${files.map(nodalFileRow).join('')}</div>`;
   } else if (folder === 'library-desktop') {
-    count = 2;
-    html = `<h3 class="nodal-section-heading">Bureau</h3><div class="nodal-system-grid"><button class="nodal-system-tile" type="button" data-nodal-window="trash"><span class="nodal-library-symbol" aria-hidden="true">${nodalExplorerIcon('folder')}</span><span><strong>Corbeille</strong><small>Raccourci</small></span></button>${nodalLibraryTile({...nodalFolder('quick-access'),title:'Explorateur de fichiers'})}</div>`;
+    count = nodalActiveUser === 'admin' ? 3 : 2;
+    html = `<h3 class="nodal-section-heading">Bureau</h3><div class="nodal-system-grid"><button class="nodal-system-tile" type="button" data-nodal-window="trash"><span class="nodal-library-symbol" aria-hidden="true">${nodalExplorerIcon('folder')}</span><span><strong>Corbeille</strong><small>Raccourci</small></span></button>${nodalLibraryTile({...nodalFolder('quick-access'),title:'Explorateur de fichiers'})}${renderNadirProgramTile()}</div>`;
   } else {
     const contents = {
       'library-documents': allFolders.filter(item => ['dossier','archives','medical','experiments','contracts'].includes(item.id)),
@@ -3315,6 +3315,22 @@ function updateNodalClock() {
   clock.textContent = new Intl.DateTimeFormat('fr-FR',{hour:'2-digit',minute:'2-digit'}).format(now);
   clock.title = new Intl.DateTimeFormat('fr-FR',{dateStyle:'full'}).format(now);
 }
+function updateNadirAccess() {
+  const allowed = nodalActiveUser === 'admin' && Boolean(window.NadirExperience);
+  nodalOs?.querySelectorAll('[data-nodal-nadir]').forEach(button => {
+    button.hidden = !allowed; button.disabled = !allowed; button.classList.toggle('hidden',!allowed);
+  });
+}
+function openNadirApp() {
+  if (nodalActiveUser !== 'admin' || nodalDesktop.classList.contains('hidden') || nodalOs.classList.contains('hidden')) return false;
+  closeNodalStartMenu();
+  return window.NadirExperience?.open() || false;
+}
+function renderNadirProgramTile() {
+  if (nodalActiveUser !== 'admin') return '';
+  return '<button class="nodal-system-tile nodal-nadir-launcher" type="button" data-nodal-nadir><span class="nodal-library-symbol nodal-nadir-symbol" aria-hidden="true"><svg viewBox="0 0 40 44" fill="none" aria-hidden="true"><path d="M3 1h25l9 9v33H3z"/><path d="M27 1v10h10M11 33V17h4l10 10V17h4v16h-4L15 23v10" /></svg></span><span><strong>Nadir.exe</strong><small>Application · Administrateur</small></span></button>';
+}
+
 function selectNodalUser(id, {focus = true, animate = true} = {}) {
   const user = Object.hasOwn(NODAL_USERS,id) ? NODAL_USERS[id] : null;
   if (!user || nodalLoginPending) return;
@@ -3344,10 +3360,11 @@ function selectNodalUser(id, {focus = true, animate = true} = {}) {
   if (focus && !nodalLogin.classList.contains('hidden')) nodalPassword.focus({preventScroll:true});
 }
 function resetNodalOs() {
+  window.NadirExperience?.reset();
   nodalBootTimers.forEach(window.clearTimeout); nodalBootTimers = [];
   window.clearTimeout(nodalNotificationTimer); window.clearTimeout(nodalSearchTimer); window.clearInterval(nodalClockTimer);
   lockNodalArchives(false); nodalWrongAttempts = 0; nodalWindowZ = 210; nodalMemoryNoticeShown = false; nodalOpenedWindowIds.clear(); nodalLoginPending = false;
-  nodalActiveUser = null; delete nodalOs.dataset.nodalSessionUser;
+  nodalActiveUser = null; delete nodalOs.dataset.nodalSessionUser; updateNadirAccess();
   nodalWindows?.replaceChildren(); updateNodalTaskbar();
   nodalLogin?.classList.add('hidden'); nodalDesktop?.classList.add('hidden'); nodalBoot?.classList.remove('hidden'); nodalNotification?.classList.add('hidden');
   nodalBoot.classList.remove('is-finishing'); nodalBoot.setAttribute('aria-busy','true');
@@ -3388,7 +3405,7 @@ function handleNodalLogin(event) {
     // Keep focus out of the password form while its welcome animation is visible.
     nodalLoginTitle.tabIndex = -1; nodalLoginTitle.focus({preventScroll:true});
     nodalBootTimers.push(window.setTimeout(() => {
-      nodalActiveUser = nodalSelectedUser; nodalOs.dataset.nodalSessionUser = nodalActiveUser;
+      nodalActiveUser = nodalSelectedUser; nodalOs.dataset.nodalSessionUser = nodalActiveUser; updateNadirAccess();
       if (nodalStartUserName) nodalStartUserName.textContent = user.name;
       nodalLogin.classList.add('hidden'); nodalDesktop.classList.remove('hidden');
       updateNodalClock(); nodalClockTimer = window.setInterval(updateNodalClock,30000);
@@ -3401,11 +3418,12 @@ function handleNodalLogin(event) {
   }
 }
 function signOutNodalUser() {
-  if (!nodalActiveUser) return;
+  if (!nodalActiveUser || window.NadirExperience?.active) return;
   const previousUser = nodalActiveUser;
   resetNodalOs(); selectNodalUser(previousUser,{focus:false,animate:false}); showNodalLogin();
 }
 function closeNodalOs() {
+  if (window.NadirExperience?.active) return;
   resetNodalOs(); nodalOs?.classList.add('hidden'); nodalOs?.setAttribute('aria-hidden','true'); body.classList.remove('nodal-os-open');
   document.querySelector('main.shell')?.removeAttribute('inert'); document.dispatchEvent(new CustomEvent('ascalon:overlaychange'));
   if (nodalReturnFocus?.isConnected) nodalReturnFocus.focus({preventScroll:true});
@@ -3430,6 +3448,7 @@ function createNodalWindow(id,title,content,options = {}) {
   fitNodalWindow(element); focusNodalWindow(element,true); return element;
 }
 function openNodalWindow(id) {
+  if (window.NadirExperience?.active) return;
   if (id === 'trash') resetNodalTrash();
   const definition = nodalWindowDefinitions[id]; if (!definition) return;
   const title = id === 'explorer' ? nodalFolder(nodalExplorerState.folder)?.title || 'Accès rapide' : definition.title;
@@ -3502,11 +3521,13 @@ nodalLoginForm?.addEventListener('submit',handleNodalLogin);
 nodalUserButtons.forEach(button => button.addEventListener('click',() => selectNodalUser(button.dataset.nodalUser)));
 nodalLogin?.querySelector('[data-nodal-exit]')?.addEventListener('click',closeNodalOs);
 nodalExit?.addEventListener('click',closeNodalOs);
-nodalStartButton?.addEventListener('click',() => {const opened = nodalStartMenu.classList.toggle('hidden') === false; nodalStartButton.setAttribute('aria-expanded',String(opened)); if (opened) nodalStartMenu.querySelector('button')?.focus();});
+nodalStartButton?.addEventListener('click',() => {if (window.NadirExperience?.active) return; const opened = nodalStartMenu.classList.toggle('hidden') === false; nodalStartButton.setAttribute('aria-expanded',String(opened)); if (opened) nodalStartMenu.querySelector('button')?.focus();});
 nodalWindows?.addEventListener('pointerdown',event => {const element = event.target.closest('.nodal-window'); if (element) focusNodalWindow(element);});
 nodalDesktop?.addEventListener('click',event => {
+  if (window.NadirExperience?.active) return;
   const target = event.target.closest('button');
   if (!event.target.closest('#nodalStartMenu, #nodalStartButton')) closeNodalStartMenu(); if (!target) return;
+  if (target.hasAttribute('data-nodal-nadir')) return openNadirApp();
   const element = target.closest('.nodal-window');
   if (target.hasAttribute('data-nodal-close')) return closeNodalWindow(element);
   if (target.hasAttribute('data-nodal-minimize')) return minimizeNodalWindow(element);
@@ -3547,7 +3568,7 @@ nodalWindows?.addEventListener('input',event => {
   nodalSearchTimer = window.setTimeout(() => {nodalExplorerState.query = query; refreshNodalExplorer(true);},90);
 });
 nodalTaskbarSearchForm?.addEventListener('submit',event => {
-  event.preventDefault(); const query = nodalTaskbarSearch.value.trim(); if (!query) return; closeNodalStartMenu();
+  event.preventDefault(); if (window.NadirExperience?.active) return; const query = nodalTaskbarSearch.value.trim(); if (!query) return; closeNodalStartMenu();
   if (normalizeCode(query) === 'CATALEYA') {openNodalPopup('ANOMALIE ÉMOTIONNELLE',['ANOMALIE ÉMOTIONNELLE DÉTECTÉE','Le sujet N-17 n’est plus totalement contrôlable.']); nodalTaskbarSearch.value = ''; return;}
   navigateNodalFolder('root'); nodalExplorerState.query = query; refreshNodalExplorer(); nodalWindows.querySelector('[data-nodal-search]')?.focus();
 });
@@ -3556,7 +3577,7 @@ nodalDesktopConsoleForm?.addEventListener('submit',event => {
   appendNodalDesktopLine('sys',normalizeCode(command) === 'CATALEYA' ? 'Le sujet N-17 n’est plus totalement contrôlable.' : 'Commande locale non reconnue.');
 });
 document.addEventListener('keydown',event => {
-  if (!body.classList.contains('nodal-os-open') || event.defaultPrevented || nodalVaultDialog.open) return;
+  if (!body.classList.contains('nodal-os-open') || event.defaultPrevented || nodalVaultDialog.open || window.NadirExperience?.active) return;
   if (event.key === 'Escape') {
     event.preventDefault();
     if (!nodalStartMenu.classList.contains('hidden')) {closeNodalStartMenu(); nodalStartButton.focus();}
@@ -3576,3 +3597,10 @@ document.addEventListener('keydown',event => {
 let nodalResizeFrame = 0;
 window.addEventListener('resize',() => {if (!body.classList.contains('nodal-os-open') || nodalResizeFrame) return; nodalResizeFrame = requestAnimationFrame(() => {nodalResizeFrame = 0; nodalWindows.querySelectorAll('.nodal-window').forEach(fitNodalWindow);});});
 window.addEventListener('pagehide',() => lockNodalArchives(false));
+
+window.NadirExperience?.configure({
+  host: nodalOs,
+  desktop: nodalDesktop,
+  canOpen: () => nodalActiveUser === 'admin' && !nodalDesktop.classList.contains('hidden') && !nodalOs.classList.contains('hidden'),
+});
+updateNadirAccess();
