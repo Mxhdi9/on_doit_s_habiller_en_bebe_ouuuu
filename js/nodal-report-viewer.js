@@ -1,4 +1,4 @@
-/* Read-only viewer. Report content is supplied only after archive decryption. */
+/* Read-only viewer for the police report. */
 (() => {
   "use strict";
   const readers = new WeakMap();
@@ -65,7 +65,6 @@
       <div class="nodal-police-toolbar"><div class="nodal-police-file"><strong>Rapport police.txt</strong><span>Lecture seule</span></div><div class="nodal-police-tools">
         <button type="button" data-nodal-report-top>Début du texte</button>
         <button type="button" data-nodal-report-autoscroll aria-pressed="false">Lecture automatique</button>
-        <button type="button" data-nodal-lock>Verrouiller</button>
       </div></div>
       <div class="nodal-police-scroll" tabindex="0" role="document" aria-label="Rapport police">
         <article class="nodal-police-document"><header class="nodal-police-heading">${seal()}

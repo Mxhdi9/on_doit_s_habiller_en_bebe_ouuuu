@@ -3050,7 +3050,7 @@ const nodalPublicFolders = [
   {id:'audio',title:'AUDIO_LOGS',description:'Enregistrements endommagés'},
 ];
 const nodalVaultFolders = window.NODAL_VAULT_DATA?.folders || [];
-const nodalStandaloneDocuments = window.NODAL_POLICE_REPORT ? [{...window.NODAL_POLICE_REPORT,standalone:true,hidden:true,location:'trash'}] : [];
+const nodalStandaloneDocuments = window.NODAL_POLICE_REPORT ? [{...window.NODAL_POLICE_REPORT,standalone:true,hidden:false,location:'desktop'}] : [];
 const nodalFolderCache = new Map();
 const nodalDocumentCache = new Map();
 const nodalSystemFolders = [
@@ -3111,7 +3111,7 @@ function nodalFolderTile(folder) {
   return `<button class="nodal-folder-tile" type="button" data-nodal-folder="${nodalEscape(folder.id)}"><span class="nodal-folder-icon" aria-hidden="true"></span><span><strong>${nodalEscape(folder.title)}</strong><small>${nodalEscape(folder.description)}</small>${folder.sealed ? `<span class="nodal-lock-badge">${locked ? '◈ Verrouillé' : '◇ Dossier ouvert'}</span>` : ''}</span></button>`;
 }
 function nodalFileRow(file) {
-  return `<button class="nodal-file-row" type="button" data-nodal-document="${nodalEscape(file.id)}"><span aria-hidden="true">▤</span><span><strong>${nodalEscape(file.title)}</strong><small>${nodalEscape(file.reference)} · ${nodalEscape(file.kind)}</small></span><span class="nodal-file-meta">${nodalDocumentCache.has(file.id) ? '◇ Ouvert' : '◈ Mot de passe requis'}</span></button>`;
+  return `<button class="nodal-file-row" type="button" data-nodal-document="${nodalEscape(file.id)}"><span aria-hidden="true">▤</span><span><strong>${nodalEscape(file.title)}</strong><small>${nodalEscape(file.reference)} · ${nodalEscape(file.kind)}</small></span><span class="nodal-file-meta">${file.data ? 'Lecture libre' : nodalDocumentCache.has(file.id) ? '◇ Ouvert' : '◈ Mot de passe requis'}</span></button>`;
 }
 function nodalDriveTile() {
   return `<button class="nodal-drive-tile" type="button" data-nodal-folder="drive-c" aria-label="Ouvrir Disque local C, 128 Go libres sur 256 Go"><span class="nodal-drive-icon" aria-hidden="true"></span><strong>Disque local (C:)</strong><i aria-hidden="true"><b style="width:50%"></b></i><small>128 Go libres sur 256 Go</small></button>`;
@@ -3128,6 +3128,9 @@ function renderNodalSidebar(active = nodalExplorerState.folder) {
   const group = (key, id, children, expanded) => `<section class="nodal-sidebar-section"><div class="nodal-tree-heading"><button class="nodal-tree-toggle" type="button" data-nodal-toggle-tree="${key}" aria-label="${expanded ? 'Replier' : 'Déplier'} ${nodalFolder(id).title}" aria-expanded="${expanded}"><span class="nodal-sidebar-chevron" aria-hidden="true">›</span></button>${link(nodalFolder(id),true)}</div><div class="nodal-tree-children" ${expanded ? '' : 'hidden'}>${children.map(folder => link(folder)).join('')}</div></section>`;
   const quick = ['library-desktop','library-downloads','library-documents','library-pictures'].map(id => nodalFolder(id));
   return `<aside class="nodal-explorer-sidebar" aria-label="Navigation des fichiers">${group('quick','quick-access',quick,nodalExplorerState.quickExpanded)}${group('computer','root',[...nodalSystemFolders,nodalFolder('drive-c')],nodalExplorerState.computerExpanded)}<div class="nodal-sidebar-network">${link(nodalFolder('network'),true)}</div></aside>`;
+}
+function nodalDesktopDocumentTile(file) {
+  return `<button class="nodal-system-tile" type="button" data-nodal-document="${nodalEscape(file.id)}"><span class="nodal-library-symbol" aria-hidden="true">${nodalExplorerIcon('documents')}</span><span><strong>${nodalEscape(file.title)}</strong><small>Document · Lecture libre</small></span></button>`;
 }
 function nodalVisibleStandaloneDocuments() {
   return nodalStandaloneDocuments.filter(file => !file.hidden);
@@ -3158,8 +3161,9 @@ function nodalExplorerResults() {
     const files = nodalFolderCache.get(folder).documents; count = files.length;
     html = `<h3 class="nodal-section-heading">${nodalEscape(nodalFolder(folder)?.title)}</h3><div class="nodal-file-list">${files.map(nodalFileRow).join('')}</div>`;
   } else if (folder === 'library-desktop') {
-    count = nodalActiveUser === 'admin' ? 3 : 2;
-    html = `<h3 class="nodal-section-heading">Bureau</h3><div class="nodal-system-grid"><button class="nodal-system-tile" type="button" data-nodal-window="trash"><span class="nodal-library-symbol" aria-hidden="true">${nodalExplorerIcon('folder')}</span><span><strong>Corbeille</strong><small>Raccourci</small></span></button>${nodalLibraryTile({...nodalFolder('quick-access'),title:'Explorateur de fichiers'})}${renderNadirProgramTile()}</div>`;
+    const desktopDocuments = visibleDocuments.filter(file => file.location === 'desktop');
+    count = (nodalActiveUser === 'admin' ? 3 : 2) + desktopDocuments.length;
+    html = `<h3 class="nodal-section-heading">Bureau</h3><div class="nodal-system-grid"><button class="nodal-system-tile" type="button" data-nodal-window="trash"><span class="nodal-library-symbol" aria-hidden="true">${nodalExplorerIcon('folder')}</span><span><strong>Corbeille</strong><small>Raccourci</small></span></button>${nodalLibraryTile({...nodalFolder('quick-access'),title:'Explorateur de fichiers'})}${desktopDocuments.map(nodalDesktopDocumentTile).join('')}${renderNadirProgramTile()}</div>`;
   } else {
     const contents = {
       'library-documents': allFolders.filter(item => ['dossier','archives','medical','experiments','contracts'].includes(item.id)),
@@ -3230,10 +3234,11 @@ function renderNodalPhotos() {
 }
 function updateNodalDesktopLocks() {
   nodalDesktop?.querySelectorAll('.nodal-icon[data-nodal-document]').forEach(button => {
-    const open = nodalDocumentCache.has(button.dataset.nodalDocument);
+    const file = nodalDocument(button.dataset.nodalDocument);
+    const free = Boolean(file?.data), open = free || nodalDocumentCache.has(button.dataset.nodalDocument);
     button.classList.toggle('is-unlocked',open);
-    button.setAttribute('aria-label',`Ouvrir Rapport police, ${open ? 'déverrouillé pour cette session' : 'mot de passe requis'}`);
-    button.title = open ? 'Rapport police — déverrouillé pour cette session' : 'Rapport police — verrouillé';
+    button.setAttribute('aria-label',`Ouvrir Rapport police, ${free ? 'accès libre' : open ? 'déverrouillé pour cette session' : 'mot de passe requis'}`);
+    button.title = free ? 'Rapport police — accès libre' : open ? 'Rapport police — déverrouillé pour cette session' : 'Rapport police — verrouillé';
   });
   nodalDesktop?.querySelectorAll('.nodal-icon[data-nodal-folder]').forEach(button => {const folder = nodalFolder(button.dataset.nodalFolder); button.lastElementChild.textContent = `${folder?.title || 'Archive'} · ${nodalFolderCache.has(folder?.id) ? 'ouvert' : 'verrouillé'}`;});
 }
@@ -3287,12 +3292,13 @@ function openNodalDocument(id) {
     const report = data.format === 'police-report';
     const element = createNodalWindow(`document-${id}`,data.title,renderNodalDocument(data),{variant:report ? 'document-window police-report-window' : 'document-window'});
     if (element) {
-      element.dataset.nodalProtected = file.folderId || file.id;
+      if (file.sealed) element.dataset.nodalProtected = file.folderId || file.id;
       if (report) window.NodalPoliceReportViewer.mount(element);
     }
     refreshNodalExplorer(true); updateNodalDesktopLocks();
   };
-  if (nodalDocumentCache.has(id)) open(nodalDocumentCache.get(id));
+  if (file.data) open(file.data);
+  else if (nodalDocumentCache.has(id)) open(nodalDocumentCache.get(id));
   else requestNodalUnlock({title:file.title,sealed:file.sealed,documentId:id,onUnlock:data => {if (file.hidden && !nodalTrashRevealed()) return; nodalDocumentCache.set(id,data); open(data);}});
 }
 function lockNodalArchives(notify = true) {
@@ -3366,6 +3372,7 @@ function resetNodalOs() {
   window.clearTimeout(nodalNotificationTimer); window.clearTimeout(nodalSearchTimer); window.clearInterval(nodalClockTimer);
   lockNodalArchives(false); nodalWrongAttempts = 0; nodalWindowZ = 210; nodalMemoryNoticeShown = false; nodalOpenedWindowIds.clear(); nodalLoginPending = false;
   nodalActiveUser = null; delete nodalOs.dataset.nodalSessionUser; updateNadirAccess();
+  nodalWindows?.querySelectorAll('.police-report-window').forEach(element => window.NodalPoliceReportViewer?.dispose(element));
   nodalWindows?.replaceChildren(); updateNodalTaskbar();
   nodalLogin?.classList.add('hidden'); nodalDesktop?.classList.add('hidden'); nodalBoot?.classList.remove('hidden'); nodalNotification?.classList.add('hidden');
   nodalBoot.classList.remove('is-finishing'); nodalBoot.setAttribute('aria-busy','true');

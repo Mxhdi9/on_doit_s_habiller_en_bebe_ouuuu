@@ -462,3 +462,7 @@
   #nodalOs .nodal-tree-children { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; }
   #nodalOs .nodal-sidebar-network { flex: 0 0 auto; }
 }
+
+/* Public police report on the desktop. */
+#nodalOs .nodal-report-symbol { height: 38px; background: none; }
+#nodalOs .nodal-report-symbol svg { display: block; width: 32px; height: 38px; }

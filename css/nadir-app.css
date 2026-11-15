@@ -74,11 +74,12 @@ body.nadir-app-open { overflow: hidden; overscroll-behavior: none; }
 #nodalOs .nadir-app__sigil .nadir-orbit { stroke: #a52e3b; }
 #nodalOs .nadir-app__sigil .nadir-mark { fill: #d3414e; stroke: none; }
 #nodalOs .nadir-app__subject { margin: 0 0 16px; color: #b88c94; font-size: 10px; letter-spacing: .36em; line-height: 1.4; }
-#nodalOs .nadir-app__title { margin: 0; color: #e34450; text-shadow: none; font-size: clamp(52px, 5.3vw, 84px); font-weight: 750; line-height: .96; letter-spacing: -.055em; text-transform: uppercase; text-wrap: balance; transition: opacity 650ms ease, color 1200ms ease, transform 850ms ease; }
 #nodalOs .nadir-app__message { max-width: 430px; min-height: 46px; margin: 24px auto 0; color: #c9818d; font-size: 14px; font-weight: 400; line-height: 1.7; text-wrap: pretty; transition: color 900ms ease, opacity 650ms ease; }
 #nodalOs .nadir-app__choice {
   --nadir-cut: 16px;
   position: relative;
+  isolation: isolate;
+  contain: paint;
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr) 24px;
   align-items: center;
@@ -125,14 +126,38 @@ body.nadir-app-open { overflow: hidden; overscroll-behavior: none; }
 #nodalOs .nadir-app__escape:hover { color: #f0dce2; background: transparent; }
 #nodalOs .nadir-app__escape:focus-visible { outline-offset: 1px; }
 
-/* State changes are slow and local; the surrounding black surface never flashes. */
+/* State changes remain local; the surrounding black surface never flashes. */
 #nodalOs .nadir-app[data-state="initializing"] .nadir-app__choice { opacity: .45; }
-#nodalOs .nadir-app[data-state="ready"] .nadir-app__sigil { opacity: 1; transform: scale(1); }
-#nodalOs .nadir-app[data-state="rewriting"] .nadir-app__title { opacity: .32; transform: translate(-2px, -2px); }
-#nodalOs .nadir-app[data-state="rewriting"] .nadir-app__message { opacity: .4; }
-#nodalOs .nadir-app[data-state="rewriting"] .nadir-app__choice { opacity: .65; }
-#nodalOs .nadir-app[data-state="rewriting"] .nadir-app__sigil { opacity: .65; transform: scale(1.04); }
-#nodalOs .nadir-app[data-state="committed"] .nadir-app__title { color: #ff3653; opacity: 1; transform: none; filter: none; }
+#nodalOs .nadir-app:is([data-state="ready"], [data-state="rewriting"]) .nadir-app__sigil { opacity: 1; transform: scale(1); }
+/* Distortion stays inside the button and runs once, then settles completely. */
+#nodalOs .nadir-app__choice [data-nadir-label] { position: relative; display: block; }
+#nodalOs .nadir-app[data-state="rewriting"] .nadir-app__choice { opacity: 1; transition: none; }
+#nodalOs .nadir-app__choice[data-glitch="scramble"] { animation: nadir-choice-distort 800ms steps(1, end) both; }
+#nodalOs .nadir-app__choice[data-glitch="scramble"] [data-nadir-label] { animation: nadir-label-distort 800ms steps(1, end) both; }
+#nodalOs .nadir-app__choice[data-glitch="scramble"] [data-nadir-label]::before,
+#nodalOs .nadir-app__choice[data-glitch="scramble"] [data-nadir-label]::after { content: attr(data-glitch-label); position: absolute; inset: 0; pointer-events: none; opacity: .65; }
+#nodalOs .nadir-app__choice[data-glitch="scramble"] [data-nadir-label]::before { color: #ff91a0; clip-path: inset(13% 0 58% 0); animation: nadir-label-slice 800ms steps(1, end) both; }
+#nodalOs .nadir-app__choice[data-glitch="scramble"] [data-nadir-label]::after { color: #b09bac; clip-path: inset(56% 0 11% 0); animation: nadir-label-slice 800ms steps(1, end) reverse both; }
+#nodalOs .nadir-app__choice[data-glitch="settle"] [data-nadir-label] { animation: nadir-label-settle 240ms ease-out both; }
+@keyframes nadir-choice-distort {
+  0%, 12%, 27%, 46%, 63%, 82%, 100% { transform: none; }
+  9%, 25%, 61% { transform: translateX(-1px) skewX(-.8deg); }
+  18%, 42%, 76% { transform: translateX(1.5px) skewX(.9deg); }
+}
+@keyframes nadir-label-distort {
+  0%, 15%, 34%, 55%, 79%, 100% { transform: none; text-shadow: none; }
+  11%, 38%, 66% { transform: translateX(-1px); text-shadow: 2px 0 #a52f4b, -1px 0 #b09bac; }
+  23%, 49%, 87% { transform: translateX(1px); text-shadow: -2px 0 #a52f4b, 1px 0 #b09bac; }
+}
+@keyframes nadir-label-slice {
+  0%, 18%, 39%, 64%, 83%, 100% { transform: translateX(0); opacity: 0; }
+  10%, 35%, 71% { transform: translateX(4px); opacity: .65; }
+  24%, 53%, 90% { transform: translateX(-3px); opacity: .5; }
+}
+@keyframes nadir-label-settle {
+  from { transform: translateY(1px); opacity: .65; letter-spacing: .19em; }
+  to { transform: none; opacity: 1; letter-spacing: .12em; }
+}
 #nodalOs .nadir-app[data-state="committed"] .nadir-app__sigil { opacity: .65; transform: scale(1.025); }
 #nodalOs .nadir-app[data-state="committed"] .nadir-app__eyebrow,
 #nodalOs .nadir-app[data-state="committed"] .nadir-app__subject,
@@ -153,7 +178,6 @@ body.nadir-app-open { overflow: hidden; overscroll-behavior: none; }
 @keyframes nadir-app-enter { from { opacity: 0; } to { opacity: 1; } }
 @media (max-width: 1100px) {
   #nodalOs .nadir-app__body { grid-template-columns: 110px minmax(0, 1fr) 150px; gap: 28px; }
-  #nodalOs .nadir-app__title { font-size: clamp(48px, 5.6vw, 70px); }
   #nodalOs .nadir-app__header,
   #nodalOs .nadir-app__footer { padding-right: 28px; padding-left: 28px; }
 }
@@ -164,7 +188,6 @@ body.nadir-app-open { overflow: hidden; overscroll-behavior: none; }
   #nodalOs .nadir-app__core { max-width: 590px; margin-right: auto; margin-left: auto; }
   #nodalOs .nadir-app__rail,
   #nodalOs .nadir-app__telemetry { display: none; }
-  #nodalOs .nadir-app__title { font-size: clamp(50px, 8vw, 76px); }
   #nodalOs .nadir-app__footer { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 20px; }
   #nodalOs .nadir-app__footer > span:first-child { grid-column: 1; grid-row: 1; }
   #nodalOs .nadir-app__footer > [data-nadir-status] { grid-column: 1; grid-row: 2; justify-self: start; text-align: left; }
@@ -178,7 +201,6 @@ body.nadir-app-open { overflow: hidden; overscroll-behavior: none; }
   #nodalOs .nadir-app__eyebrow { font-size: 8px; letter-spacing: .13em; }
   #nodalOs .nadir-app__sigil { width: 124px; height: 124px; margin-top: 18px; margin-bottom: 16px; }
   #nodalOs .nadir-app__subject { margin-bottom: 14px; font-size: 9px; letter-spacing: .3em; }
-  #nodalOs .nadir-app__title { font-size: clamp(40px, 10.7vw, 62px); letter-spacing: -.05em; }
   #nodalOs .nadir-app__message { min-height: 43px; margin-top: 21px; font-size: 13px; line-height: 1.65; }
   #nodalOs .nadir-app__choice { grid-template-columns: 32px minmax(0, 1fr) 22px; gap: 13px; min-height: 69px; margin-top: 20px; padding: 17px 18px; }
   #nodalOs .nadir-app__choice [data-nadir-label] { font-size: 18px; }
@@ -193,7 +215,6 @@ body.nadir-app-open { overflow: hidden; overscroll-behavior: none; }
   #nodalOs .nadir-app__body { padding-block: 22px; }
   #nodalOs .nadir-app__sigil { width: 96px; height: 96px; margin-top: 14px; margin-bottom: 12px; }
   #nodalOs .nadir-app__subject { margin-bottom: 10px; }
-  #nodalOs .nadir-app__title { font-size: clamp(44px, 5vw, 66px); }
   #nodalOs .nadir-app__message { min-height: 36px; margin-top: 18px; font-size: 13px; }
   #nodalOs .nadir-app__choice { min-height: 64px; margin-top: 18px; padding-block: 14px; }
   #nodalOs .nadir-app__receipt { min-height: 22px; margin-top: 12px; }
@@ -203,7 +224,6 @@ body.nadir-app-open { overflow: hidden; overscroll-behavior: none; }
   #nodalOs .nadir-app__body { padding-block: 12px; }
   #nodalOs .nadir-app__sigil { width: 56px; height: 56px; margin-block: 8px; }
   #nodalOs .nadir-app__subject { margin-bottom: 8px; }
-  #nodalOs .nadir-app__title { font-size: clamp(36px, 10vw, 48px); }
   #nodalOs .nadir-app__message { min-height: 34px; margin-top: 12px; font-size: 12px; }
   #nodalOs .nadir-app__choice { min-height: 56px; margin-top: 14px; padding-block: 13px; }
   #nodalOs .nadir-app__receipt { min-height: 18px; margin-top: 10px; font-size: 7px; }
@@ -217,13 +237,12 @@ body.nadir-app-open { overflow: hidden; overscroll-behavior: none; }
   #nodalOs .nadir-app__telemetry { display: none; }
   #nodalOs .nadir-app__core { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 0 27px; max-width: 620px; text-align: left; }
   #nodalOs .nadir-app__eyebrow { grid-column: 2; grid-row: 1; font-size: 8px; letter-spacing: .12em; }
-  #nodalOs .nadir-app__sigil { grid-column: 1; grid-row: 1 / span 5; align-self: center; width: 96px; height: 96px; margin: 0; }
+  #nodalOs .nadir-app__sigil { grid-column: 1; grid-row: 1 / span 4; align-self: center; width: 96px; height: 96px; margin: 0; }
   #nodalOs .nadir-app__subject { display: none; }
-  #nodalOs .nadir-app__title { grid-column: 2; grid-row: 2; font-size: 34px; line-height: .98; }
-  #nodalOs .nadir-app__message { grid-column: 2; grid-row: 3; min-height: 0; margin: 8px 0 0; font-size: 11px; line-height: 1.4; }
-  #nodalOs .nadir-app__choice { grid-column: 2; grid-row: 4; min-height: 44px; margin: 9px 0 0; padding: 10px 16px; }
+  #nodalOs .nadir-app__message { grid-column: 2; grid-row: 2; min-height: 0; margin: 8px 0 0; font-size: 11px; line-height: 1.4; }
+  #nodalOs .nadir-app__choice { grid-column: 2; grid-row: 3; min-height: 44px; margin: 9px 0 0; padding: 10px 16px; }
   #nodalOs .nadir-app__choice [data-nadir-label] { font-size: 16px; }
-  #nodalOs .nadir-app__receipt { grid-column: 2; grid-row: 5; min-height: 11px; margin-top: 6px; font-size: 7px; line-height: 1.5; }
+  #nodalOs .nadir-app__receipt { grid-column: 2; grid-row: 4; min-height: 11px; margin-top: 6px; font-size: 7px; line-height: 1.5; }
   #nodalOs .nadir-app__footer { grid-template-columns: minmax(0, 1fr) auto; min-height: 43px; padding-block: 3px; font-size: 7px; }
   #nodalOs .nadir-app__escape { min-height: 35px; font-size: 10px; }
 }
@@ -232,6 +251,5 @@ body.nadir-app-open { overflow: hidden; overscroll-behavior: none; }
   #nodalOs .nadir-app *,
   #nodalOs .nadir-app *::before,
   #nodalOs .nadir-app *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  #nodalOs .nadir-app[data-state="rewriting"] .nadir-app__title { transform: none; filter: none; }
   #nodalOs .nadir-app[data-state="committed"] .nadir-app__sigil { filter: none; }
 }

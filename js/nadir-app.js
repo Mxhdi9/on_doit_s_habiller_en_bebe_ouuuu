@@ -49,17 +49,25 @@
     settings.onExit?.();
   }
 
+  function setChoiceLabel(value) {
+    const label = screen.querySelector("[data-nadir-label]");
+    label.textContent = value;
+    label.dataset.glitchLabel = value;
+  }
+
   function renderCommitted() {
     state = "committed";
     screen.dataset.state = state;
-    screen.querySelector("[data-nadir-label]").textContent = "Tuer";
+    setChoiceLabel("Tuer");
     screen.querySelector("[data-nadir-phase]").textContent = "INTENTION RÉÉCRITE";
-    screen.querySelector(".nadir-app__title").innerHTML = "VOUS AVEZ<br>CHOISI.";
     screen.querySelector("[data-nadir-message]").textContent = "Vous avez demandé de le sauver. Le protocole a enregistré autre chose.";
     screen.querySelector("[data-nadir-integrity]").textContent = "COMPROMISE";
     screen.querySelector("[data-nadir-status]").textContent = "DÉCISION SCELLÉE / N-17";
     screen.querySelector("[data-nadir-receipt]").textContent = "AUCUN RETOUR AU SEIN DU PROTOCOLE.";
-    screen.querySelector("[data-nadir-choice]").disabled = true;
+    const choice = screen.querySelector("[data-nadir-choice]");
+    choice.disabled = true;
+    choice.setAttribute("aria-label", "Tuer");
+    delete choice.dataset.glitch;
   }
 
   function commitChoice() {
@@ -71,8 +79,21 @@
     choice.disabled = true;
     screen.focus({ preventScroll: true });
     screen.querySelector("[data-nadir-phase]").textContent = "TRANSMISSION DE LA DÉCISION";
-    screen.querySelector("[data-nadir-label]").textContent = "Sauver";
+    setChoiceLabel("Sauver");
     screen.querySelector("[data-nadir-status]").textContent = "ÉCRITURE EN COURS";
+    const reducedMotion = motion.matches;
+    if (!reducedMotion) {
+      choice.dataset.glitch = "scramble";
+      // Only the visual label scrambles; its accessible name stays stable.
+      [[90, "SΛUVER"], [200, "SAU█ER"], [310, "SΛ/VER"], [420, "T█/R"],
+        [530, "TU▓R"], [650, "TU_R"], [740, "TUER"]].forEach(([delay, label]) => {
+        later(() => { if (!motion.matches) setChoiceLabel(label); }, delay);
+      });
+      later(() => {
+        setChoiceLabel("Tuer");
+        choice.dataset.glitch = "settle";
+      }, 800);
+    }
     later(() => {
       renderCommitted();
       // This hook is for a future RP cue; it performs no action outside this scene.
@@ -80,7 +101,7 @@
         bubbles: true,
         detail: { requested: "save", recorded: "kill", subject: "N-17" },
       }));
-    }, motion.matches ? 120 : 820);
+    }, reducedMotion ? 120 : 1040);
   }
 
   function open() {
@@ -94,12 +115,12 @@
     screen.dataset.state = state;
     screen.setAttribute("role", "dialog");
     screen.setAttribute("aria-modal", "true");
-    screen.setAttribute("aria-labelledby", "nadirAppTitle");
+    screen.setAttribute("aria-labelledby", "nadirAppName");
     screen.setAttribute("aria-describedby", "nadirAppMessage");
     screen.tabIndex = -1;
     screen.innerHTML = `
       <header class="nadir-app__header">
-        <span class="nadir-app__wordmark">NADIR<span>.EXE</span></span>
+        <span class="nadir-app__wordmark" id="nadirAppName">NADIR<span>.EXE</span></span>
         <span class="nadir-app__channel">CANAL PRIVILÉGIÉ / ADMIN</span>
         <span class="nadir-app__connection"><i></i>CONNEXION ÉTABLIE</span>
       </header>
@@ -111,11 +132,10 @@
             <svg viewBox="0 0 200 200" fill="none"><circle class="nadir-orbit" cx="100" cy="100" r="87"/><circle cx="100" cy="100" r="72" stroke-dasharray="2 8"/><path d="M100 0v28m0 144v28M0 100h28m144 0h28M38 38l15 15m94 94 15 15M38 162l15-15m94-94 15-15"/><path class="nadir-mark" d="M66 137V63h15l38 49V63h15v74h-15L81 88v49H66Z"/><path d="M85 153h30M85 47h30"/></svg>
           </div>
           <p class="nadir-app__subject">SUJET N-17</p>
-          <h1 class="nadir-app__title" id="nadirAppTitle">UNE VIE.<br>UNE DÉCISION.</h1>
           <p class="nadir-app__message" id="nadirAppMessage" data-nadir-message>Il est encore temps d’intervenir.</p>
-          <button class="nadir-app__choice" data-nadir-choice type="button" disabled>
+          <button class="nadir-app__choice" data-nadir-choice type="button" aria-label="Sauver" disabled>
             <span class="nadir-app__choice-index" aria-hidden="true">01</span>
-            <span data-nadir-label>Sauver</span>
+            <span data-nadir-label data-glitch-label="Sauver" aria-hidden="true">Sauver</span>
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>
           </button>
           <p class="nadir-app__receipt" data-nadir-receipt role="status" aria-live="polite">Authentification de l’opérateur…</p>
