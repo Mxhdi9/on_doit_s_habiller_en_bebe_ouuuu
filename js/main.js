@@ -2848,6 +2848,7 @@ function handleConsoleCommand() {
   consoleInput.value = "";
 
   const responses = {
+    HELP: NODAL_SECRET_COMMAND,
     ETAT: "archive ouverte. niveau incomplet.",
     STATUS: "archive ouverte. niveau incomplet.",
     N17: "sujet actif. douleur consignée. motif absent.",
@@ -3601,6 +3602,11 @@ window.addEventListener('pagehide',() => lockNodalArchives(false));
 window.NadirExperience?.configure({
   host: nodalOs,
   desktop: nodalDesktop,
+  onExit: () => {
+    closeNodalOs();
+    showPage('messages');
+    consoleInput.focus({preventScroll:true});
+  },
   canOpen: () => nodalActiveUser === 'admin' && !nodalDesktop.classList.contains('hidden') && !nodalOs.classList.contains('hidden'),
 });
 updateNadirAccess();

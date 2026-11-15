@@ -43,6 +43,12 @@
     document.dispatchEvent(new CustomEvent("ascalon:overlaychange"));
   }
 
+  function exitExperience() {
+    if (!screen) return;
+    close({ restoreFocus: false });
+    settings.onExit?.();
+  }
+
   function renderCommitted() {
     state = "committed";
     screen.dataset.state = state;
@@ -125,7 +131,7 @@
     settings.host.appendChild(screen);
     document.body.classList.add("nadir-app-open");
     screen.querySelector("[data-nadir-choice]").addEventListener("click", commitChoice);
-    screen.querySelector("[data-nadir-exit]").addEventListener("click", () => close());
+    screen.querySelector("[data-nadir-exit]").addEventListener("click", exitExperience);
     screen.focus({ preventScroll: true });
     document.dispatchEvent(new CustomEvent("ascalon:overlaychange"));
 
@@ -162,7 +168,7 @@
     if (event.key === "Escape") {
       event.preventDefault();
       event.stopImmediatePropagation();
-      close();
+      exitExperience();
     } else if (event.key === "Tab") {
       const controls = [...screen.querySelectorAll("button:not(:disabled)")];
       const first = controls[0], last = controls[controls.length - 1];
@@ -178,7 +184,7 @@
   }, true);
 
   document.addEventListener("fullscreenchange", () => {
-    if (screen && ownsFullscreen && document.fullscreenElement !== screen) close();
+    if (screen && ownsFullscreen && document.fullscreenElement !== screen) exitExperience();
   });
   window.addEventListener("pagehide", () => close({ restoreFocus: false }));
   window.NadirExperience = Object.freeze({
